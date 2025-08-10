@@ -12,6 +12,7 @@ import {z} from 'genkit';
 
 const GenerateTeamNameInputSchema = z.object({
   topic: z.string().optional().describe('An optional topic to base the name on.'),
+  nonce: z.string().optional().describe('A random string to ensure a unique response.'),
 });
 export type GenerateTeamNameInput = z.infer<typeof GenerateTeamNameInputSchema>;
 
@@ -35,7 +36,7 @@ const prompt = ai.definePrompt({
 {{#if topic}}
 Base the name around the topic of: {{{topic}}}
 {{/if}}
-Do not use colons or other special characters that are not allowed in team names. Be creative!
+Do not use colons or other special characters that are not allowed in team names. Be creative! Respond with a different name every time. Nonce: {{{nonce}}}
 `,
 });
 

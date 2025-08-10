@@ -73,7 +73,7 @@ export function Registration() {
   const handleGenerateName = async () => {
     setIsGeneratingName(true);
     try {
-      const { teamName } = await generateTeamName({});
+      const { teamName } = await generateTeamName({ nonce: String(Math.random()) });
       form.setValue("teamName", teamName, { shouldValidate: true });
       toast({
         title: "Team Name Generated!",
