@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -8,16 +9,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket } from "lucide-react";
+import { Loader2, Rocket } from "lucide-react";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/admin/dashboard");
@@ -27,6 +30,8 @@ export default function AdminLogin() {
         title: "Login Failed",
         description: error.message,
       });
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -50,6 +55,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -60,10 +66,18 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              Login
+            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Logging in...
+                    </>
+                ) : (
+                    "Login"
+                )}
             </Button>
           </form>
         </CardContent>
@@ -71,3 +85,5 @@ export default function AdminLogin() {
     </div>
   );
 }
+
+    

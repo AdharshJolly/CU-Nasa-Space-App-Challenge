@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 
@@ -30,7 +30,7 @@ export type TimelineEvent = z.infer<typeof timelineEventSchema> & { id: string }
 interface TimelineEventDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: Omit<TimelineEvent, 'id'>) => void;
+    onSave: (data: Omit<TimelineEvent, 'id'>) => Promise<void>;
     event: TimelineEvent | null;
 }
 
@@ -55,12 +55,14 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
     }
   }, [event, form, isOpen])
 
+  const { isSubmitting } = form.formState;
 
-  const onSubmit = (values: z.infer<typeof timelineEventSchema>) => {
-    onSave({
+  const onSubmit = async (values: z.infer<typeof timelineEventSchema>) => {
+    await onSave({
         ...values,
         date: format(new Date(values.date), "yyyy-MM-dd")
     });
+    form.reset();
   };
 
   return (
@@ -89,6 +91,7 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
                                             "w-full pl-3 text-left font-normal",
                                             !field.value && "text-muted-foreground"
                                         )}
+                                        disabled={isSubmitting}
                                         >
                                         {field.value ? (
                                             format(new Date(field.value), "PPP")
@@ -105,6 +108,7 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
                                         selected={field.value ? new Date(field.value) : undefined}
                                         onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
                                         initialFocus
+                                        disabled={isSubmitting}
                                     />
                                     </PopoverContent>
                                 </Popover>
@@ -119,7 +123,7 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
                             <FormItem>
                                 <FormLabel>Title</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g., Hackathon Kickoff" {...field} />
+                                    <Input placeholder="e.g., Hackathon Kickoff" {...field} disabled={isSubmitting} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -132,15 +136,18 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
                             <FormItem>
                                 <FormLabel>Description</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="Describe the event..." {...field} />
+                                    <Textarea placeholder="Describe the event..." {...field} disabled={isSubmitting} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                     <DialogFooter>
-                        <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                        <Button type="submit">Save Event</Button>
+                        <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Event
+                        </Button>
                     </DialogFooter>
                 </form>
              </Form>
@@ -148,3 +155,5 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
     </Dialog>
   )
 }
+
+    

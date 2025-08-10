@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 const problemSchema = z.object({
     title: z.string().min(5, "Title must be at least 5 characters."),
@@ -22,7 +23,7 @@ export type ProblemStatement = z.infer<typeof problemSchema> & { id: string };
 interface ProblemStatementDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: Omit<ProblemStatement, 'id'>) => void;
+    onSave: (data: Omit<ProblemStatement, 'id'>) => Promise<void>;
     problem: ProblemStatement | null;
 }
 
@@ -44,9 +45,11 @@ export function ProblemStatementDialog({ isOpen, onClose, onSave, problem }: Pro
     }
   }, [problem, form, isOpen])
 
+  const { isSubmitting } = form.formState;
 
-  const onSubmit = (values: z.infer<typeof problemSchema>) => {
-    onSave(values);
+  const onSubmit = async (values: z.infer<typeof problemSchema>) => {
+    await onSave(values);
+    form.reset();
   };
 
   return (
@@ -67,7 +70,7 @@ export function ProblemStatementDialog({ isOpen, onClose, onSave, problem }: Pro
                             <FormItem>
                                 <FormLabel>Title</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g., Orbital Debris Mitigation" {...field} />
+                                    <Input placeholder="e.g., Orbital Debris Mitigation" {...field} disabled={isSubmitting} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -80,7 +83,7 @@ export function ProblemStatementDialog({ isOpen, onClose, onSave, problem }: Pro
                             <FormItem>
                                 <FormLabel>Category</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g., Space Exploration" {...field} />
+                                    <Input placeholder="e.g., Space Exploration" {...field} disabled={isSubmitting}/>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -93,15 +96,18 @@ export function ProblemStatementDialog({ isOpen, onClose, onSave, problem }: Pro
                             <FormItem>
                                 <FormLabel>Description</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="Describe the challenge in detail..." {...field} />
+                                    <Textarea placeholder="Describe the challenge in detail..." {...field} disabled={isSubmitting}/>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                     <DialogFooter>
-                        <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                        <Button type="submit">Save Problem</Button>
+                        <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Problem
+                        </Button>
                     </DialogFooter>
                 </form>
              </Form>
@@ -109,3 +115,5 @@ export function ProblemStatementDialog({ isOpen, onClose, onSave, problem }: Pro
     </Dialog>
   )
 }
+
+    

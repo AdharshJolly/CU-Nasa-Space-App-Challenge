@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Rocket, Trash, UserPlus } from "lucide-react";
+import { Loader2, Rocket, Trash, UserPlus } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { collection, addDoc } from "firebase/firestore";
@@ -46,6 +46,8 @@ export function Registration() {
     control: form.control,
     name: "members",
   });
+
+  const { isSubmitting } = form.formState;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -98,7 +100,7 @@ export function Registration() {
                       <FormItem>
                       <FormLabel className="text-lg font-headline">Team Name</FormLabel>
                       <FormControl>
-                          <Input placeholder="The Star Gazers" {...field} />
+                          <Input placeholder="The Star Gazers" {...field} disabled={isSubmitting}/>
                       </FormControl>
                       <FormMessage />
                       </FormItem>
@@ -119,6 +121,7 @@ export function Registration() {
                                 size="icon"
                                 className="h-7 w-7"
                                 onClick={() => remove(index)}
+                                disabled={isSubmitting}
                             >
                                 <Trash className="h-4 w-4" />
                                 <span className="sr-only">Remove member</span>
@@ -132,7 +135,7 @@ export function Registration() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Full Name</FormLabel>
-                              <FormControl><Input placeholder="Galileo Galilei" {...field} /></FormControl>
+                              <FormControl><Input placeholder="Galileo Galilei" {...field} disabled={isSubmitting} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -143,7 +146,7 @@ export function Registration() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Email Address</FormLabel>
-                              <FormControl><Input type="email" placeholder="star-gazer@galaxy.com" {...field} /></FormControl>
+                              <FormControl><Input type="email" placeholder="star-gazer@galaxy.com" {...field} disabled={isSubmitting} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -154,7 +157,7 @@ export function Registration() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Phone Number</FormLabel>
-                              <FormControl><Input type="tel" placeholder="+91 98765 43210" {...field} /></FormControl>
+                              <FormControl><Input type="tel" placeholder="+91 98765 43210" {...field} disabled={isSubmitting} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -166,7 +169,7 @@ export function Registration() {
                 
                 <div className="flex flex-col gap-4">
                     {fields.length < 6 && (
-                        <Button type="button" variant="outline" onClick={() => append({ name: "", email: "", phone: "" })}>
+                        <Button type="button" variant="outline" onClick={() => append({ name: "", email: "", phone: "" })} disabled={isSubmitting}>
                             <UserPlus className="mr-2 h-4 w-4" /> Add Team Member
                         </Button>
                     )}
@@ -175,8 +178,15 @@ export function Registration() {
                      )}
 
 
-                    <Button type="submit" className="w-full" size="lg">
-                        Confirm Registration
+                    <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Submitting...
+                            </>
+                        ) : (
+                            "Confirm Registration"
+                        )}
                     </Button>
                 </div>
             </form>
@@ -187,3 +197,5 @@ export function Registration() {
     </section>
   );
 }
+
+    

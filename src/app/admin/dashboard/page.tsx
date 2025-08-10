@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2 } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
 import { format } from "date-fns";
@@ -39,6 +39,7 @@ export default function AdminDashboard() {
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(null);
   const [editingTimelineEvent, setEditingTimelineEvent] = useState<TimelineEvent | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -191,7 +192,7 @@ export default function AdminDashboard() {
         });
         return;
     }
-
+    setIsExporting(true);
     try {
         const XLSX = await import("xlsx");
         const flattenedData = teams.flatMap(team => 
@@ -218,6 +219,8 @@ export default function AdminDashboard() {
             title: "Export Failed",
             description: "Could not generate the Excel file. Please try again.",
         });
+    } finally {
+        setIsExporting(false);
     }
   };
 
@@ -358,8 +361,18 @@ export default function AdminDashboard() {
                             <CardTitle>Registered Teams</CardTitle>
                             <CardDescription>A list of all teams registered for the Space Apps Challenge.</CardDescription>
                         </div>
-                        <Button onClick={handleExportToExcel} disabled={teams.length === 0}>
-                            <Download className="mr-2" /> Download as Excel
+                         <Button onClick={handleExportToExcel} disabled={teams.length === 0 || isExporting}>
+                            {isExporting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Exporting...
+                                </>
+                            ) : (
+                                <>
+                                    <Download className="mr-2" />
+                                    Download as Excel
+                                </>
+                            )}
                         </Button>
                     </CardHeader>
                     <CardContent>
@@ -406,3 +419,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+    
