@@ -16,7 +16,7 @@ const sponsors = [
 
 export function Hero() {
   return (
-    <section id="hero" className="relative text-center py-20 md:py-32 lg:py-40 flex flex-col items-center overflow-hidden">
+    <section id="hero" className="relative text-center flex min-h-dvh flex-col items-center justify-center overflow-hidden">
         {/* Animated Starfield */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
           <div id="stars" className="absolute top-0 left-0 w-full h-[2000px] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] animate-[move-stars_50s_linear_infinite]"></div>
