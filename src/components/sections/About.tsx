@@ -27,7 +27,6 @@ export function About() {
     <section id="about" className="relative py-12 md:py-24 bg-background/80 backdrop-blur-sm overflow-hidden">
         <div className="absolute -left-32 -top-32 w-96 h-96 opacity-10 -rotate-45" style={{
             transform: 'translateZ(-100px) scale(2)',
-            transformStyle: 'preserve-3d'
         }}>
             <Image src={FloatingAstronaut} alt="Floating Astronaut" layout="fill" objectFit="contain" data-ai-hint="astronaut space" />
         </div>
