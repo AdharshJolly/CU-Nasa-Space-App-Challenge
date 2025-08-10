@@ -2,6 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Countdown } from '@/components/Countdown';
 import Link from 'next/link';
 import Image from 'next/image';
+import FloatingAstronaut from '@/assets/spaceElements/FloatingAstronaut.png'
+import AstronautWithPole from '@/assets/spaceElements/AstronautWithFlagPole.png'
 
 export function Hero() {
   return (
@@ -19,15 +21,15 @@ export function Hero() {
 
       <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
           <Image
-            src="https://placehold.co/400x400.png"
+            src={FloatingAstronaut}
             alt="Floating Astronaut"
             width={400}
-            height={400}
+            height={700}
             className="absolute -left-20 top-1/4 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 opacity-50 md:opacity-80 animate-[float-astronaut_8s_ease-in-out_infinite]"
             data-ai-hint="astronaut"
           />
           <Image
-            src="https://placehold.co/300x300.png"
+            src={AstronautWithPole}
             alt="Floating Satellite"
             width={300}
             height={300}
