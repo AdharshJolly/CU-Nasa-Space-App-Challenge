@@ -1,3 +1,4 @@
+
 "use client";
 
 import { z } from "zod";
@@ -13,14 +14,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
+const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
+
 const memberSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z.string().min(10, { message: "Please enter a valid phone number." }),
+  phone: z.string().regex(indianPhoneNumberRegex, { message: "Please enter a valid 10-digit Indian phone number." }),
 });
 
 const formSchema = z.object({
-  teamName: z.string().min(2, { message: "Team name must be at least 2 characters." }),
+  teamName: z.string()
+    .min(3, { message: "Team name must be at least 3 characters." })
+    .max(25, { message: "Team name cannot be more than 25 characters." }),
   members: z.array(memberSchema).min(2, "You must have at least two members.").max(6, "You can have a maximum of 6 members."),
 });
 
@@ -149,7 +154,7 @@ export function Registration() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Phone Number</FormLabel>
-                              <FormControl><Input type="tel" placeholder="+1 (555) 123-4567" {...field} /></FormControl>
+                              <FormControl><Input type="tel" placeholder="+91 98765 43210" {...field} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
