@@ -6,22 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, SatelliteDish } from "lucide-react";
 import { Progress } from '../ui/progress';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-
-const problems = [
-    { title: "Orbital Debris Mitigation", category: "Space Exploration", description: "Design a novel solution to track, manage, or remove orbital debris to ensure the safety of current and future space missions." },
-    { title: "Earth Climate Data Visualization", category: "Earth Science", description: "Develop an interactive tool to visualize complex climate datasets, making them accessible and understandable to the public." },
-    { title: "Lunar Habitat Challenge", category: "Deep Space", description: "Conceptualize and design a sustainable habitat for the first long-term human settlement on the Moon." },
-    { title: "AI for Asteroid Detection", category: "Planetary Defense", description: "Create an AI/ML model that can analyze telescope imagery to identify and classify near-Earth asteroids more effectively." },
-];
+import type { ProblemStatement } from '@/components/admin/ProblemStatementDialog';
 
 export function ProblemStatements() {
   const [problemsReleased, setProblemsReleased] = useState<boolean | null>(null);
+  const [problems, setProblems] = useState<ProblemStatement[]>([]);
   const [progress, setProgress] = useState(13);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, "settings", "features"), (doc) => {
+    const settingsUnsubscribe = onSnapshot(doc(db, "settings", "features"), (doc) => {
         if (doc.exists()) {
             setProblemsReleased(doc.data().problemsReleased);
         } else {
@@ -29,7 +24,15 @@ export function ProblemStatements() {
         }
     });
 
-    return () => unsubscribe();
+    const problemsUnsubscribe = onSnapshot(query(collection(db, "problems")), (snapshot) => {
+        const problemsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ProblemStatement[];
+        setProblems(problemsData);
+    });
+
+    return () => {
+      settingsUnsubscribe();
+      problemsUnsubscribe();
+    }
   }, []);
 
 
@@ -87,8 +90,8 @@ export function ProblemStatements() {
           </Card>
         ) : (
           <div className="grid gap-8 md:grid-cols-2">
-            {problems.map((problem) => (
-                <Card key={problem.title} className="flex flex-col bg-card/50 backdrop-blur-sm hover:border-primary border-2 border-transparent transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
+            {problems.length > 0 ? problems.map((problem) => (
+                <Card key={problem.id} className="flex flex-col bg-card/50 backdrop-blur-sm hover:border-primary border-2 border-transparent transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
                     <CardHeader>
                         <CardTitle className="font-headline">{problem.title}</CardTitle>
                         <CardDescription className="text-primary font-semibold">{problem.category}</CardDescription>
@@ -102,7 +105,9 @@ export function ProblemStatements() {
                         </Button>
                     </CardFooter>
                 </Card>
-            ))}
+            )) : (
+              <p className="text-center text-muted-foreground md:col-span-2">No challenges have been added yet. Please check back later.</p>
+            )}
           </div>
         )}
       </div>

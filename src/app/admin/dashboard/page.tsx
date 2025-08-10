@@ -1,17 +1,18 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { collection, getDocs, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { collection, getDocs, doc, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, query } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle } from "lucide-react";
+import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 
 interface TeamMember {
     name: string;
@@ -26,9 +27,12 @@ interface Team {
 }
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [problems, setProblems] = useState<ProblemStatement[]>([]);
   const [problemsReleased, setProblemsReleased] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -36,10 +40,24 @@ export default function AdminDashboard() {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
-        fetchTeams();
       } else {
         router.push("/admin");
       }
+    });
+    return () => unsubscribeAuth();
+  }, [router]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribeTeams = onSnapshot(query(collection(db, "registrations")), (snapshot) => {
+        const teamsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Team[];
+        setTeams(teamsData);
+    });
+
+    const unsubscribeProblems = onSnapshot(query(collection(db, "problems")), (snapshot) => {
+        const problemsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ProblemStatement[];
+        setProblems(problemsData);
     });
 
     const unsubscribeSettings = onSnapshot(doc(db, "settings", "features"), (doc) => {
@@ -49,16 +67,11 @@ export default function AdminDashboard() {
     });
 
     return () => {
-        unsubscribeAuth();
+        unsubscribeTeams();
+        unsubscribeProblems();
         unsubscribeSettings();
     };
-  }, [router]);
-
-  const fetchTeams = async () => {
-    const querySnapshot = await getDocs(collection(db, "registrations"));
-    const teamsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Team[];
-    setTeams(teamsData);
-  };
+  }, [user]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -81,6 +94,55 @@ export default function AdminDashboard() {
               description: "Could not update the setting. Please try again."
           })
       }
+  }
+
+  const handleAddNewProblem = () => {
+    setEditingProblem(null);
+    setIsDialogOpen(true);
+  };
+
+  const handleEditProblem = (problem: ProblemStatement) => {
+    setEditingProblem(problem);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteProblem = async (problemId: string) => {
+      if (confirm("Are you sure you want to delete this problem statement?")) {
+        try {
+            await deleteDoc(doc(db, "problems", problemId));
+            toast({
+                title: "Success",
+                description: "Problem statement deleted successfully."
+            });
+        } catch (error) {
+             toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not delete the problem statement. Please try again."
+            });
+        }
+      }
+  }
+
+  const handleSaveProblem = async (problemData: Omit<ProblemStatement, 'id'>) => {
+    try {
+        if (editingProblem) {
+            const problemRef = doc(db, "problems", editingProblem.id);
+            await updateDoc(problemRef, problemData);
+             toast({ title: "Success", description: "Problem statement updated successfully." });
+        } else {
+            await addDoc(collection(db, "problems"), problemData);
+            toast({ title: "Success", description: "Problem statement added successfully." });
+        }
+        setIsDialogOpen(false);
+    } catch(error) {
+        console.error("Error saving problem:", error)
+        toast({
+            variant: "destructive",
+            title: "Save Failed",
+            description: "Could not save the problem statement. Please try again."
+        });
+    }
   }
 
   if (!user) {
@@ -127,6 +189,48 @@ export default function AdminDashboard() {
                         </div>
                     </CardContent>
                 </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle>Problem Statements</CardTitle>
+                            <CardDescription>Add, edit, or delete challenge statements.</CardDescription>
+                        </div>
+                        <Button onClick={handleAddNewProblem}>
+                            <PlusCircle className="mr-2"/> Add New Problem
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                             <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[30%]">Title</TableHead>
+                                    <TableHead className="w-[20%]">Category</TableHead>
+                                    <TableHead>Description</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {problems.map((problem) => (
+                                    <TableRow key={problem.id}>
+                                        <TableCell className="font-medium">{problem.title}</TableCell>
+                                        <TableCell>{problem.category}</TableCell>
+                                        <TableCell className="text-muted-foreground">{problem.description}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => handleEditProblem(problem)}>
+                                                <Pencil className="h-4 w-4"/>
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteProblem(problem.id)}>
+                                                <Trash2 className="h-4 w-4"/>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+
                 <Card>
                     <CardHeader>
                         <CardTitle>Registered Teams</CardTitle>
@@ -161,6 +265,12 @@ export default function AdminDashboard() {
                 </Card>
             </div>
         </main>
+        <ProblemStatementDialog
+            isOpen={isDialogOpen}
+            onClose={() => setIsDialogOpen(false)}
+            onSave={handleSaveProblem}
+            problem={editingProblem}
+        />
     </div>
   );
 }
