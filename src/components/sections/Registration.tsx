@@ -36,6 +36,33 @@ const formSchema = z.object({
 }, {
     message: "This team name is already taken. Please choose another.",
     path: ["teamName"],
+}).refine(async (data, ctx) => {
+    const emails = data.members.map(m => m.email);
+    const q = query(collection(db, "registrations"), where("members", "array-contains-any", data.members.map(m => ({ email: m.email, name: m.name, phone: m.phone }))));
+    const querySnapshot = await getDocs(q);
+    
+    const existingEmails: string[] = [];
+    querySnapshot.forEach(doc => {
+        doc.data().members.forEach((member: { email: string; }) => {
+            if (emails.includes(member.email)) {
+                existingEmails.push(member.email);
+            }
+        });
+    });
+
+    let hadError = false;
+    data.members.forEach((member, index) => {
+        if (existingEmails.includes(member.email)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "This email is already registered.",
+                path: [`members`, index, 'email'],
+            });
+            hadError = true;
+        }
+    });
+
+    return !hadError;
 });
 
 
