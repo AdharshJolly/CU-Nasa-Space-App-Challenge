@@ -1,4 +1,4 @@
-import { LiveUpdateBanner } from "@/components/layout/LiveUpdateBanner";
+
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
@@ -16,7 +16,6 @@ import { AnimateOnScroll } from "@/components/AnimateOnScroll";
 export default function Home() {
   return (
     <div className="flex min-h-dvh flex-col bg-background bg-grid-pattern">
-      <LiveUpdateBanner />
       <Header />
       <main className="flex-1">
         <Hero />
