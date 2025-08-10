@@ -37,7 +37,7 @@ export function ProblemStatements() {
           </p>
         </div>
         {!problemsReleased ? (
-          <Card className="text-center bg-card p-8 md:p-12 rounded-lg border-primary/20 border-2 max-w-3xl mx-auto">
+          <Card className="text-center bg-card p-8 md:p-12 rounded-lg border-primary/20 border-2 max-w-3xl mx-auto shadow-2xl shadow-primary/10">
              <CardHeader>
                 <div className="flex justify-center items-center mb-4">
                     <SatelliteDish className="h-12 w-12 text-primary animate-pulse" />
@@ -62,7 +62,7 @@ export function ProblemStatements() {
         ) : (
           <div className="grid gap-8 md:grid-cols-2">
             {problems.map((problem) => (
-                <Card key={problem.title} className="flex flex-col">
+                <Card key={problem.title} className="flex flex-col bg-card hover:border-primary border-2 border-transparent transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
                     <CardHeader>
                         <CardTitle className="font-headline">{problem.title}</CardTitle>
                         <CardDescription className="text-primary font-semibold">{problem.category}</CardDescription>

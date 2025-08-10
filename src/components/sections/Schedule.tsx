@@ -55,7 +55,7 @@ export function Schedule() {
                             <div className="flex items-center">
                                 <div className={`w-1/2 pr-8 text-right`}>
                                    {index % 2 === 0 && (
-                                     <div className="bg-background p-6 rounded-lg border-2 border-transparent hover:border-primary transition-colors duration-300">
+                                     <div className="bg-background p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
                                         <p className="text-primary font-bold">{event.date}</p>
                                         <h3 className="font-headline text-xl font-semibold mt-1">{event.title}</h3>
                                         <p className="text-muted-foreground text-sm mt-2">{event.description}</p>
@@ -67,7 +67,7 @@ export function Schedule() {
                                 </div>
                                  <div className={`w-1/2 pl-8 text-left`}>
                                      {index % 2 !== 0 && (
-                                         <div className="bg-background p-6 rounded-lg border-2 border-transparent hover:border-primary transition-colors duration-300">
+                                         <div className="bg-background p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
                                             <p className="text-primary font-bold">{event.date}</p>
                                             <h3 className="font-headline text-xl font-semibold mt-1">{event.title}</h3>
                                             <p className="text-muted-foreground text-sm mt-2">{event.description}</p>

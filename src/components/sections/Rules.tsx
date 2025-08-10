@@ -43,7 +43,7 @@ export function Rules() {
         <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="w-full">
                 {rules.map((rule, index) => (
-                    <AccordionItem value={`item-${index}`} key={index}>
+                    <AccordionItem value={`item-${index}`} key={index} className="bg-card/50 rounded-lg mb-2 px-4 transition-all duration-300 hover:bg-card">
                         <AccordionTrigger className="font-headline text-lg hover:no-underline">
                             <div className="flex items-center gap-3">
                                 <Gavel className="h-5 w-5 text-primary"/>

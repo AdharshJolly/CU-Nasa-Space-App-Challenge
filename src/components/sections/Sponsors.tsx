@@ -21,7 +21,7 @@ export function Sponsors() {
         </div>
         <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
           {sponsors.map((sponsor) => (
-            <div key={sponsor.name} className="relative h-16 w-40 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all">
+            <div key={sponsor.name} className="relative h-16 w-40 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all duration-300 transform hover:scale-110">
               <Image
                 src={sponsor.logo}
                 alt={`${sponsor.name} logo`}
