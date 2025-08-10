@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -24,7 +25,8 @@ export function Countdown() {
     
     useEffect(() => {
       // Set target date only on the client to avoid hydration mismatch
-      setTargetDate(new Date('2025-10-10T09:00:00'));
+      // Target: August 22, 2025, 10:00 AM IST (UTC+05:30)
+      setTargetDate(new Date('2025-08-22T10:00:00+05:30'));
     }, []);
 
     useEffect(() => {
