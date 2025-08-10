@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
 import { format } from "date-fns";
@@ -182,6 +182,45 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleExportToExcel = async () => {
+    if (teams.length === 0) {
+        toast({
+            variant: "destructive",
+            title: "No Data",
+            description: "There are no registered teams to export.",
+        });
+        return;
+    }
+
+    try {
+        const XLSX = await import("xlsx");
+        const flattenedData = teams.flatMap(team => 
+            team.members.map(member => ({
+                "Team Name": team.teamName,
+                "Member Name": member.name,
+                "Email": member.email,
+                "Phone": member.phone,
+            }))
+        );
+
+        const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
+        XLSX.writeFile(workbook, "registered_teams.xlsx");
+        toast({
+            title: "Export Successful",
+            description: "The team data has been downloaded as an Excel file.",
+        });
+    } catch (error) {
+        console.error("Failed to export to Excel:", error);
+        toast({
+            variant: "destructive",
+            title: "Export Failed",
+            description: "Could not generate the Excel file. Please try again.",
+        });
+    }
+  };
+
 
   if (!user) {
     return <div className="flex min-h-dvh items-center justify-center bg-background">Loading...</div>;
@@ -314,9 +353,14 @@ export default function AdminDashboard() {
                 </Card>
 
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Registered Teams</CardTitle>
-                        <CardDescription>A list of all teams registered for the Space Apps Challenge.</CardDescription>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle>Registered Teams</CardTitle>
+                            <CardDescription>A list of all teams registered for the Space Apps Challenge.</CardDescription>
+                        </div>
+                        <Button onClick={handleExportToExcel} disabled={teams.length === 0}>
+                            <Download className="mr-2" /> Download as Excel
+                        </Button>
                     </CardHeader>
                     <CardContent>
                         <Table>
