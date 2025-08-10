@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, SatelliteDish } from "lucide-react";
 import { Progress } from '../ui/progress';
-
-const problemsReleased = false; 
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const problems = [
     { title: "Orbital Debris Mitigation", category: "Space Exploration", description: "Design a novel solution to track, manage, or remove orbital debris to ensure the safety of current and future space missions." },
@@ -17,7 +17,21 @@ const problems = [
 ];
 
 export function ProblemStatements() {
+  const [problemsReleased, setProblemsReleased] = useState<boolean | null>(null);
   const [progress, setProgress] = useState(13);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, "settings", "features"), (doc) => {
+        if (doc.exists()) {
+            setProblemsReleased(doc.data().problemsReleased);
+        } else {
+            setProblemsReleased(false);
+        }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
 
   useEffect(() => {
     if (problemsReleased) return;
@@ -36,7 +50,19 @@ export function ProblemStatements() {
             Tackle real-world problems on Earth and in space using open data from NASA and its partners.
           </p>
         </div>
-        {!problemsReleased ? (
+        {problemsReleased === null ? (
+            <Card className="text-center bg-card/50 backdrop-blur-sm p-8 md:p-12 rounded-lg border-primary/20 border-2 max-w-3xl mx-auto shadow-2xl shadow-primary/10">
+                <CardHeader>
+                     <div className="flex justify-center items-center mb-4">
+                        <SatelliteDish className="h-12 w-12 text-primary animate-pulse" />
+                     </div>
+                     <CardTitle className="font-headline text-2xl md:text-3xl font-bold">CONNECTING TO HQ...</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">Checking for latest challenge data...</p>
+                </CardContent>
+            </Card>
+        ) : !problemsReleased ? (
           <Card className="text-center bg-card/50 backdrop-blur-sm p-8 md:p-12 rounded-lg border-primary/20 border-2 max-w-3xl mx-auto shadow-2xl shadow-primary/10">
              <CardHeader>
                 <div className="flex justify-center items-center mb-4">

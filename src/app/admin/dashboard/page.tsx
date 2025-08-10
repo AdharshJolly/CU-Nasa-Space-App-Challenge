@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, onSnapshot, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LogOut, Rocket } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { LogOut, Rocket, Settings } from "lucide-react";
 
 interface TeamMember {
     name: string;
@@ -25,10 +28,12 @@ interface Team {
 export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [problemsReleased, setProblemsReleased] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
         fetchTeams();
@@ -36,7 +41,17 @@ export default function AdminDashboard() {
         router.push("/admin");
       }
     });
-    return () => unsubscribe();
+
+    const unsubscribeSettings = onSnapshot(doc(db, "settings", "features"), (doc) => {
+        if (doc.exists()) {
+            setProblemsReleased(doc.data().problemsReleased);
+        }
+    });
+
+    return () => {
+        unsubscribeAuth();
+        unsubscribeSettings();
+    };
   }, [router]);
 
   const fetchTeams = async () => {
@@ -49,6 +64,24 @@ export default function AdminDashboard() {
     await signOut(auth);
     router.push("/admin");
   };
+
+  const handleReleaseToggle = async (checked: boolean) => {
+      try {
+          await setDoc(doc(db, "settings", "features"), { problemsReleased: checked });
+          setProblemsReleased(checked);
+          toast({
+              title: "Success!",
+              description: `Problem statements are now ${checked ? 'live' : 'hidden'}.`
+          })
+      } catch (error) {
+          console.error("Error updating settings: ", error);
+          toast({
+              variant: "destructive",
+              title: "Update Failed",
+              description: "Could not update the setting. Please try again."
+          })
+      }
+  }
 
   if (!user) {
     return <div className="flex min-h-dvh items-center justify-center bg-background">Loading...</div>;
@@ -69,7 +102,31 @@ export default function AdminDashboard() {
         </header>
 
         <main className="flex-1 p-4 md:p-8">
-            <div className="container mx-auto">
+            <div className="container mx-auto grid gap-8">
+                 <Card>
+                    <CardHeader>
+                         <div className="flex items-center gap-2">
+                             <Settings className="h-6 w-6" />
+                            <CardTitle>Site Controls</CardTitle>
+                        </div>
+                        <CardDescription>Control feature visibility on the main website.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center space-x-4 rounded-md border p-4">
+                            <div className="flex-1 space-y-1">
+                                <p className="text-sm font-medium leading-none">Release Problem Statements</p>
+                                <p className="text-sm text-muted-foreground">
+                                Make the challenges visible to all participants on the main page.
+                                </p>
+                            </div>
+                            <Switch
+                                id="release-problems"
+                                checked={problemsReleased}
+                                onCheckedChange={handleReleaseToggle}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
                 <Card>
                     <CardHeader>
                         <CardTitle>Registered Teams</CardTitle>
