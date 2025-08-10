@@ -50,12 +50,12 @@ export function Registration() {
   }
 
   return (
-    <section id="register" className="py-12 md:py-24 bg-card">
+    <section id="register" className="py-12 md:py-24 bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 md:px-6">
-        <Card className="max-w-4xl mx-auto bg-background shadow-2xl">
-          <CardHeader className="text-center">
+        <Card className="max-w-4xl mx-auto bg-card shadow-2xl shadow-primary/10 border-primary/20 border">
+          <CardHeader className="text-center p-6 md:p-8">
             <CardTitle className="font-headline text-3xl md:text-4xl">Ready to Launch?</CardTitle>
-            <CardDescription className="max-w-2xl mx-auto text-lg pt-2">
+            <CardDescription className="max-w-2xl mx-auto text-lg pt-2 text-muted-foreground">
                 Secure your team's spot at the International Space Apps Challenge 2025. Join a global community of innovators and make your mark on the universe.
             </CardDescription>
              <div className="flex justify-center pt-4">
@@ -72,9 +72,9 @@ export function Registration() {
                 </ul>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6 md:p-8">
             <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-0 md:p-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
                   name="teamName"

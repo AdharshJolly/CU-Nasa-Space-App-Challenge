@@ -40,7 +40,7 @@ const timelineEvents = [
 
 export function Schedule() {
     return (
-        <section id="schedule" className="py-12 md:py-24 bg-card">
+        <section id="schedule" className="py-12 md:py-24 bg-background/80 backdrop-blur-sm">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="text-center mb-16">
                     <h2 className="font-headline text-3xl md:text-4xl font-bold">Event Timeline</h2>
@@ -55,19 +55,19 @@ export function Schedule() {
                             <div className="flex items-center">
                                 <div className={`w-1/2 pr-8 text-right`}>
                                    {index % 2 === 0 && (
-                                     <div className="bg-background p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
+                                     <div className="bg-card p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
                                         <p className="text-primary font-bold">{event.date}</p>
                                         <h3 className="font-headline text-xl font-semibold mt-1">{event.title}</h3>
                                         <p className="text-muted-foreground text-sm mt-2">{event.description}</p>
                                      </div>
                                    )}
                                 </div>
-                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-4 border-card">
+                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-4 border-background">
                                    <CheckCircle className="text-primary-foreground h-5 w-5" />
                                 </div>
                                  <div className={`w-1/2 pl-8 text-left`}>
                                      {index % 2 !== 0 && (
-                                         <div className="bg-background p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
+                                         <div className="bg-card p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
                                             <p className="text-primary font-bold">{event.date}</p>
                                             <h3 className="font-headline text-xl font-semibold mt-1">{event.title}</h3>
                                             <p className="text-muted-foreground text-sm mt-2">{event.description}</p>

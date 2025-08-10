@@ -21,7 +21,7 @@ const aboutItems = [
 
 export function About() {
   return (
-    <section id="about" className="py-12 md:py-24 bg-card">
+    <section id="about" className="py-12 md:py-24 bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
             <h2 className="font-headline text-3xl md:text-4xl font-bold">About the Event</h2>
@@ -31,7 +31,7 @@ export function About() {
         </div>
         <div className="grid gap-8 md:grid-cols-3">
           {aboutItems.map((item, index) => (
-            <Card key={index} className="bg-background border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
+            <Card key={index} className="bg-card border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
               <CardHeader className="flex flex-col items-center text-center gap-4">
                 {item.icon}
                 <CardTitle className="font-headline text-2xl">{item.title}</CardTitle>

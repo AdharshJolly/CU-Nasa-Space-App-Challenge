@@ -26,7 +26,7 @@ const perks = [
 
 export function Perks() {
   return (
-    <section id="perks" className="py-12 md:py-24 bg-card">
+    <section id="perks" className="py-12 md:py-24 bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl md:text-4xl font-bold">Participant Perks</h2>
@@ -36,7 +36,7 @@ export function Perks() {
         </div>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {perks.map((perk) => (
-            <div key={perk.title} className="flex flex-col items-center text-center p-6 bg-background rounded-lg border-2 border-transparent hover:border-primary transition-colors">
+            <div key={perk.title} className="flex flex-col items-center text-center p-6 bg-card rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
               <div className="mb-4">{perk.icon}</div>
               <h3 className="font-headline text-xl font-semibold mb-2">{perk.title}</h3>
               <p className="text-muted-foreground text-sm">{perk.description}</p>

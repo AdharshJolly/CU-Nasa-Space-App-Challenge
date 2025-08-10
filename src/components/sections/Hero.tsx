@@ -32,7 +32,7 @@ export function Hero() {
         </p>
         <Countdown />
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" asChild className="transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
+          <Button size="lg" asChild className="transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/40">
             <Link href="#register">Register Now</Link>
           </Button>
           <Button size="lg" variant="secondary" asChild className="transition-transform duration-300 hover:scale-105">

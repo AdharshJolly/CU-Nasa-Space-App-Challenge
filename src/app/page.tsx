@@ -14,7 +14,7 @@ import { Contact } from "@/components/sections/Contact";
 
 export default function Home() {
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
+    <div className="flex min-h-dvh flex-col bg-background bg-grid-pattern">
       <LiveUpdateBanner />
       <Header />
       <main className="flex-1">
