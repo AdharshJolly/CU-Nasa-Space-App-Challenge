@@ -8,11 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Rocket, Trash, UserPlus } from "lucide-react";
+import { Loader2, Rocket, Trash, UserPlus, Wand2 } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { generateTeamName } from "@/ai/flows/generate-team-name-flow";
+import { useState } from "react";
 
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
@@ -31,6 +33,7 @@ const formSchema = z.object({
 
 export function Registration() {
   const { toast } = useToast();
+  const [isGeneratingName, setIsGeneratingName] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,6 +70,26 @@ export function Registration() {
     }
   }
 
+  const handleGenerateName = async () => {
+    setIsGeneratingName(true);
+    try {
+      const { teamName } = await generateTeamName({});
+      form.setValue("teamName", teamName, { shouldValidate: true });
+      toast({
+        title: "Team Name Generated!",
+        description: `We've called you "${teamName}". Feel free to change it!`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: "Could not generate a team name. Please try again.",
+      });
+    } finally {
+      setIsGeneratingName(false);
+    }
+  };
+
   return (
     <section id="register" className="py-12 md:py-24 bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 md:px-6">
@@ -98,11 +121,28 @@ export function Registration() {
                   name="teamName"
                   render={({ field }) => (
                       <FormItem>
-                      <FormLabel className="text-lg font-headline">Team Name</FormLabel>
-                      <FormControl>
-                          <Input placeholder="The Star Gazers" {...field} disabled={isSubmitting}/>
-                      </FormControl>
-                      <FormMessage />
+                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+                            <div className="flex-grow">
+                                <FormLabel className="text-lg font-headline">Team Name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="The Star Gazers" {...field} disabled={isSubmitting || isGeneratingName}/>
+                                </FormControl>
+                            </div>
+                            <Button type="button" variant="outline" onClick={handleGenerateName} disabled={isSubmitting || isGeneratingName}>
+                                {isGeneratingName ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Wand2 className="mr-2 h-4 w-4" />
+                                        Generate Name
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                        <FormMessage />
                       </FormItem>
                   )}
                 />
@@ -197,5 +237,3 @@ export function Registration() {
     </section>
   );
 }
-
-    
