@@ -10,9 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+
 
 const timelineEventSchema = z.object({
-    date: z.string().min(5, "Date is required."),
+    date: z.string({
+        required_error: "A date is required.",
+    }),
     title: z.string().min(5, "Title must be at least 5 characters."),
     description: z.string().min(10, "Description must be at least 10 characters."),
 });
@@ -38,7 +46,10 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
   
   useEffect(() => {
     if (event) {
-        form.reset(event);
+        form.reset({
+            ...event,
+            date: event.date ? format(new Date(event.date), "PPP") : ""
+        });
     } else {
         form.reset({ date: "", title: "", description: "" });
     }
@@ -46,7 +57,10 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
 
 
   const onSubmit = (values: z.infer<typeof timelineEventSchema>) => {
-    onSave(values);
+    onSave({
+        ...values,
+        date: format(new Date(values.date), "yyyy-MM-dd")
+    });
   };
 
   return (
@@ -64,11 +78,36 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
                         control={form.control}
                         name="date"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                                 <FormLabel>Date</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="e.g., October 10, 2025" {...field} />
-                                </FormControl>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                        )}
+                                        >
+                                        {field.value ? (
+                                            format(new Date(field.value), "PPP")
+                                        ) : (
+                                            <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={field.value ? new Date(field.value) : undefined}
+                                        onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                                        initialFocus
+                                    />
+                                    </PopoverContent>
+                                </Popover>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -109,5 +148,3 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
     </Dialog>
   )
 }
-
-    

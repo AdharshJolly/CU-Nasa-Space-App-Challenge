@@ -6,6 +6,7 @@ import { CheckCircle } from 'lucide-react';
 import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { TimelineEvent } from '@/components/admin/TimelineEventDialog';
+import { format } from 'date-fns';
 
 
 export function Schedule() {
@@ -38,7 +39,7 @@ export function Schedule() {
                                 <div className={`w-1/2 pr-8 text-right`}>
                                    {index % 2 === 0 && (
                                      <div className="bg-card p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
-                                        <p className="text-primary font-bold">{event.date}</p>
+                                        <p className="text-primary font-bold">{format(new Date(event.date), "PPP")}</p>
                                         <h3 className="font-headline text-xl font-semibold mt-1">{event.title}</h3>
                                         <p className="text-muted-foreground text-sm mt-2">{event.description}</p>
                                      </div>
@@ -50,7 +51,7 @@ export function Schedule() {
                                  <div className={`w-1/2 pl-8 text-left`}>
                                      {index % 2 !== 0 && (
                                          <div className="bg-card p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
-                                            <p className="text-primary font-bold">{event.date}</p>
+                                            <p className="text-primary font-bold">{format(new Date(event.date), "PPP")}</p>
                                             <h3 className="font-headline text-xl font-semibold mt-1">{event.title}</h3>
                                             <p className="text-muted-foreground text-sm mt-2">{event.description}</p>
                                          </div>
@@ -67,5 +68,3 @@ export function Schedule() {
         </section>
     );
 }
-
-    

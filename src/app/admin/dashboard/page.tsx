@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { collection, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, query, doc } from "firebase/firestore";
+import { collection, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, query, doc, orderBy } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
+import { format } from "date-fns";
 
 
 interface TeamMember {
@@ -65,10 +66,8 @@ export default function AdminDashboard() {
         setProblems(problemsData);
     });
     
-    const unsubscribeTimeline = onSnapshot(query(collection(db, "timeline")), (snapshot) => {
+    const unsubscribeTimeline = onSnapshot(query(collection(db, "timeline"), orderBy("date")), (snapshot) => {
         const eventsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TimelineEvent));
-        // Simple sort by date string, assuming YYYY-MM-DD or similar format that sorts chronologically
-        eventsData.sort((a, b) => a.date.localeCompare(b.date));
         setTimelineEvents(eventsData);
     });
 
@@ -255,7 +254,7 @@ export default function AdminDashboard() {
                             <TableBody>
                                 {timelineEvents.map((event) => (
                                     <TableRow key={event.id}>
-                                        <TableCell className="font-medium">{event.date}</TableCell>
+                                        <TableCell className="font-medium">{format(new Date(event.date), "PPP")}</TableCell>
                                         <TableCell>{event.title}</TableCell>
                                         <TableCell className="text-muted-foreground">{event.description}</TableCell>
                                         <TableCell className="text-right">
@@ -363,5 +362,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-    
