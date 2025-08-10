@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Rocket, Trash, UserPlus } from "lucide-react";
 import { Separator } from "../ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 const memberSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -69,8 +70,11 @@ export function Registration() {
                     </li>
                 </ul>
             </div>
-            <div className="bg-background p-8 rounded-lg shadow-2xl">
-                <h3 className="font-headline text-2xl font-bold mb-4 text-center">Register Your Team</h3>
+            <Card className="bg-background shadow-2xl">
+              <CardHeader>
+                <CardTitle className="font-headline text-2xl font-bold text-center">Register Your Team</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
@@ -90,7 +94,7 @@ export function Registration() {
                     <Separator />
 
                     {fields.map((field, index) => (
-                      <div key={field.id} className="space-y-4 p-4 border rounded-lg relative">
+                      <div key={field.id} className="space-y-4 p-4 border rounded-lg relative bg-card/50">
                         <h4 className="font-headline text-lg font-semibold">{index === 0 ? 'Team Lead' : `Team Member ${index + 1}`}</h4>
                         <FormField
                           control={form.control}
@@ -155,7 +159,8 @@ export function Registration() {
                     </Button>
                 </form>
                 </Form>
-            </div>
+              </CardContent>
+            </Card>
         </div>
       </div>
     </section>
