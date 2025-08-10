@@ -4,6 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import FloatingAstronaut from '@/assets/spaceElements/FloatingAstronaut.png'
 import AstronautPole from '@/assets/spaceElements/AstronautWithFlagPole.png'
+import { MapPin } from 'lucide-react';
+
+const sponsors = [
+  { name: "NASA", logo: "https://placehold.co/200x100.png", hint: "space agency" },
+  { name: "SpaceX", logo: "https://placehold.co/200x100.png", hint: "rocket company" },
+  { name: "Google Cloud", logo: "https://placehold.co/200x100.png", hint: "tech company" },
+];
 
 export function Hero() {
   return (
@@ -46,9 +53,15 @@ export function Hero() {
         >
           NASA International Space Apps Challenge 2025
         </h1>
-        <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
+        <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-4">
           Join thousands of innovators across the globe to solve challenges on Earth and in space.
         </p>
+
+        <div className="flex justify-center items-center gap-2 mb-8 text-lg text-primary font-semibold backdrop-blur-sm bg-primary/10 py-2 px-4 rounded-lg border border-primary/20 max-w-md mx-auto">
+            <MapPin className="h-5 w-5" />
+            <span>CHRIST University, Kengeri Campus</span>
+        </div>
+
         <Countdown />
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button size="lg" asChild className="transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/40">
@@ -57,6 +70,23 @@ export function Hero() {
           <Button size="lg" variant="secondary" asChild className="transition-transform duration-300 hover:scale-105">
             <Link href="#problems">View Challenges</Link>
           </Button>
+        </div>
+
+        <div className="mt-20">
+            <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-6">In collaboration with</h3>
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+              {sponsors.map((sponsor) => (
+                <div key={sponsor.name} className="relative h-12 w-32 filter grayscale opacity-70 hover:opacity-100 hover:grayscale-0 transition-all duration-300">
+                  <Image
+                    src={sponsor.logo}
+                    alt={`${sponsor.name} logo`}
+                    fill
+                    style={{objectFit: "contain"}}
+                    data-ai-hint={sponsor.hint}
+                  />
+                </div>
+              ))}
+            </div>
         </div>
       </div>
     </section>
