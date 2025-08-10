@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Countdown } from '@/components/Countdown';
-import FloatingAstronaut from '@/assets/spaceElements/Floating-Astronaut.png'
+import FloatingAstronaut from '@/assets/spaceElements/Floating-Astronaut.png';
 import Link from 'next/link';
 import Image from 'next/image';
 
