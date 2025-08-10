@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import FloatingAstronaut from '@/assets/spaceElements/FloatingAstronaut.png'
 import AstronautPole from '@/assets/spaceElements/AstronautWithFlagPole.png'
-import { MapPin, X } from 'lucide-react';
+import { MapPin, Sparkles } from 'lucide-react';
 
 const sponsors = [
   { name: "NASA", logo: "https://placehold.co/200x100.png", hint: "space agency" },
@@ -64,7 +64,7 @@ export function Hero() {
                   </div>
                   {index < sponsors.length - 1 && (
                     <span className="text-primary font-bold text-2xl mx-2">
-                      <X />
+                      <Sparkles />
                     </span>
                   )}
                 </React.Fragment>
