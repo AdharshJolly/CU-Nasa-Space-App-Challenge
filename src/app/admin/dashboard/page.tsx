@@ -11,10 +11,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2 } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
 import { format } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
 
 
 interface TeamMember {
@@ -35,6 +36,8 @@ export default function AdminDashboard() {
   const [problems, setProblems] = useState<ProblemStatement[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [problemsReleased, setProblemsReleased] = useState(false);
+  const [liveBannerText, setLiveBannerText] = useState("");
+  const [isSavingBanner, setIsSavingBanner] = useState(false);
   const [isProblemDialogOpen, setIsProblemDialogOpen] = useState(false);
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(null);
@@ -78,11 +81,18 @@ export default function AdminDashboard() {
         }
     });
 
+    const unsubscribeBanner = onSnapshot(doc(db, "settings", "liveBanner"), (doc) => {
+        if (doc.exists()) {
+            setLiveBannerText(doc.data().text);
+        }
+    });
+
     return () => {
         unsubscribeTeams();
         unsubscribeProblems();
         unsubscribeSettings();
         unsubscribeTimeline();
+        unsubscribeBanner();
     };
   }, [user]);
 
@@ -93,7 +103,7 @@ export default function AdminDashboard() {
 
   const handleReleaseToggle = async (checked: boolean) => {
       try {
-          await setDoc(doc(db, "settings", "features"), { problemsReleased: checked });
+          await setDoc(doc(db, "settings", "features"), { problemsReleased: checked }, { merge: true });
           setProblemsReleased(checked);
           toast({
               title: "Success!",
@@ -106,6 +116,25 @@ export default function AdminDashboard() {
               title: "Update Failed",
               description: "Could not update the setting. Please try again."
           })
+      }
+  }
+
+  const handleSaveBanner = async () => {
+      setIsSavingBanner(true);
+      try {
+          await setDoc(doc(db, "settings", "liveBanner"), { text: liveBannerText });
+          toast({
+              title: "Success!",
+              description: "Live banner has been updated."
+          })
+      } catch(error) {
+           toast({
+              variant: "destructive",
+              title: "Update Failed",
+              description: "Could not update the banner. Please try again."
+          })
+      } finally {
+        setIsSavingBanner(false);
       }
   }
 
@@ -273,6 +302,34 @@ export default function AdminDashboard() {
                 </Card>
 
                  <Card>
+                    <CardHeader>
+                         <div className="flex items-center gap-2">
+                             <Megaphone className="h-6 w-6" />
+                            <CardTitle>Live Banner</CardTitle>
+                        </div>
+                        <CardDescription>Update the announcement banner at the top of the site. Leave empty to hide it.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Textarea 
+                            placeholder="Enter banner text here..."
+                            value={liveBannerText}
+                            onChange={(e) => setLiveBannerText(e.target.value)}
+                            disabled={isSavingBanner}
+                        />
+                        <Button onClick={handleSaveBanner} disabled={isSavingBanner}>
+                             {isSavingBanner ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                "Save Banner"
+                            )}
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
                              <div className="flex items-center gap-2">
@@ -421,3 +478,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+    
