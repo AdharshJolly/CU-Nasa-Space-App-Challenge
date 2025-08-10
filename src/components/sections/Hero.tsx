@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Countdown } from '@/components/Countdown';
+import FloatingAstronaut from '@/assets/spaceElements/Floating-Astronaut.png'
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -19,7 +20,7 @@ export function Hero() {
       <div className="container mx-auto px-4 md:px-6 z-20 relative">
         <div className="relative w-full flex justify-center">
             <div className="absolute -top-40 right-1/2 translate-x-[24rem] w-64 h-64 opacity-30 md:opacity-50 animate-fade-in-up" style={{animationDelay: '1s'}}>
-                <Image src="https://placehold.co/400x400.png" alt="Floating Astronaut" width={400} height={400} data-ai-hint="astronaut space" className="animate-[spin_60s_linear_infinite]" />
+                <Image src={FloatingAstronaut} alt="Floating Astronaut" width={400} height={400} data-ai-hint="astronaut space" className="animate-[spin_60s_linear_infinite]" />
             </div>
             <div className="absolute -top-20 right-1/2 translate-x-[-26rem] w-48 h-48 opacity-20 md:opacity-40 animate-fade-in-up" style={{animationDelay: '1.5s'}}>
                 <Image src="https://placehold.co/300x300.png" alt="Satellite" width={300} height={300} data-ai-hint="satellite space" className="animate-[spin_90s_linear_infinite_reverse]" />
