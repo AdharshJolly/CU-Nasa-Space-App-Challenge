@@ -1,5 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, CalendarDays, Users } from "lucide-react";
+import Image from "next/image";
+import FloatingAstronaut from '@/assets/spaceElements/Floating-Astronaut.png';
+
 
 const aboutItems = [
   {
@@ -21,8 +24,14 @@ const aboutItems = [
 
 export function About() {
   return (
-    <section id="about" className="py-12 md:py-24 bg-background/80 backdrop-blur-sm">
-      <div className="container mx-auto px-4 md:px-6">
+    <section id="about" className="relative py-12 md:py-24 bg-background/80 backdrop-blur-sm overflow-hidden">
+        <div className="absolute -left-32 -top-32 w-96 h-96 opacity-10 -rotate-45" style={{
+            transform: 'translateZ(-100px) scale(2)',
+            transformStyle: 'preserve-3d'
+        }}>
+            <Image src={FloatingAstronaut} alt="Floating Astronaut" layout="fill" objectFit="contain" data-ai-hint="astronaut space" />
+        </div>
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className="text-center mb-12">
             <h2 className="font-headline text-3xl md:text-4xl font-bold">About the Event</h2>
             <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
@@ -31,7 +40,7 @@ export function About() {
         </div>
         <div className="grid gap-8 md:grid-cols-3">
           {aboutItems.map((item, index) => (
-            <Card key={index} className="bg-card border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
+            <Card key={index} className="bg-card/50 border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm">
               <CardHeader className="flex flex-col items-center text-center gap-4">
                 {item.icon}
                 <CardTitle className="font-headline text-2xl">{item.title}</CardTitle>
