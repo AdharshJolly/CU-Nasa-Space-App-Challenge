@@ -1,8 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Countdown } from '@/components/Countdown';
-import FloatingAstronaut from '@/assets/spaceElements/Floating-Astronaut.png';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export function Hero() {
   return (
@@ -18,14 +16,6 @@ export function Hero() {
         }}>
       </div>
       <div className="container mx-auto px-4 md:px-6 z-20 relative">
-        <div className="relative w-full flex justify-center h-48">
-            <div className="absolute -top-24 md:-top-40 right-1/2 translate-x-[12rem] md:translate-x-[24rem] w-48 h-48 md:w-64 md:h-64 opacity-30 md:opacity-50 animate-fade-in-up" style={{animationDelay: '1s'}}>
-                <Image src={FloatingAstronaut} alt="Floating Astronaut" width={400} height={400} data-ai-hint="astronaut space" className="animate-[spin_60s_linear_infinite]" />
-            </div>
-            <div className="absolute -top-10 md:-top-20 right-1/2 translate-x-[-14rem] md:translate-x-[-26rem] w-32 h-32 md:w-48 md:h-48 opacity-20 md:opacity-40 animate-fade-in-up" style={{animationDelay: '1.5s'}}>
-                <Image src="https://placehold.co/300x300.png" alt="Satellite" width={300} height={300} data-ai-hint="satellite space" className="animate-[spin_90s_linear_infinite_reverse]" />
-            </div>
-        </div>
 
         <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-4"
             style={{ textShadow: '0 0 15px hsl(var(--primary) / 0.6), 0 0 30px hsl(var(--primary) / 0.4)'}}

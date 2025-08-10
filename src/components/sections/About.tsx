@@ -1,7 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, CalendarDays, Users } from "lucide-react";
-import Image from "next/image";
-import FloatingAstronaut from '@/assets/spaceElements/Floating-Astronaut.png';
 
 
 const aboutItems = [
@@ -24,13 +22,8 @@ const aboutItems = [
 
 export function About() {
   return (
-    <section id="about" className="relative py-12 md:py-24 bg-background/80 backdrop-blur-sm overflow-hidden">
-        <div className="absolute -left-32 -top-32 w-96 h-96 opacity-10 -rotate-45" style={{
-            transform: 'translateZ(-100px) scale(2)',
-        }}>
-            <Image src={FloatingAstronaut} alt="Floating Astronaut" layout="fill" objectFit="contain" data-ai-hint="astronaut space" />
-        </div>
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
+    <section id="about" className="py-12 md:py-24 bg-background/80 backdrop-blur-sm">
+      <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
             <h2 className="font-headline text-3xl md:text-4xl font-bold">About the Event</h2>
             <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
