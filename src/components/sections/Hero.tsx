@@ -1,10 +1,12 @@
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Countdown } from '@/components/Countdown';
 import Link from 'next/link';
 import Image from 'next/image';
 import FloatingAstronaut from '@/assets/spaceElements/FloatingAstronaut.png'
 import AstronautPole from '@/assets/spaceElements/AstronautWithFlagPole.png'
-import { MapPin } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
 
 const sponsors = [
   { name: "NASA", logo: "https://placehold.co/200x100.png", hint: "space agency" },
@@ -47,6 +49,28 @@ export function Hero() {
 
 
       <div className="container mx-auto px-4 md:px-6 z-20 relative">
+        <div className="mb-8">
+            <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6">
+              {sponsors.map((sponsor, index) => (
+                <React.Fragment key={sponsor.name}>
+                  <div className="relative h-12 w-32 filter grayscale-0 opacity-80 hover:opacity-100 transition-all duration-300">
+                    <Image
+                      src={sponsor.logo}
+                      alt={`${sponsor.name} logo`}
+                      fill
+                      style={{objectFit: "contain"}}
+                      data-ai-hint={sponsor.hint}
+                    />
+                  </div>
+                  {index < sponsors.length - 1 && (
+                    <span className="text-primary font-bold text-2xl mx-2">
+                      <X />
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+        </div>
 
         <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-4"
             style={{ textShadow: '0 0 15px hsl(var(--primary) / 0.6), 0 0 30px hsl(var(--primary) / 0.4)'}}
@@ -70,23 +94,6 @@ export function Hero() {
           <Button size="lg" variant="secondary" asChild className="transition-transform duration-300 hover:scale-105">
             <Link href="#problems">View Challenges</Link>
           </Button>
-        </div>
-
-        <div className="mt-20">
-            <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-6">In collaboration with</h3>
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-              {sponsors.map((sponsor) => (
-                <div key={sponsor.name} className="relative h-12 w-32 filter grayscale opacity-70 hover:opacity-100 hover:grayscale-0 transition-all duration-300">
-                  <Image
-                    src={sponsor.logo}
-                    alt={`${sponsor.name} logo`}
-                    fill
-                    style={{objectFit: "contain"}}
-                    data-ai-hint={sponsor.hint}
-                  />
-                </div>
-              ))}
-            </div>
         </div>
       </div>
     </section>
