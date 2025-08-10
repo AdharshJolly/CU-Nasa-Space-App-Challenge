@@ -12,7 +12,6 @@ import { Registration } from "@/components/sections/Registration";
 import { Contact } from "@/components/sections/Contact";
 import { AnimateOnScroll } from "@/components/AnimateOnScroll";
 import { LiveUpdatesBanner } from "@/components/layout/LiveUpdatesBanner";
-import { Game } from "@/components/sections/Game";
 
 export default function Home() {
   return (
@@ -35,9 +34,6 @@ export default function Home() {
         </AnimateOnScroll>
         <AnimateOnScroll>
           <ProblemStatements />
-        </AnimateOnScroll>
-        <AnimateOnScroll>
-          <Game />
         </AnimateOnScroll>
         <AnimateOnScroll>
           <Sponsors />
