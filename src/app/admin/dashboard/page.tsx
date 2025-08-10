@@ -4,15 +4,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { collection, getDocs, doc, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, query } from "firebase/firestore";
+import { collection, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, query, doc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
+import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
+
 
 interface TeamMember {
     name: string;
@@ -30,9 +32,12 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [problems, setProblems] = useState<ProblemStatement[]>([]);
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [problemsReleased, setProblemsReleased] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isProblemDialogOpen, setIsProblemDialogOpen] = useState(false);
+  const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(null);
+  const [editingTimelineEvent, setEditingTimelineEvent] = useState<TimelineEvent | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -59,6 +64,13 @@ export default function AdminDashboard() {
         const problemsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ProblemStatement[];
         setProblems(problemsData);
     });
+    
+    const unsubscribeTimeline = onSnapshot(query(collection(db, "timeline")), (snapshot) => {
+        const eventsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TimelineEvent));
+        // Simple sort by date string, assuming YYYY-MM-DD or similar format that sorts chronologically
+        eventsData.sort((a, b) => a.date.localeCompare(b.date));
+        setTimelineEvents(eventsData);
+    });
 
     const unsubscribeSettings = onSnapshot(doc(db, "settings", "features"), (doc) => {
         if (doc.exists()) {
@@ -70,6 +82,7 @@ export default function AdminDashboard() {
         unsubscribeTeams();
         unsubscribeProblems();
         unsubscribeSettings();
+        unsubscribeTimeline();
     };
   }, [user]);
 
@@ -96,30 +109,24 @@ export default function AdminDashboard() {
       }
   }
 
+  // Problem Statement Handlers
   const handleAddNewProblem = () => {
     setEditingProblem(null);
-    setIsDialogOpen(true);
+    setIsProblemDialogOpen(true);
   };
 
   const handleEditProblem = (problem: ProblemStatement) => {
     setEditingProblem(problem);
-    setIsDialogOpen(true);
+    setIsProblemDialogOpen(true);
   };
 
   const handleDeleteProblem = async (problemId: string) => {
       if (confirm("Are you sure you want to delete this problem statement?")) {
         try {
             await deleteDoc(doc(db, "problems", problemId));
-            toast({
-                title: "Success",
-                description: "Problem statement deleted successfully."
-            });
+            toast({ title: "Success", description: "Problem statement deleted." });
         } catch (error) {
-             toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Could not delete the problem statement. Please try again."
-            });
+             toast({ variant: "destructive", title: "Error", description: "Could not delete problem statement." });
         }
       }
   }
@@ -127,23 +134,55 @@ export default function AdminDashboard() {
   const handleSaveProblem = async (problemData: Omit<ProblemStatement, 'id'>) => {
     try {
         if (editingProblem) {
-            const problemRef = doc(db, "problems", editingProblem.id);
-            await updateDoc(problemRef, problemData);
-             toast({ title: "Success", description: "Problem statement updated successfully." });
+            await updateDoc(doc(db, "problems", editingProblem.id), problemData);
+            toast({ title: "Success", description: "Problem statement updated." });
         } else {
             await addDoc(collection(db, "problems"), problemData);
-            toast({ title: "Success", description: "Problem statement added successfully." });
+            toast({ title: "Success", description: "Problem statement added." });
         }
-        setIsDialogOpen(false);
+        setIsProblemDialogOpen(false);
     } catch(error) {
-        console.error("Error saving problem:", error)
-        toast({
-            variant: "destructive",
-            title: "Save Failed",
-            description: "Could not save the problem statement. Please try again."
-        });
+        toast({ variant: "destructive", title: "Save Failed", description: "Could not save problem." });
     }
   }
+  
+  // Timeline Event Handlers
+  const handleAddNewTimelineEvent = () => {
+    setEditingTimelineEvent(null);
+    setIsTimelineDialogOpen(true);
+  };
+
+  const handleEditTimelineEvent = (event: TimelineEvent) => {
+    setEditingTimelineEvent(event);
+    setIsTimelineDialogOpen(true);
+  };
+  
+  const handleDeleteTimelineEvent = async (eventId: string) => {
+      if (confirm("Are you sure you want to delete this timeline event?")) {
+        try {
+            await deleteDoc(doc(db, "timeline", eventId));
+            toast({ title: "Success", description: "Timeline event deleted." });
+        } catch (error) {
+             toast({ variant: "destructive", title: "Error", description: "Could not delete timeline event." });
+        }
+      }
+  }
+
+  const handleSaveTimelineEvent = async (eventData: Omit<TimelineEvent, 'id'>) => {
+    try {
+        if (editingTimelineEvent) {
+            await updateDoc(doc(db, "timeline", editingTimelineEvent.id), eventData);
+            toast({ title: "Success", description: "Timeline event updated." });
+        } else {
+            await addDoc(collection(db, "timeline"), eventData);
+            toast({ title: "Success", description: "Timeline event added." });
+        }
+        setIsTimelineDialogOpen(false);
+    } catch(error) {
+        toast({ variant: "destructive", title: "Save Failed", description: "Could not save timeline event." });
+    }
+  }
+
 
   if (!user) {
     return <div className="flex min-h-dvh items-center justify-center bg-background">Loading...</div>;
@@ -187,6 +226,50 @@ export default function AdminDashboard() {
                                 onCheckedChange={handleReleaseToggle}
                             />
                         </div>
+                    </CardContent>
+                </Card>
+
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                             <div className="flex items-center gap-2">
+                                <CalendarDays className="h-6 w-6" />
+                                <CardTitle>Event Timeline</CardTitle>
+                            </div>
+                            <CardDescription>Manage the event schedule shown on the homepage.</CardDescription>
+                        </div>
+                        <Button onClick={handleAddNewTimelineEvent}>
+                            <PlusCircle className="mr-2"/> Add New Event
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                             <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[25%]">Date</TableHead>
+                                    <TableHead className="w-[30%]">Title</TableHead>
+                                    <TableHead>Description</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {timelineEvents.map((event) => (
+                                    <TableRow key={event.id}>
+                                        <TableCell className="font-medium">{event.date}</TableCell>
+                                        <TableCell>{event.title}</TableCell>
+                                        <TableCell className="text-muted-foreground">{event.description}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => handleEditTimelineEvent(event)}>
+                                                <Pencil className="h-4 w-4"/>
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteTimelineEvent(event.id)}>
+                                                <Trash2 className="h-4 w-4"/>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
 
@@ -266,11 +349,19 @@ export default function AdminDashboard() {
             </div>
         </main>
         <ProblemStatementDialog
-            isOpen={isDialogOpen}
-            onClose={() => setIsDialogOpen(false)}
+            isOpen={isProblemDialogOpen}
+            onClose={() => setIsProblemDialogOpen(false)}
             onSave={handleSaveProblem}
             problem={editingProblem}
+        />
+         <TimelineEventDialog
+            isOpen={isTimelineDialogOpen}
+            onClose={() => setIsTimelineDialogOpen(false)}
+            onSave={handleSaveTimelineEvent}
+            event={editingTimelineEvent}
         />
     </div>
   );
 }
+
+    
