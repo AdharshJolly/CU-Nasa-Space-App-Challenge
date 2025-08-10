@@ -44,7 +44,7 @@ export function Hero() {
         <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-4"
             style={{ textShadow: '0 0 15px hsl(var(--primary) / 0.6), 0 0 30px hsl(var(--primary) / 0.4)'}}
         >
-          International Space Apps Challenge 2025
+          NASA International Space Apps Challenge 2025
         </h1>
         <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
           Join thousands of innovators across the globe to solve challenges on Earth and in space.

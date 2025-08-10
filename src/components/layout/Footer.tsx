@@ -27,7 +27,7 @@ export function Footer() {
           </div>
         </div>
          <div className="mt-12 border-t border-border pt-8 text-center">
-          <p className="text-sm text-muted-foreground">&copy; 2024 International Space Apps Challenge. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">&copy; 2024 NASA International Space Apps Challenge. All rights reserved.</p>
         </div>
       </div>
     </footer>

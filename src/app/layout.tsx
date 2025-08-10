@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'International Space Apps Challenge 2025',
+  title: 'NASA International Space Apps Challenge 2025',
   description: 'Join thousands of innovators across the globe to solve challenges on Earth and in space.',
 };
 

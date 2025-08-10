@@ -56,7 +56,7 @@ export function Registration() {
           <CardHeader className="text-center p-6 md:p-8">
             <CardTitle className="font-headline text-3xl md:text-4xl">Ready to Launch?</CardTitle>
             <CardDescription className="max-w-2xl mx-auto text-lg pt-2 text-muted-foreground">
-                Secure your team's spot at the International Space Apps Challenge 2025. Join a global community of innovators and make your mark on the universe.
+                Secure your team's spot at the NASA International Space Apps Challenge 2025. Join a global community of innovators and make your mark on the universe.
             </CardDescription>
              <div className="flex justify-center pt-4">
                 <ul className="space-y-2 text-muted-foreground flex flex-col md:flex-row md:space-y-0 md:space-x-6">
