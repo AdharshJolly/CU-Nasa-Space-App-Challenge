@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Loader2, Rocket, Trash, UserPlus, Wand2 } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { generateTeamName } from "@/ai/flows/generate-team-name-flow";
 import { useState } from "react";
@@ -29,7 +29,15 @@ const formSchema = z.object({
     .min(3, { message: "Team name must be at least 3 characters." })
     .max(25, { message: "Team name cannot be more than 25 characters." }),
   members: z.array(memberSchema).min(2, "You must have at least two members.").max(6, "You can have a maximum of 6 members."),
+}).refine(async (data) => {
+    const q = query(collection(db, "registrations"), where("teamName", "==", data.teamName));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.empty;
+}, {
+    message: "This team name is already taken. Please choose another.",
+    path: ["teamName"],
 });
+
 
 export function Registration() {
   const { toast } = useToast();
@@ -237,3 +245,5 @@ export function Registration() {
     </section>
   );
 }
+
+    
