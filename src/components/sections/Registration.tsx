@@ -10,6 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Rocket, Trash, UserPlus } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const memberSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -40,13 +42,22 @@ export function Registration() {
     name: "members",
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: "Registration Successful! 🎉",
-      description: "Welcome aboard, astronauts! Check your email for confirmation.",
-    });
-    form.reset();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await addDoc(collection(db, "registrations"), values);
+      toast({
+        title: "Registration Successful! 🎉",
+        description: "Welcome aboard, astronauts! Your team is registered.",
+      });
+      form.reset();
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: "There was a problem registering your team. Please try again.",
+      });
+    }
   }
 
   return (
