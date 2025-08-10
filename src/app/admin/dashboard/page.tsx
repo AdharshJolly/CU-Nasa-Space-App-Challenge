@@ -11,11 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone, Users, ShieldAlert } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 
 interface TeamMember {
@@ -95,6 +96,8 @@ export default function AdminDashboard() {
         unsubscribeBanner();
     };
   }, [user]);
+  
+  const totalParticipants = teams.reduce((acc, team) => acc + team.members.length, 0);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -150,14 +153,12 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteProblem = async (problemId: string) => {
-      if (confirm("Are you sure you want to delete this problem statement?")) {
-        try {
-            await deleteDoc(doc(db, "problems", problemId));
-            toast({ title: "Success", description: "Problem statement deleted." });
-        } catch (error) {
-             toast({ variant: "destructive", title: "Error", description: "Could not delete problem statement." });
-        }
-      }
+    try {
+        await deleteDoc(doc(db, "problems", problemId));
+        toast({ title: "Success", description: "Problem statement deleted." });
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "Could not delete problem statement." });
+    }
   }
 
   const handleSaveProblem = async (problemData: Omit<ProblemStatement, 'id'>) => {
@@ -187,14 +188,12 @@ export default function AdminDashboard() {
   };
   
   const handleDeleteTimelineEvent = async (eventId: string) => {
-      if (confirm("Are you sure you want to delete this timeline event?")) {
-        try {
-            await deleteDoc(doc(db, "timeline", eventId));
-            toast({ title: "Success", description: "Timeline event deleted." });
-        } catch (error) {
-             toast({ variant: "destructive", title: "Error", description: "Could not delete timeline event." });
-        }
-      }
+    try {
+        await deleteDoc(doc(db, "timeline", eventId));
+        toast({ title: "Success", description: "Timeline event deleted." });
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "Could not delete timeline event." });
+    }
   }
 
   const handleSaveTimelineEvent = async (eventData: Omit<TimelineEvent, 'id'>) => {
@@ -276,6 +275,33 @@ export default function AdminDashboard() {
 
         <main className="flex-1 p-4 md:p-8">
             <div className="container mx-auto grid gap-8">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Event Snapshot</CardTitle>
+                        <CardDescription>A quick overview of your event's registration status.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 md:grid-cols-2">
+                         <Card className="p-4">
+                            <div className="flex items-center gap-4">
+                                <Users className="h-8 w-8 text-primary" />
+                                <div>
+                                    <p className="text-2xl font-bold">{teams.length}</p>
+                                    <p className="text-sm text-muted-foreground">Teams Registered</p>
+                                </div>
+                            </div>
+                        </Card>
+                        <Card className="p-4">
+                            <div className="flex items-center gap-4">
+                                <Users className="h-8 w-8 text-primary" />
+                                <div>
+                                    <p className="text-2xl font-bold">{totalParticipants}</p>
+                                    <p className="text-sm text-muted-foreground">Total Participants</p>
+                                </div>
+                            </div>
+                        </Card>
+                    </CardContent>
+                </Card>
+
                  <Card>
                     <CardHeader>
                          <div className="flex items-center gap-2">
@@ -362,9 +388,27 @@ export default function AdminDashboard() {
                                             <Button variant="ghost" size="icon" onClick={() => handleEditTimelineEvent(event)}>
                                                 <Pencil className="h-4 w-4"/>
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteTimelineEvent(event.id)}>
-                                                <Trash2 className="h-4 w-4"/>
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete this timeline event.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteTimelineEvent(event.id)} className="bg-destructive hover:bg-destructive/90">
+                                                            Yes, delete it
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -403,9 +447,30 @@ export default function AdminDashboard() {
                                             <Button variant="ghost" size="icon" onClick={() => handleEditProblem(problem)}>
                                                 <Pencil className="h-4 w-4"/>
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteProblem(problem.id)}>
-                                                <Trash2 className="h-4 w-4"/>
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                         <div className="flex items-center gap-2">
+                                                            <ShieldAlert className="h-6 w-6 text-destructive"/>
+                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        </div>
+                                                        <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete this problem statement.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteProblem(problem.id)} className="bg-destructive hover:bg-destructive/90">
+                                                            Yes, delete it
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -478,5 +543,7 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+    
 
     
