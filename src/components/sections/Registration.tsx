@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Rocket, Trash, UserPlus } from "lucide-react";
 import { Separator } from "../ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 const memberSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -52,13 +52,14 @@ export function Registration() {
   return (
     <section id="register" className="py-12 md:py-24 bg-card">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-4">
-                <h2 className="font-headline text-3xl md:text-4xl font-bold">Ready to Launch?</h2>
-                <p className="text-muted-foreground text-lg">
-                    Secure your team's spot at the International Space Apps Challenge 2025. Join a global community of innovators and make your mark on the universe.
-                </p>
-                <ul className="space-y-2 text-muted-foreground">
+        <Card className="max-w-4xl mx-auto bg-background shadow-2xl">
+          <CardHeader className="text-center">
+            <CardTitle className="font-headline text-3xl md:text-4xl">Ready to Launch?</CardTitle>
+            <CardDescription className="max-w-2xl mx-auto text-lg pt-2">
+                Secure your team's spot at the International Space Apps Challenge 2025. Join a global community of innovators and make your mark on the universe.
+            </CardDescription>
+             <div className="flex justify-center pt-4">
+                <ul className="space-y-2 text-muted-foreground flex flex-col md:flex-row md:space-y-0 md:space-x-6">
                     <li className="flex items-center gap-2">
                         <Rocket className="h-4 w-4 text-primary" /> Teams of 2 to 6 members
                     </li>
@@ -70,32 +71,45 @@ export function Registration() {
                     </li>
                 </ul>
             </div>
-            <Card className="bg-background shadow-2xl">
-              <CardHeader>
-                <CardTitle className="font-headline text-2xl font-bold text-center">Register Your Team</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="teamName"
-                      render={({ field }) => (
-                          <FormItem>
-                          <FormLabel>Team Name</FormLabel>
-                          <FormControl>
-                              <Input placeholder="The Star Gazers" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                          </FormItem>
-                      )}
-                    />
-                    
-                    <Separator />
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-0 md:p-6">
+                <FormField
+                  control={form.control}
+                  name="teamName"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel className="text-lg font-headline">Team Name</FormLabel>
+                      <FormControl>
+                          <Input placeholder="The Star Gazers" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
+                />
+                
+                <Separator />
 
-                    {fields.map((field, index) => (
-                      <div key={field.id} className="space-y-4 p-4 border rounded-lg relative bg-card/50">
-                        <h4 className="font-headline text-lg font-semibold">{index === 0 ? 'Team Lead' : `Team Member ${index + 1}`}</h4>
+                <div className="space-y-6">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="space-y-4 p-4 border rounded-lg relative bg-card/50">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-headline text-lg font-semibold">{index === 0 ? 'Team Lead' : `Team Member #${index + 1}`}</h4>
+                        {index > 1 && (
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => remove(index)}
+                            >
+                                <Trash className="h-4 w-4" />
+                                <span className="sr-only">Remove member</span>
+                            </Button>
+                        )}
+                      </div>
+                      <div className="grid md:grid-cols-3 gap-4">
                         <FormField
                           control={form.control}
                           name={`members.${index}.name`}
@@ -129,39 +143,30 @@ export function Registration() {
                             </FormItem>
                           )}
                         />
-                        {index > 1 && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute top-2 right-2 h-7 w-7"
-                                onClick={() => remove(index)}
-                            >
-                                <Trash className="h-4 w-4" />
-                                <span className="sr-only">Remove member</span>
-                            </Button>
-                        )}
                       </div>
-                    ))}
-                    
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="flex flex-col gap-4">
                     {fields.length < 6 && (
-                        <Button type="button" variant="outline" className="w-full" onClick={() => append({ name: "", email: "", phone: "" })}>
+                        <Button type="button" variant="outline" onClick={() => append({ name: "", email: "", phone: "" })}>
                             <UserPlus className="mr-2 h-4 w-4" /> Add Team Member
                         </Button>
                     )}
-                     {form.formState.errors.members && !form.formState.errors.members.root && (
-                         <p className="text-sm font-medium text-destructive">{form.formState.errors.members.message}</p>
+                     {form.formState.errors.members && (
+                         <p className="text-sm font-medium text-destructive text-center">{form.formState.errors.members.message || form.formState.errors.members.root?.message}</p>
                      )}
 
 
                     <Button type="submit" className="w-full" size="lg">
                         Confirm Registration
                     </Button>
-                </form>
-                </Form>
-              </CardContent>
-            </Card>
-        </div>
+                </div>
+            </form>
+            </Form>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );
