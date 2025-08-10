@@ -95,3 +95,21 @@
 .animate-fade-in-up {
     animation: fade-in-up 0.8s ease-out forwards;
 }
+
+@keyframes float-astronaut {
+  0%, 100% {
+    transform: translateY(-10px) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(5deg);
+  }
+}
+
+@keyframes float-satellite {
+  0%, 100% {
+    transform: translateY(5px) rotate(3deg) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-3deg) scale(1.05);
+  }
+}

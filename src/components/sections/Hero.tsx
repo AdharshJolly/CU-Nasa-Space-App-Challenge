@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Countdown } from '@/components/Countdown';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Hero() {
   return (
@@ -15,6 +16,27 @@ export function Hero() {
           maskImage: 'radial-gradient(ellipse at center, black 20%, transparent 70%)'
         }}>
       </div>
+
+      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
+          <Image
+            src="https://placehold.co/400x400.png"
+            alt="Floating Astronaut"
+            width={400}
+            height={400}
+            className="absolute -left-20 top-1/4 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 opacity-50 md:opacity-80 animate-[float-astronaut_8s_ease-in-out_infinite]"
+            data-ai-hint="astronaut"
+          />
+          <Image
+            src="https://placehold.co/300x300.png"
+            alt="Floating Satellite"
+            width={300}
+            height={300}
+            className="absolute -right-16 bottom-1/4 w-40 h-40 md:w-56 md:h-56 lg:w-72 lg:h-72 opacity-40 md:opacity-70 animate-[float-satellite_12s_ease-in-out_infinite_2s]"
+            data-ai-hint="satellite"
+          />
+      </div>
+
+
       <div className="container mx-auto px-4 md:px-6 z-20 relative">
 
         <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-4"
