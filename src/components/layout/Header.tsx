@@ -30,7 +30,7 @@ export function Header() {
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
           <Rocket className="h-7 w-7 text-primary" />
-          <span className="font-headline text-2xl font-bold text-foreground">Space Apps</span>
+          <span className="font-headline text-2xl font-bold text-foreground">Space Apps Challenge</span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => (
@@ -55,7 +55,7 @@ export function Header() {
                 <SheetClose asChild>
                   <Link href="/" className="flex items-center gap-2 mb-4">
                       <Rocket className="h-7 w-7 text-primary" />
-                      <span className="font-headline text-2xl font-bold text-foreground">Space Apps</span>
+                      <span className="font-headline text-2xl font-bold text-foreground">Space Apps Challenge</span>
                   </Link>
                 </SheetClose>
                 {navLinks.map((link) => (

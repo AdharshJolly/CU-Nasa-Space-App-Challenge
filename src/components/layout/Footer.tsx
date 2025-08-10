@@ -9,7 +9,7 @@ export function Footer() {
           <div className="flex flex-col items-center md:items-start">
               <Link href="/" className="flex items-center gap-2 mb-4">
                   <Rocket className="h-6 w-6 text-primary" />
-                  <span className="font-headline text-xl font-bold text-foreground">Space Apps 2025</span>
+                  <span className="font-headline text-xl font-bold text-foreground">Space Apps Challenge 2025</span>
               </Link>
               <p className="max-w-xs text-sm text-muted-foreground">Exploring space, one challenge at a time. The largest international space and science hackathon.</p>
           </div>
