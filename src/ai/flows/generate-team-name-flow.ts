@@ -28,6 +28,9 @@ const prompt = ai.definePrompt({
   name: 'generateTeamNamePrompt',
   input: {schema: GenerateTeamNameInputSchema},
   output: {schema: GenerateTeamNameOutputSchema},
+  config: {
+    temperature: 1, // Increase temperature for more creative/varied responses
+  },
   prompt: `You are a creative assistant for the NASA International Space Apps Challenge. Your task is to generate a cool, creative, and memorable team name. The name should be space-themed, inspiring, and suitable for a hackathon.
 {{#if topic}}
 Base the name around the topic of: {{{topic}}}
