@@ -195,16 +195,18 @@ export default function AdminDashboard() {
     setIsExporting(true);
     try {
         const XLSX = await import("xlsx");
-        const flattenedData = teams.flatMap(team => 
-            team.members.map(member => ({
-                "Team Name": team.teamName,
-                "Member Name": member.name,
-                "Email": member.email,
-                "Phone": member.phone,
-            }))
-        );
+        const transformedData = teams.map(team => {
+            const row: {[key: string]: string} = { "Team Name": team.teamName };
+            team.members.forEach((member, index) => {
+                const memberIndex = index + 1;
+                row[`Member ${memberIndex} Name`] = member.name;
+                row[`Member ${memberIndex} Email`] = member.email;
+                row[`Member ${memberIndex} Phone`] = member.phone;
+            });
+            return row;
+        });
 
-        const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+        const worksheet = XLSX.utils.json_to_sheet(transformedData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
         XLSX.writeFile(workbook, "registered_teams.xlsx");
@@ -419,5 +421,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-    
