@@ -12,10 +12,12 @@ import { Speakers } from "@/components/sections/Speakers";
 import { Registration } from "@/components/sections/Registration";
 import { Contact } from "@/components/sections/Contact";
 import { AnimateOnScroll } from "@/components/AnimateOnScroll";
+import { LiveUpdatesBanner } from "@/components/layout/LiveUpdatesBanner";
 
 export default function Home() {
   return (
     <div className="flex min-h-dvh flex-col bg-background bg-grid-pattern">
+      <LiveUpdatesBanner />
       <Header />
       <main className="flex-1">
         <Hero />
