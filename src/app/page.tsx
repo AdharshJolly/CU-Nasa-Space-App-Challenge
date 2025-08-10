@@ -11,6 +11,7 @@ import { Sponsors } from "@/components/sections/Sponsors";
 import { Speakers } from "@/components/sections/Speakers";
 import { Registration } from "@/components/sections/Registration";
 import { Contact } from "@/components/sections/Contact";
+import { AnimateOnScroll } from "@/components/AnimateOnScroll";
 
 export default function Home() {
   return (
@@ -19,15 +20,33 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
-        <About />
-        <Speakers />
-        <Schedule />
-        <Rules />
-        <Perks />
-        <ProblemStatements />
-        <Sponsors />
-        <Registration />
-        <Contact />
+        <AnimateOnScroll>
+          <About />
+        </AnimateOnScroll>
+        <AnimateOnScroll>
+          <Speakers />
+        </AnimateOnScroll>
+        <AnimateOnScroll>
+          <Schedule />
+        </AnimateOnScroll>
+        <AnimateOnScroll>
+          <Rules />
+        </AnimateOnScroll>
+        <AnimateOnScroll>
+          <Perks />
+        </AnimateOnScroll>
+        <AnimateOnScroll>
+          <ProblemStatements />
+        </AnimateOnScroll>
+        <AnimateOnScroll>
+          <Sponsors />
+        </AnimateOnScroll>
+        <AnimateOnScroll>
+          <Registration />
+        </AnimateOnScroll>
+        <AnimateOnScroll>
+          <Contact />
+        </AnimateOnScroll>
       </main>
       <Footer />
     </div>
