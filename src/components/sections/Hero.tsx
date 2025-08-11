@@ -62,7 +62,7 @@ export function Hero() {
           <div className="flex justify-center items-center w-full max-w-lg mx-auto px-4">
             {sponsors.map((sponsor, index) => (
               <React.Fragment key={sponsor.name}>
-                <div className="flex-1 h-10 sm:h-12 md:h-16 lg:h-20 opacity-90 hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                <div className="flex-1 h-10 md:min-w-60 sm:h-12 md:h-16 lg:h-28 opacity-90 hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                   <Image
                     src={sponsor.logo}
                     alt={`${sponsor.name} logo`}
