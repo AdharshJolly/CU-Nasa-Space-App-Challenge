@@ -9,7 +9,7 @@ import { Gavel } from 'lucide-react';
 const rules = [
     { 
         title: "Team Formation", 
-        content: "Teams can have a maximum of 5 members. You can form a team before the event or join one during the team formation session." 
+        content: "Teams can have a minimum of 2 and a maximum of 5 members. You can form a team before the event or join one during the team formation session." 
     },
     { 
         title: "Project Submission", 

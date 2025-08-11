@@ -55,7 +55,7 @@ const formSchema = z
     members: z
       .array(memberSchema)
       .min(2, "You must have at least two members.")
-      .max(6, "You can have a maximum of 6 members."),
+      .max(5, "You can have a maximum of 5 members."),
   })
   .refine(
     async (data) => {
@@ -211,13 +211,13 @@ export function Registration() {
 
               <div className="mt-4 max-w-2xl mx-auto text-base text-primary/80 bg-primary/10 p-4 rounded-lg border border-primary/20">
                 <p className="font-bold">Please Note:</p>
-                <p>A registration fee of <b className="text-primary">₹250 per participant</b> is required to confirm your spot. After submitting this form, the team lead will receive an email with payment details and further instructions.</p>
+                <p>A registration fee of <b className="text-primary">₹250 per team</b> is required to confirm your spot. After submitting this form, the team lead will receive an email with payment details and further instructions.</p>
               </div>
 
               <div className="flex justify-center pt-4">
                 <ul className="space-y-2 text-muted-foreground flex flex-col md:flex-row md:space-y-0 md:space-x-6">
                   <li className="flex items-center gap-2">
-                    <Rocket className="h-4 w-4 text-primary" /> Teams of 2 to 6
+                    <Rocket className="h-4 w-4 text-primary" /> Teams of 2 to 5
                     members
                   </li>
                   <li className="flex items-center gap-2">
@@ -436,7 +436,7 @@ export function Registration() {
                   </div>
 
                   <div className="flex flex-col gap-4">
-                    {fields.length < 6 && (
+                    {fields.length < 5 && (
                       <Button
                         type="button"
                         variant="outline"
