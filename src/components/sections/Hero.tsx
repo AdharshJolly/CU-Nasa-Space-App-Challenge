@@ -6,12 +6,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import FloatingAstronaut from '@/assets/spaceElements/FloatingAstronaut.png'
 import AstronautPole from '@/assets/spaceElements/AstronautWithFlagPole.png'
+import NasaLogo from "@/assets/logos/nasa.png";
+import CULogo from "@/assets/logos/christ_university.png";
+import MSFTLogo from "@/assets/logos/msft.png";
 import { MapPin, Sparkles } from 'lucide-react';
 
 const sponsors = [
-  { name: "NASA", logo: "https://placehold.co/200x100.png", hint: "space agency" },
-  { name: "SpaceX", logo: "https://placehold.co/200x100.png", hint: "rocket company" },
-  { name: "Google Cloud", logo: "https://placehold.co/200x100.png", hint: "tech company" },
+  { name: "CHRIST University", logo: CULogo, hint: "host organization" },
+  { name: "NASA", logo: NasaLogo, hint: "space agency" },
+  { name: "Microsoft", logo: MSFTLogo, hint: "tech company" },
 ];
 
 export function Hero() {
