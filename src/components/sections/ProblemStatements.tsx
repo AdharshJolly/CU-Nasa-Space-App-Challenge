@@ -86,7 +86,7 @@ export function ProblemStatements() {
                   DECRYPTING TRANSMISSION...
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-2 max-w-md mx-auto">
-                  Challenge data packets are being received. Key domains identified. Full data available soon.
+                  Challenge data packets are being received. Key domains have been identified. <b>Stay tuned, the full problem statements will be released soon!</b>
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -135,5 +135,3 @@ export function ProblemStatements() {
     </section>
   );
 }
-
-    
