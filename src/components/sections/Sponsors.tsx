@@ -70,7 +70,7 @@ export function Sponsors() {
           {sponsors.map((sponsor) => (
             <div
               key={sponsor.name}
-              className="relative h-32 min-w-60 transition-all duration-300 transform hover:scale-110"
+              className="relative h-32 min-w-44 transition-all duration-300 transform hover:scale-110"
             >
               <Image
                 src={sponsor.logo}
