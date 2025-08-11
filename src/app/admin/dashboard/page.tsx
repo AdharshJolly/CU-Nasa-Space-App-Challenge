@@ -24,6 +24,10 @@ interface TeamMember {
     name: string;
     email: string;
     phone: string;
+    registerNumber: string;
+    className: string;
+    department: string;
+    school: string;
 }
 
 interface Team {
@@ -263,16 +267,18 @@ export default function AdminDashboard() {
     setIsExporting(true);
     try {
         const XLSX = await import("xlsx");
-        const transformedData = teams.map(team => {
-            const row: {[key: string]: string} = { "Team Name": team.teamName };
-            team.members.forEach((member, index) => {
-                const memberIndex = index + 1;
-                row[`Member ${memberIndex} Name`] = member.name;
-                row[`Member ${memberIndex} Email`] = member.email;
-                row[`Member ${memberIndex} Phone`] = member.phone;
-            });
-            return row;
-        });
+        const transformedData = teams.flatMap(team => 
+            team.members.map(member => ({
+                "Team Name": team.teamName,
+                "Member Name": member.name,
+                "Email": member.email,
+                "Phone": member.phone,
+                "Register Number": member.registerNumber,
+                "Class": member.className,
+                "Department": member.department,
+                "School": member.school,
+            }))
+        );
 
         const worksheet = XLSX.utils.json_to_sheet(transformedData);
         const workbook = XLSX.utils.book_new();
@@ -556,6 +562,10 @@ export default function AdminDashboard() {
                                                 {team.members.map((member, index) => (
                                                     <li key={index} className="mb-1">
                                                         {member.name} ({member.email}, {member.phone})
+                                                        <br />
+                                                        <span className="text-xs text-muted-foreground">
+                                                            RegNo: {member.registerNumber} | Class: {member.className} | Dept: {member.department} | School: {member.school}
+                                                        </span>
                                                     </li>
                                                 ))}
                                             </ul>
@@ -583,7 +593,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-    
-
-    

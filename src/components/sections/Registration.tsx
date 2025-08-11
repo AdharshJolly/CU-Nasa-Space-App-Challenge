@@ -1,3 +1,4 @@
+
 "use client";
 
 import { z } from "zod";
@@ -36,6 +37,12 @@ const memberSchema = z.object({
   phone: z.string().regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
   }),
+  registerNumber: z
+    .string()
+    .min(1, { message: "Register number is required." }),
+  className: z.string().min(1, { message: "Class is required." }),
+  department: z.string().min(1, { message: "Department is required." }),
+  school: z.string().min(1, { message: "School is required." }),
 });
 
 const formSchema = z
@@ -74,6 +81,10 @@ const formSchema = z
           email: m.email,
           name: m.name,
           phone: m.phone,
+          registerNumber: m.registerNumber,
+          className: m.className,
+          department: m.department,
+          school: m.school,
         }))
       )
     );
@@ -111,8 +122,24 @@ export function Registration() {
     defaultValues: {
       teamName: "",
       members: [
-        { name: "", email: "", phone: "" },
-        { name: "", email: "", phone: "" },
+        {
+          name: "",
+          email: "",
+          phone: "",
+          registerNumber: "",
+          className: "",
+          department: "",
+          school: "",
+        },
+        {
+          name: "",
+          email: "",
+          phone: "",
+          registerNumber: "",
+          className: "",
+          department: "",
+          school: "",
+        },
       ],
     },
   });
@@ -328,6 +355,76 @@ export function Registration() {
                           )}
                         />
                       </div>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`members.${index}.registerNumber`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Register Number</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="222XXXX"
+                                  {...field}
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`members.${index}.className`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Class</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g. 3BTECH-CS"
+                                  {...field}
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`members.${index}.department`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Department</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g. Computer Science"
+                                  {...field}
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`members.${index}.school`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>School</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g. School of Engineering"
+                                  {...field}
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -337,7 +434,17 @@ export function Registration() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => append({ name: "", email: "", phone: "" })}
+                      onClick={() =>
+                        append({
+                          name: "",
+                          email: "",
+                          phone: "",
+                          registerNumber: "",
+                          className: "",
+                          department: "",
+                          school: "",
+                        })
+                      }
                       disabled={isSubmitting}
                     >
                       <UserPlus className="mr-2 h-4 w-4" /> Add Team Member
