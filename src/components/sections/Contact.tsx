@@ -36,7 +36,7 @@ const studentCoordinators = [
   {
     name: "Manoj Reddy",
     role: "Head Student Coordinator",
-    avatar: Manoj.src || Manoj,
+    avatar: Manoj.src,
     hint: "man portrait",
     email: "m.manoj@btech.christuniversity.in",
     phone: "+918618627856",
@@ -52,8 +52,8 @@ const studentCoordinators = [
   {
     name: "Adharsh Jolly",
     role: "Participant Liason",
-    avatar: Adharsh.src || Adharsh,
-    hint: "woman portrait",
+    avatar: Adharsh.src,
+    hint: "man portrait",
     email: "adharsh.jolly@btech.christuniversity.in",
     phone: "+919431703182",
   },
