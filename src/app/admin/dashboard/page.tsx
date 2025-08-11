@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone, Users, ShieldAlert } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone, Users, ShieldAlert, BadgeInfo } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
 import { format } from "date-fns";
@@ -83,6 +83,8 @@ export default function AdminDashboard() {
   const [problemsReleased, setProblemsReleased] = useState(false);
   const [liveBannerText, setLiveBannerText] = useState("");
   const [isSavingBanner, setIsSavingBanner] = useState(false);
+  const [challengeDomains, setChallengeDomains] = useState("");
+  const [isSavingDomains, setIsSavingDomains] = useState(false);
   const [isProblemDialogOpen, setIsProblemDialogOpen] = useState(false);
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(null);
@@ -132,12 +134,19 @@ export default function AdminDashboard() {
         }
     });
 
+    const unsubscribeDomains = onSnapshot(doc(db, "settings", "challengeDomains"), (doc) => {
+        if (doc.exists()) {
+            setChallengeDomains(doc.data().domains || "");
+        }
+    });
+
     return () => {
         unsubscribeTeams();
         unsubscribeProblems();
         unsubscribeSettings();
         unsubscribeTimeline();
         unsubscribeBanner();
+        unsubscribeDomains();
     };
   }, [user]);
   
@@ -184,6 +193,25 @@ export default function AdminDashboard() {
         setIsSavingBanner(false);
       }
   }
+
+  const handleSaveDomains = async () => {
+    setIsSavingDomains(true);
+    try {
+        await setDoc(doc(db, "settings", "challengeDomains"), { domains: challengeDomains });
+        toast({
+            title: "Success!",
+            description: "Challenge domains have been updated."
+        })
+    } catch(error) {
+         toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: "Could not update the domains. Please try again."
+        })
+    } finally {
+      setIsSavingDomains(false);
+    }
+}
 
   // Problem Statement Handlers
   const handleAddNewProblem = () => {
@@ -406,6 +434,34 @@ export default function AdminDashboard() {
                     </CardContent>
                 </Card>
 
+                <Card>
+                    <CardHeader>
+                         <div className="flex items-center gap-2">
+                             <BadgeInfo className="h-6 w-6" />
+                            <CardTitle>Challenge Domains</CardTitle>
+                        </div>
+                        <CardDescription>Enter a comma-separated list of domains to show before problems are released.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Textarea 
+                            placeholder="e.g., Earth Observation, Space Exploration, Robotics..."
+                            value={challengeDomains}
+                            onChange={(e) => setChallengeDomains(e.target.value)}
+                            disabled={isSavingDomains}
+                        />
+                        <Button onClick={handleSaveDomains} disabled={isSavingDomains}>
+                             {isSavingDomains ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                "Save Domains"
+                            )}
+                        </Button>
+                    </CardContent>
+                </Card>
+
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
@@ -598,3 +654,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+    

@@ -9,10 +9,12 @@ import { Progress } from '../ui/progress';
 import { doc, onSnapshot, collection, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { ProblemStatement } from '@/components/admin/ProblemStatementDialog';
+import { Badge } from '../ui/badge';
 
 export function ProblemStatements() {
   const [problemsReleased, setProblemsReleased] = useState<boolean | null>(null);
   const [problems, setProblems] = useState<ProblemStatement[]>([]);
+  const [challengeDomains, setChallengeDomains] = useState<string[]>([]);
   const [progress, setProgress] = useState(13);
 
   useEffect(() => {
@@ -29,9 +31,18 @@ export function ProblemStatements() {
         setProblems(problemsData);
     });
 
+    const domainsUnsubscribe = onSnapshot(doc(db, "settings", "challengeDomains"), (doc) => {
+      if (doc.exists() && doc.data().domains) {
+        setChallengeDomains(doc.data().domains.split(',').map((d: string) => d.trim()).filter((d: string) => d));
+      } else {
+        setChallengeDomains([]);
+      }
+    });
+
     return () => {
       settingsUnsubscribe();
       problemsUnsubscribe();
+      domainsUnsubscribe();
     }
   }, []);
 
@@ -75,11 +86,21 @@ export function ProblemStatements() {
                   DECRYPTING TRANSMISSION...
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-2 max-w-md mx-auto">
-                  Challenge data packets are being received from a secure NASA channel. Decryption is in progress.
+                  Challenge data packets are being received. Key domains identified. Full data available soon.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-               <Progress value={progress} className="w-full h-4" />
+                {challengeDomains.length > 0 ? (
+                  <div className="flex flex-wrap justify-center gap-3">
+                    {challengeDomains.map(domain => (
+                      <Badge key={domain} variant="secondary" className="text-lg py-2 px-4 border-2 border-primary/20 bg-primary/10 text-primary animate-fade-in-up">
+                        {domain}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <Progress value={progress} className="w-full h-4" />
+                )}
                <div className="font-code text-sm text-muted-foreground grid grid-cols-2 md:grid-cols-4 gap-2">
                     <div><span className="text-primary">Status:</span> SECURE LINK</div>
                     <div><span className="text-primary">Integrity:</span> 99.8%</div>
@@ -114,3 +135,5 @@ export function ProblemStatements() {
     </section>
   );
 }
+
+    
