@@ -53,10 +53,10 @@ export function Hero() {
 
       <div className="container mx-auto px-4 md:px-6 z-20 relative">
         <div className="mb-8">
-            <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6">
+            <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
               {sponsors.map((sponsor, index) => (
                 <React.Fragment key={sponsor.name}>
-                  <div className="relative h-12 w-32 filter grayscale-0 opacity-80 hover:opacity-100 transition-all duration-300">
+                  <div className="relative h-16 w-auto max-w-48 filter grayscale-0 opacity-80 hover:opacity-100 transition-all duration-300">
                     <Image
                       src={sponsor.logo}
                       alt={`${sponsor.name} logo`}
@@ -66,7 +66,7 @@ export function Hero() {
                     />
                   </div>
                   {index < sponsors.length - 1 && (
-                    <span className="text-primary font-bold text-2xl mx-2">
+                    <span className="text-primary font-bold text-2xl mx-2 hidden md:inline-block">
                       <Sparkles />
                     </span>
                   )}
