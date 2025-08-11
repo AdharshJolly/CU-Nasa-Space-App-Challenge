@@ -11,23 +11,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
 import Manoj from "@/assets/co-ordinators/manoj.jpeg";
+import Adharsh from "@/assets/co-ordinators/adharsh.jpg";
 
 const facultyCoordinators = [
   {
     name: "Dr. Joseph Rodriguez",
     role: "Faculty Advisor",
-    avatar: "https://placehold.co/100x100.png",
+    avatar: "",
     hint: "woman portrait",
-    email: "evelyn.reed@example.com",
-    phone: "+1-202-555-0181",
+    email: "joseph.rodrigues@christuniversity.in",
+    phone: "+919420594564",
   },
   {
-    name: "Dr. Ben Carter",
+    name: "Ms. Minu Narayanan",
     role: "Logistics & Operations",
-    avatar: "https://placehold.co/100x100.png",
+    avatar: "",
     hint: "man portrait",
-    email: "ben.carter@example.com",
-    phone: "+1-202-555-0193",
+    email: "minu.narayanan@christuniversity.in",
+    phone: "+918095777925",
   },
 ];
 
@@ -41,20 +42,28 @@ const studentCoordinators = [
     phone: "+918618627856",
   },
   {
-    name: "Leo Martinez",
+    name: "Vishnu Nambiar",
     role: "Technical Support Lead",
-    avatar: "https://placehold.co/100x100.png",
+    avatar: "",
     hint: "man portrait",
-    email: "leo.martinez@example.com",
-    phone: "+1-202-555-0162",
+    email: "vishnu.nambiar@btech.christuniversity.in",
+    phone: "+918848799780",
   },
   {
-    name: "Samantha Chen",
+    name: "Adharsh Jolly",
     role: "Participant Liason",
-    avatar: "https://placehold.co/100x100.png",
+    avatar: Adharsh.src || Adharsh,
     hint: "woman portrait",
-    email: "samantha.chen@example.com",
-    phone: "+1-202-555-0178",
+    email: "adharsh.jolly@btech.christuniversity.in",
+    phone: "+919431703182",
+  },
+  {
+    name: "Annmarie Vinish",
+    role: "Participant Liason",
+    avatar: "",
+    hint: "woman portrait",
+    email: "annmarie.vinish@btech.christuniversity.in",
+    phone: "+918921323033",
   },
 ];
 
@@ -84,7 +93,7 @@ const CoordinatorCard = ({
       </AvatarFallback>
     </Avatar>
     <CardTitle className="font-headline text-xl">{name}</CardTitle>
-    <CardDescription>{role}</CardDescription>
+    {/* <CardDescription>{role}</CardDescription> */}
     <CardContent className="mt-4 flex flex-col gap-2">
       <Button variant="outline" size="sm" asChild>
         <a href={`mailto:${email}`}>
@@ -130,7 +139,7 @@ export function Contact() {
             <h3 className="text-2xl font-headline font-bold text-center mb-8 text-primary">
               Student Coordinators
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
               {studentCoordinators.map((person) => (
                 <CoordinatorCard key={person.name} {...person} />
               ))}
