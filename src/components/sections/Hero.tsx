@@ -1,4 +1,4 @@
-
+"use client"
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Countdown } from '@/components/Countdown';
@@ -50,18 +50,18 @@ export function Hero() {
           />
       </div>
 
-
       <div className="container mx-auto px-4 md:px-6 z-20 relative">
         <div className="mb-8">
             <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
               {sponsors.map((sponsor, index) => (
                 <React.Fragment key={sponsor.name}>
-                  <div className="relative h-20 w-auto max-w-48 filter grayscale opacity-80 hover:opacity-100 hover:grayscale-0 transition-all duration-300">
+                  <div className="h-16 md:h-20 w-auto min-w-16 md:min-w-20 max-w-48 opacity-90 hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                     <Image
                       src={sponsor.logo}
                       alt={`${sponsor.name} logo`}
-                      fill
-                      style={{objectFit: "contain"}}
+                      width={200}
+                      height={80}
+                      className="h-full w-auto object-contain"
                       data-ai-hint={sponsor.hint}
                     />
                   </div>
@@ -84,7 +84,8 @@ export function Hero() {
           Join thousands of innovators across the globe to solve challenges on Earth and in space.
         </p>
 
-        <div className="flex justify-center items-center gap-2 mb-8 text-lg text-primary font-semibold backdrop-blur-sm bg-primary/10 py-2 px-4 rounded-lg border border-primary/20 max-w-md mx-auto">
+        <div className="flex justify-center items-center gap-2 mb-8 text-lg text-primary font-semibold backdrop-blur-sm bg-primary/10 py-2 px-4 rounded-lg border border-primary/20 max-w-md mx-auto cursor-pointer hover:bg-primary/15 transition-colors duration-300"
+             onClick={() => window.open('https://www.google.com/maps/dir//Mysore+Rd,+Kanmanike,+Kengeri,+Kumbalgodu,+Bengaluru,+Karnataka+560074/@12.863116,77.3554932,12z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3bae472f365fe219:0xcae219b3b46324db!2m2!1d77.4378951!2d12.8631289?entry=ttu&g_ep=EgoyMDI1MDgwNi4wIKXMDSoASAFQAw%3D%3D', '_blank')}>
             <MapPin className="h-5 w-5" />
             <span>CHRIST University, Kengeri Campus</span>
         </div>

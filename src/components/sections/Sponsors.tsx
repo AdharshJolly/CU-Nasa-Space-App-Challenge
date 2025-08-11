@@ -1,10 +1,16 @@
 import Image from "next/image";
+import NasaLogo from "@/assets/logos/nasa.png";
+import SumvnLogo from "@/assets/logos/sumvn.png";
+import TelenganaGovtLogo from "@/assets/logos/govt_telangana.png";
+import RichLogo from "@/assets/logos/govt_telangana.png";
+import CULogo from "@/assets/logos/christ_university.png";
+import MSFTLogo from "@/assets/logos/msft.png";
 
 const sponsors = [
-  { name: "NASA", logo: "https://placehold.co/200x100.png", hint: "space agency" },
-  { name: "SpaceX", logo: "https://placehold.co/200x100.png", hint: "rocket company" },
-  { name: "ESA", logo: "https://placehold.co/200x100.png", hint: "space agency" },
-  { name: "Google Cloud", logo: "https://placehold.co/200x100.png", hint: "tech company" },
+  { name: "NASA", logo: NasaLogo, hint: "space agency" },
+  { name: "SUMVN", logo: SumvnLogo, hint: "rocket company" },
+  { name: "Telengana Govt", logo: TelenganaGovtLogo, hint: "space agency" },
+  { name: "RICH", logo: RichLogo, hint: "tech company" },
   { name: "JAXA", logo: "https://placehold.co/200x100.png", hint: "space agency" },
   { name: "AWS", logo: "https://placehold.co/200x100.png", hint: "cloud provider" },
 ];
