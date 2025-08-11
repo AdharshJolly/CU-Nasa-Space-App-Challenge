@@ -28,6 +28,7 @@ import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { generateTeamName } from "@/ai/flows/generate-team-name-flow";
 import { useState } from "react";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
@@ -117,6 +118,7 @@ const formSchema = z
 export function Registration() {
   const { toast } = useToast();
   const [isGeneratingName, setIsGeneratingName] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -154,10 +156,7 @@ export function Registration() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await addDoc(collection(db, "registrations"), values);
-      toast({
-        title: "Registration Successful! 🎉",
-        description: "Welcome aboard, astronauts! Your team is registered.",
-      });
+      setIsSuccessDialogOpen(true);
       form.reset();
     } catch (e) {
       console.error("Error adding document: ", e);
@@ -193,291 +192,320 @@ export function Registration() {
   };
 
   return (
-    <section
-      id="register"
-      className="py-12 md:py-24 bg-background/80 backdrop-blur-sm"
-    >
-      <div className="container mx-auto px-4 md:px-6">
-        <Card className="max-w-4xl mx-auto bg-card shadow-2xl shadow-primary/10 border-primary/20 border">
-          <CardHeader className="text-center p-6 md:p-8">
-            <CardTitle className="font-headline text-3xl md:text-4xl">
-              Ready to Launch?
-            </CardTitle>
-            <CardDescription className="max-w-2xl mx-auto text-lg pt-2 text-muted-foreground">
-              Secure your team's spot at the NASA International Space Apps
-              Challenge 2025. Join a global community of innovators and make
-              your mark on the universe.
-            </CardDescription>
-            <div className="flex justify-center pt-4">
-              <ul className="space-y-2 text-muted-foreground flex flex-col md:flex-row md:space-y-0 md:space-x-6">
-                <li className="flex items-center gap-2">
-                  <Rocket className="h-4 w-4 text-primary" /> Teams of 2 to 6
-                  members
-                </li>
-                <li className="flex items-center gap-2">
-                  <Rocket className="h-4 w-4 text-primary" /> Open to all skill
-                  levels
-                </li>
-                <li className="flex items-center gap-2">
-                  <Rocket className="h-4 w-4 text-primary" /> In-person events
-                </li>
-              </ul>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6 md:p-8">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8"
-              >
-                <FormField
-                  control={form.control}
-                  name="teamName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                        <div className="flex-grow">
-                          <FormLabel className="text-lg font-headline">
-                            Team Name
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="The Star Gazers"
-                              {...field}
-                              disabled={isSubmitting || isGeneratingName}
-                            />
-                          </FormControl>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={handleGenerateName}
-                          disabled={isSubmitting || isGeneratingName}
-                        >
-                          {isGeneratingName ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Generating...
-                            </>
-                          ) : (
-                            <>
-                              <Wand2 className="mr-2 h-4 w-4" />
-                              Generate Name
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+    <>
+      <section
+        id="register"
+        className="py-12 md:py-24 bg-background/80 backdrop-blur-sm"
+      >
+        <div className="container mx-auto px-4 md:px-6">
+          <Card className="max-w-4xl mx-auto bg-card shadow-2xl shadow-primary/10 border-primary/20 border">
+            <CardHeader className="text-center p-6 md:p-8">
+              <CardTitle className="font-headline text-3xl md:text-4xl">
+                Ready to Launch?
+              </CardTitle>
+              <CardDescription className="max-w-2xl mx-auto text-lg pt-2 text-muted-foreground">
+                Secure your team's spot at the NASA International Space Apps
+                Challenge 2025. Join a global community of innovators and make
+                your mark on the universe.
+              </CardDescription>
 
-                <Separator />
+              <div className="mt-4 max-w-2xl mx-auto text-base text-primary/80 bg-primary/10 p-4 rounded-lg border border-primary/20">
+                <p className="font-bold">Please Note:</p>
+                <p>A registration fee of <b className="text-primary">₹250 per participant</b> is required to confirm your spot. After submitting this form, the team lead will receive an email with payment details and further instructions.</p>
+              </div>
 
-                <div className="space-y-6">
-                  {fields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="space-y-4 p-4 border rounded-lg relative bg-card/50"
-                    >
-                      <div className="flex justify-between items-center">
-                        <h4 className="font-headline text-lg font-semibold">
-                          {index === 0
-                            ? "Team Lead"
-                            : `Team Member #${index + 1}`}
-                        </h4>
-                        {index > 1 && (
+              <div className="flex justify-center pt-4">
+                <ul className="space-y-2 text-muted-foreground flex flex-col md:flex-row md:space-y-0 md:space-x-6">
+                  <li className="flex items-center gap-2">
+                    <Rocket className="h-4 w-4 text-primary" /> Teams of 2 to 6
+                    members
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Rocket className="h-4 w-4 text-primary" /> Open to all skill
+                    levels
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Rocket className="h-4 w-4 text-primary" /> In-person events
+                  </li>
+                </ul>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 md:p-8">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8"
+                >
+                  <FormField
+                    control={form.control}
+                    name="teamName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+                          <div className="flex-grow">
+                            <FormLabel className="text-lg font-headline">
+                              Team Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="The Star Gazers"
+                                {...field}
+                                disabled={isSubmitting || isGeneratingName}
+                              />
+                            </FormControl>
+                          </div>
                           <Button
                             type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => remove(index)}
-                            disabled={isSubmitting}
+                            variant="outline"
+                            onClick={handleGenerateName}
+                            disabled={isSubmitting || isGeneratingName}
                           >
-                            <Trash className="h-4 w-4" />
-                            <span className="sr-only">Remove member</span>
+                            {isGeneratingName ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="mr-2 h-4 w-4" />
+                                Generate Name
+                              </>
+                            )}
                           </Button>
-                        )}
-                      </div>
-                      <div className="grid md:grid-cols-3 gap-4">
-                        <FormField
-                          control={form.control}
-                          name={`members.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Full Name</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Galileo Galilei"
-                                  {...field}
-                                  disabled={isSubmitting}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`members.${index}.email`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>CHRIST Email Address</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="email"
-                                  placeholder="star-gazer@galaxy.com"
-                                  {...field}
-                                  disabled={isSubmitting}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`members.${index}.phone`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Phone Number</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="tel"
-                                  placeholder="+91 98765 43210"
-                                  {...field}
-                                  disabled={isSubmitting}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <FormField
-                          control={form.control}
-                          name={`members.${index}.registerNumber`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Register Number</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="222XXXX"
-                                  {...field}
-                                  disabled={isSubmitting}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`members.${index}.className`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Class</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. 3BTECH-CS"
-                                  {...field}
-                                  disabled={isSubmitting}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`members.${index}.department`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Department</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. Computer Science"
-                                  {...field}
-                                  disabled={isSubmitting}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`members.${index}.school`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>School</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. School of Engineering"
-                                  {...field}
-                                  disabled={isSubmitting}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <div className="flex flex-col gap-4">
-                  {fields.length < 6 && (
+                  <Separator />
+
+                  <div className="space-y-6">
+                    {fields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="space-y-4 p-4 border rounded-lg relative bg-card/50"
+                      >
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-headline text-lg font-semibold">
+                            {index === 0
+                              ? "Team Lead"
+                              : `Team Member #${index + 1}`}
+                          </h4>
+                          {index > 1 && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => remove(index)}
+                              disabled={isSubmitting}
+                            >
+                              <Trash className="h-4 w-4" />
+                              <span className="sr-only">Remove member</span>
+                            </Button>
+                          )}
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name={`members.${index}.name`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Full Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Galileo Galilei"
+                                    {...field}
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`members.${index}.email`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>CHRIST Email Address</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="email"
+                                    placeholder="star-gazer@galaxy.com"
+                                    {...field}
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`members.${index}.phone`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="tel"
+                                    placeholder="+91 98765 43210"
+                                    {...field}
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <FormField
+                            control={form.control}
+                            name={`members.${index}.registerNumber`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Register Number</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="222XXXX"
+                                    {...field}
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`members.${index}.className`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Class</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. 3BTECH-CS"
+                                    {...field}
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`members.${index}.department`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Department</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Computer Science"
+                                    {...field}
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`members.${index}.school`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>School</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. School of Engineering"
+                                    {...field}
+                                    disabled={isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    {fields.length < 6 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          append({
+                            name: "",
+                            email: "",
+                            phone: "",
+                            registerNumber: "",
+                            className: "",
+                            department: "",
+                            school: "",
+                          })
+                        }
+                        disabled={isSubmitting}
+                      >
+                        <UserPlus className="mr-2 h-4 w-4" /> Add Team Member
+                      </Button>
+                    )}
+                    {form.formState.errors.members && (
+                      <p className="text-sm font-medium text-destructive text-center">
+                        {form.formState.errors.members.message ||
+                          form.formState.errors.members.root?.message}
+                      </p>
+                    )}
+
                     <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() =>
-                        append({
-                          name: "",
-                          email: "",
-                          phone: "",
-                          registerNumber: "",
-                          className: "",
-                          department: "",
-                          school: "",
-                        })
-                      }
+                      type="submit"
+                      className="w-full"
+                      size="lg"
                       disabled={isSubmitting}
                     >
-                      <UserPlus className="mr-2 h-4 w-4" /> Add Team Member
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Confirm Registration"
+                      )}
                     </Button>
-                  )}
-                  {form.formState.errors.members && (
-                    <p className="text-sm font-medium text-destructive text-center">
-                      {form.formState.errors.members.message ||
-                        form.formState.errors.members.root?.message}
-                    </p>
-                  )}
-
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    size="lg"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      "Confirm Registration"
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
-    </section>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+      <AlertDialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex justify-center items-center mb-4">
+                <Rocket className="h-12 w-12 text-primary animate-pulse" />
+            </div>
+            <AlertDialogTitle className="text-center text-2xl font-headline">Registration Submitted!</AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base">
+              Welcome aboard, astronauts! Your registration is provisionally complete. 
+              To finalize your spot, the team lead must complete the payment.
+              <br/><br/>
+              <b>Next Step:</b> Please check the team lead's email inbox for a message containing payment instructions and a link to the planning portal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setIsSuccessDialogOpen(false)} className="w-full">
+                Roger That!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
