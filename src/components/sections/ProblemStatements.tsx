@@ -2,14 +2,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, SatelliteDish } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SatelliteDish } from "lucide-react";
 import { Progress } from '../ui/progress';
 import { doc, onSnapshot, collection, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { ProblemStatement } from '@/components/admin/ProblemStatementDialog';
 import { Badge } from '../ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 export function ProblemStatements() {
   const [problemsReleased, setProblemsReleased] = useState<boolean | null>(null);
@@ -110,24 +110,25 @@ export function ProblemStatements() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2">
-            {problems.length > 0 ? problems.map((problem) => (
-                <Card key={problem.id} className="flex flex-col bg-card/50 backdrop-blur-sm hover:border-primary border-2 border-transparent transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
-                    <CardHeader>
-                        <CardTitle className="font-headline">{problem.title}</CardTitle>
-                        <CardDescription className="text-primary font-semibold">{problem.category}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                        <p className="text-muted-foreground">{problem.description}</p>
-                    </CardContent>
-                    <CardFooter>
-                        <Button variant="secondary" className="w-full">
-                            <CheckCircle className="mr-2 h-4 w-4" /> Select Challenge
-                        </Button>
-                    </CardFooter>
-                </Card>
-            )) : (
-              <p className="text-center text-muted-foreground md:col-span-2">No challenges have been added yet. Please check back later.</p>
+          <div className="max-w-3xl mx-auto">
+             {problems.length > 0 ? (
+                <Accordion type="single" collapsible className="w-full space-y-2">
+                    {problems.map((problem) => (
+                        <AccordionItem value={problem.id} key={problem.id} className="bg-card/50 backdrop-blur-sm rounded-lg px-4 border-b-0 hover:bg-card transition-colors">
+                            <AccordionTrigger className="font-headline text-lg hover:no-underline text-left">
+                                <div className="flex flex-col gap-1">
+                                    <span className='text-primary text-sm'>{problem.category}</span>
+                                    <span>{problem.title}</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="text-muted-foreground">
+                                {problem.description}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+             ) : (
+              <p className="text-center text-muted-foreground">No challenges have been added yet. Please check back later.</p>
             )}
           </div>
         )}
