@@ -44,7 +44,7 @@ export function Hero() {
           alt="Floating Astronaut"
           width={400}
           height={700}
-          className="absolute -left-20 top-1/4 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 opacity-50 md:opacity-80 animate-[float-astronaut_8s_ease-in-out_infinite]"
+          className="absolute -left-20 top-2/4 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 opacity-50 md:opacity-80 animate-[float-astronaut_8s_ease-in-out_infinite]"
           data-ai-hint="astronaut"
         />
         <Image
