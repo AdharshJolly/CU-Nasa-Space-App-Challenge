@@ -1,11 +1,12 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Award, Code, Lightbulb, Users } from "lucide-react";
 
 const perks = [
     {
       icon: <Award className="h-8 w-8 text-primary" />,
-      title: "Win Prizes",
-      description: "Compete for cash prizes, opportunities, and global recognition.",
+      title: "Qualify for Nationals",
+      description: "Top teams will get the chance to compete at the national level.",
     },
     {
       icon: <Users className="h-8 w-8 text-primary" />,
