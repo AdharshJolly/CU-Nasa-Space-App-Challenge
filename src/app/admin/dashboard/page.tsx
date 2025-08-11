@@ -267,18 +267,23 @@ export default function AdminDashboard() {
     setIsExporting(true);
     try {
         const XLSX = await import("xlsx");
-        const transformedData = teams.flatMap(team => 
-            team.members.map(member => ({
-                "Team Name": team.teamName,
-                "Member Name": member.name,
-                "Email": member.email,
-                "Phone": member.phone,
-                "Register Number": member.registerNumber,
-                "Class": member.className,
-                "Department": member.department,
-                "School": member.school,
-            }))
-        );
+        
+        const transformedData = teams.map(team => {
+            const row: {[key: string]: any} = { "Team Name": team.teamName };
+            
+            team.members.forEach((member, index) => {
+                const memberNumber = index + 1;
+                row[`Member ${memberNumber} Name`] = member.name;
+                row[`Member ${memberNumber} Email`] = member.email;
+                row[`Member ${memberNumber} Phone`] = member.phone;
+                row[`Member ${memberNumber} Register Number`] = member.registerNumber;
+                row[`Member ${memberNumber} Class`] = member.className;
+                row[`Member ${memberNumber} Department`] = member.department;
+                row[`Member ${memberNumber} School`] = member.school;
+            });
+
+            return row;
+        });
 
         const worksheet = XLSX.utils.json_to_sheet(transformedData);
         const workbook = XLSX.utils.book_new();
