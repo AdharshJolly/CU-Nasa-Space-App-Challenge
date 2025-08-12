@@ -1,3 +1,4 @@
+
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
@@ -11,8 +12,22 @@ import { Registration } from "@/components/sections/Registration";
 import { Contact } from "@/components/sections/Contact";
 import { AnimateOnScroll } from "@/components/AnimateOnScroll";
 import { LiveUpdatesBanner } from "@/components/layout/LiveUpdatesBanner";
+import { PreviousProblemStatements } from "@/components/sections/PreviousProblemStatements";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-export default function Home() {
+
+export default async function Home() {
+  let problemsReleased = false;
+  try {
+    const settingsDoc = await getDoc(doc(db, "settings", "features"));
+    if (settingsDoc.exists()) {
+      problemsReleased = settingsDoc.data().problemsReleased;
+    }
+  } catch (error) {
+    console.error("Could not fetch settings from Firestore in build time.", error);
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-background bg-grid-pattern">
       <LiveUpdatesBanner />
@@ -34,6 +49,11 @@ export default function Home() {
         <AnimateOnScroll>
           <ProblemStatements />
         </AnimateOnScroll>
+        {!problemsReleased && (
+            <AnimateOnScroll>
+              <PreviousProblemStatements />
+            </AnimateOnScroll>
+        )}
         <AnimateOnScroll>
           <Registration />
         </AnimateOnScroll>
