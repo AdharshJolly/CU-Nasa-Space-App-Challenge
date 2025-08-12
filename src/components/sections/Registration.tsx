@@ -209,7 +209,7 @@ export function Registration() {
 
               <div className="mt-4 max-w-2xl mx-auto text-base text-primary/80 bg-primary/10 p-4 rounded-lg border border-primary/20">
                 <p className="font-bold">Please Note:</p>
-                <p>A registration fee of <b className="text-primary">₹500 per team</b> is required to cover food expenses. Your team's registration will only be confirmed after the payment is made. Payment details will be sent to the team lead's email.</p>
+                <p>A registration fee of <b className="text-primary">₹500 per team</b> is required to cover your snacks and wristbands. Your team's registration will only be confirmed after the payment is made. Payment details will be sent to the team lead's email.</p>
               </div>
 
               <div className="flex justify-center pt-4">
@@ -507,3 +507,5 @@ export function Registration() {
     </>
   );
 }
+
+    
