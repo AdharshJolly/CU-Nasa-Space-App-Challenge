@@ -14,7 +14,7 @@ const rules = [
     },
     { 
         title: "Project Submission", 
-        content: "All projects must be submitted via the official event platform by the deadline i.e. at the completion of 24hrs. Late submissions will not be accepted." 
+        content: "This is a 24-hour hackathon. All projects must be submitted via the official event platform by the deadline, which is at the completion of the 24 hours. Late submissions will not be accepted." 
     },
     { 
         title: "Code of Conduct", 
