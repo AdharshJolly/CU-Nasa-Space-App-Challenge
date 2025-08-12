@@ -28,7 +28,7 @@ const facultyCoordinators = [
     name: "Ms. Minu Narayanan",
     role: "Logistics & Operations",
     avatar: "",
-    hint: "man portrait",
+    hint: "woman portrait",
     email: "minu.narayanan@christuniversity.in",
     phone: "+918095777925",
   },
