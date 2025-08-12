@@ -1,21 +1,25 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { SatelliteDish } from "lucide-react";
+import { Lightbulb, SatelliteDish } from "lucide-react";
 import { Progress } from '../ui/progress';
 import { doc, onSnapshot, collection, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { ProblemStatement } from '@/components/admin/ProblemStatementDialog';
-import { Badge } from '../ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel';
+import Autoplay from "embla-carousel-autoplay";
+
 
 export function ProblemStatements() {
   const [problemsReleased, setProblemsReleased] = useState<boolean | null>(null);
   const [problems, setProblems] = useState<ProblemStatement[]>([]);
   const [challengeDomains, setChallengeDomains] = useState<string[]>([]);
   const [progress, setProgress] = useState(13);
+  const autoplayPlugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
+
 
   useEffect(() => {
     const settingsUnsubscribe = onSnapshot(doc(db, "settings", "features"), (doc) => {
@@ -55,13 +59,74 @@ export function ProblemStatements() {
     return () => clearInterval(timer);
   }, [problemsReleased]);
 
+  const renderNotReleased = () => {
+    if (challengeDomains.length > 0) {
+      return (
+        <div className="w-full max-w-2xl mx-auto">
+          <Carousel
+            plugins={[autoplayPlugin.current]}
+            className="w-full"
+            onMouseEnter={autoplayPlugin.current.stop}
+            onMouseLeave={autoplayPlugin.current.reset}
+            opts={{
+              loop: true,
+            }}
+          >
+             <CarouselContent>
+                {challengeDomains.map((domain) => (
+                  <CarouselItem key={domain}>
+                    <div className="p-1">
+                      <Card className="bg-card/50 backdrop-blur-sm border-primary/20 border-2 shadow-lg shadow-primary/10">
+                        <CardHeader className="flex flex-col items-center text-center gap-4">
+                            <Lightbulb className="h-10 w-10 text-primary" />
+                            <CardTitle className="font-headline text-2xl">{domain}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-center text-muted-foreground">
+                            This is one of the key domains for this year's challenge. Start thinking about what you can build!
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+             </CarouselContent>
+          </Carousel>
+        </div>
+      );
+    }
+
+    return (
+       <Card className="text-center bg-card/50 backdrop-blur-sm p-8 md:p-12 rounded-lg border-primary/20 border-2 max-w-3xl mx-auto shadow-2xl shadow-primary/10">
+         <CardHeader>
+            <div className="flex justify-center items-center mb-4">
+                <SatelliteDish className="h-12 w-12 text-primary animate-pulse" />
+            </div>
+            <CardTitle className="font-headline text-2xl md:text-3xl font-bold text-primary tracking-widest">
+              DECRYPTING TRANSMISSION...
+            </CardTitle>
+            <CardDescription className="text-muted-foreground mt-2 max-w-md mx-auto">
+              Challenge data packets are being received. Stay tuned, the full problem statements will be released soon!
+            </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <Progress value={progress} className="w-full h-4" />
+           <div className="font-code text-sm text-muted-foreground grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div><span className="text-primary">Status:</span> SECURE LINK</div>
+                <div><span className="text-primary">Integrity:</span> 99.8%</div>
+                <div><span className="text-primary">Source:</span> LRO/LCN</div>
+                <div><span className="text-primary">ETA:</span> CLASSIFIED</div>
+           </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <section id="problems" className="py-12 md:py-24 bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl md:text-4xl font-bold">The Challenges</h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
-            Tackle real-world problems on Earth and in space using open data from NASA and its partners.
+            {problemsReleased ? "Tackle real-world problems on Earth and in space using open data from NASA and its partners." : "The challenge domains are being revealed. Get ready for liftoff!"}
           </p>
         </div>
         {problemsReleased === null ? (
@@ -77,38 +142,7 @@ export function ProblemStatements() {
                 </CardContent>
             </Card>
         ) : !problemsReleased ? (
-          <Card className="text-center bg-card/50 backdrop-blur-sm p-8 md:p-12 rounded-lg border-primary/20 border-2 max-w-3xl mx-auto shadow-2xl shadow-primary/10">
-             <CardHeader>
-                <div className="flex justify-center items-center mb-4">
-                    <SatelliteDish className="h-12 w-12 text-primary animate-pulse" />
-                </div>
-                <CardTitle className="font-headline text-2xl md:text-3xl font-bold text-primary tracking-widest">
-                  DECRYPTING TRANSMISSION...
-                </CardTitle>
-                <CardDescription className="text-muted-foreground mt-2 max-w-md mx-auto">
-                  Challenge data packets are being received. Key domains have been identified. <b>Stay tuned, the full problem statements will be released soon!</b>
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                {challengeDomains.length > 0 ? (
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {challengeDomains.map(domain => (
-                      <Badge key={domain} variant="secondary" className="text-lg py-2 px-4 border-2 border-primary/20 bg-primary/10 text-primary animate-fade-in-up">
-                        {domain}
-                      </Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <Progress value={progress} className="w-full h-4" />
-                )}
-               <div className="font-code text-sm text-muted-foreground grid grid-cols-2 md:grid-cols-4 gap-2">
-                    <div><span className="text-primary">Status:</span> SECURE LINK</div>
-                    <div><span className="text-primary">Integrity:</span> 99.8%</div>
-                    <div><span className="text-primary">Source:</span> LRO/LCN</div>
-                    <div><span className="text-primary">ETA:</span> CLASSIFIED</div>
-               </div>
-            </CardContent>
-          </Card>
+          renderNotReleased()
         ) : (
           <div className="max-w-3xl mx-auto">
              {problems.length > 0 ? (
