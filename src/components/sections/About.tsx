@@ -33,7 +33,7 @@ export function About() {
             About the Event
           </h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
-            The NASA International Space Apps Challenge is a hackathon for
+            The NASA International Space Apps Challenge is an intense, <b className="text-primary/90">24-hour hackathon</b> for
             creatives and technologists around the world to work with NASA's
             free and open data.
           </p>

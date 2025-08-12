@@ -93,7 +93,7 @@ export function Hero() {
           NASA International Space Apps Challenge 2025
         </h1>
         <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-4">
-          Join thousands of innovators across the globe for a{" "}
+          Join innovators across the university for a{" "}
           <b className="text-primary">non-stop 24-hour hackathon</b> to solve
           challenges on Earth and in space.
         </p>
