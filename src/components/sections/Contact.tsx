@@ -13,6 +13,7 @@ import { Mail, Phone } from "lucide-react";
 import Manoj from "@/assets/co-ordinators/manoj.jpeg";
 import Adharsh from "@/assets/co-ordinators/adharsh.jpg";
 import Vishnu from "@/assets/co-ordinators/vishnu.jpg";
+import Annemarie from "@/assets/co-ordinators/annemarie.jpg";
 
 const facultyCoordinators = [
   {
@@ -61,7 +62,7 @@ const studentCoordinators = [
   {
     name: "Annmarie Vinish",
     role: "Participant Liason",
-    avatar: "",
+    avatar: Annemarie.src,
     hint: "woman portrait",
     email: "annmarie.vinish@btech.christuniversity.in",
     phone: "+918921323033",
