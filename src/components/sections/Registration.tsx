@@ -204,14 +204,12 @@ export function Registration() {
                 Ready to Launch?
               </CardTitle>
               <CardDescription className="max-w-2xl mx-auto text-lg pt-2 text-muted-foreground">
-                Secure your team's spot at the NASA International Space Apps
-                Challenge 2025. Join a global community of innovators and make
-                your mark on the universe.
+                Secure your team's spot! This event is exclusively for students of CHRIST (Deemed to be University). Join innovators from your university and make your mark.
               </CardDescription>
 
               <div className="mt-4 max-w-2xl mx-auto text-base text-primary/80 bg-primary/10 p-4 rounded-lg border border-primary/20">
                 <p className="font-bold">Please Note:</p>
-                <p>A registration fee of <b className="text-primary">₹250 per team</b> is required to confirm your spot. After submitting this form, the team lead will receive an email with payment details and further instructions.</p>
+                <p>A registration fee of <b className="text-primary">₹500 per team</b> is required to cover food expenses. After submitting this form, the team lead will receive an email with payment details.</p>
               </div>
 
               <div className="flex justify-center pt-4">
@@ -333,7 +331,7 @@ export function Registration() {
                                 <FormControl>
                                   <Input
                                     type="email"
-                                    placeholder="star-gazer@galaxy.com"
+                                    placeholder="galileo.g@btech.christuniversity.in"
                                     {...field}
                                     disabled={isSubmitting}
                                   />
