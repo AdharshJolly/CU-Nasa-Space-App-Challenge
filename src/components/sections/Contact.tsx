@@ -17,7 +17,7 @@ import Annemarie from "@/assets/co-ordinators/annemarie.jpg";
 
 const facultyCoordinators = [
   {
-    name: "Dr. Joseph Rodriguez",
+    name: "Dr. Joseph Rodrigues",
     role: "Faculty Advisor",
     avatar: "",
     hint: "woman portrait",
