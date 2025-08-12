@@ -10,15 +10,15 @@ import { Gavel } from 'lucide-react';
 const rules = [
     { 
         title: "Team Formation", 
-        content: "Teams can have a minimum of 2 and a maximum of 5 members. You can form a team before the event or join one during the team formation session." 
+        content: "Teams can have a minimum of 2 and a maximum of 5 members. You will have to form a team before the event and register." 
     },
     { 
         title: "Project Submission", 
-        content: "All projects must be submitted via the official event platform by the deadline. Late submissions will not be accepted. Your submission must include a link to your code repository and a short video demonstration." 
+        content: "All projects must be submitted via the official event platform by the deadline i.e. at the completion of 24hrs. Late submissions will not be accepted." 
     },
     { 
         title: "Code of Conduct", 
-        content: "All participants must adhere to the code of conduct. We are committed to providing a safe, respectful, and inclusive environment for everyone. Harassment and disruptive behavior are strictly prohibited." 
+        content: "All participants must adhere to the code of conduct prescribe by CHRIST (Demeed to be University). We are committed to providing a safe, respectful, and inclusive environment for everyone. Any violations will be taken seriously." 
     },
     { 
         title: "Originality", 
