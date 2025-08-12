@@ -1,12 +1,12 @@
 
-import { Award, Code, Lightbulb, Users } from "lucide-react";
+import { Award, Code, Lightbulb, Users, Rocket } from "lucide-react";
 
 const perks = [
     {
       icon: <Award className="h-8 w-8 text-primary" />,
       title: "Qualify for Nationals",
       description: "Top teams get the chance to compete at the national level.",
-      detailedDescription: "The winning teams from our event will be nominated for the next level: NASA Space Apps national level, putting your project on a national stage. Qualifying teams will be given an opportunity for felicitation at the Microsoft Campus. Projects that meet NASA's standards have a chance to win a seeding fund of up to ₹25 crores."
+      detailedDescription: "The winning teams from our event will be nominated for the next level: NASA Space Apps national level, putting your project on a national stage. Qualifying teams will be given an opportunity for felicitation at the Microsoft Campus."
     },
     {
       icon: <Users className="h-8 w-8 text-primary" />,
@@ -26,6 +26,12 @@ const perks = [
       description: "Create a tangible project to showcase to potential employers.",
       detailedDescription: "You'll leave with a fully-fledged project for your resume or portfolio, demonstrating your ability to build a real-world application under a deadline."
     },
+    {
+      icon: <Rocket className="h-8 w-8 text-primary" />,
+      title: "Launch Your Idea",
+      description: "Win up to ₹25 Crores in seeding funds for your project.",
+      detailedDescription: "Projects that meet NASA's high standards have the incredible opportunity to receive a seeding fund of up to ₹25 crores to transform your hackathon project into a real-world startup."
+    }
 ];
 
 export function Perks() {
@@ -38,7 +44,7 @@ export function Perks() {
             More than just a competition, it's an opportunity to accelerate your journey.
           </p>
         </div>
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {perks.map((perk) => (
             <div key={perk.title} className="group relative overflow-hidden rounded-lg border-2 border-transparent bg-card p-6 text-center transition-all duration-300 hover:border-primary hover:shadow-2xl hover:shadow-primary/20">
               <div className="flex flex-col items-center">
