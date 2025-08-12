@@ -9,7 +9,7 @@ import { doc, onSnapshot, collection, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { ProblemStatement } from '@/components/admin/ProblemStatementDialog';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 import Autoplay from "embla-carousel-autoplay";
 
 
@@ -62,7 +62,7 @@ export function ProblemStatements() {
   const renderNotReleased = () => {
     if (challengeDomains.length > 0) {
       return (
-        <div className="w-full max-w-2xl mx-auto">
+        <div className="w-full max-w-4xl mx-auto">
           <Carousel
             plugins={[autoplayPlugin.current]}
             className="w-full"
@@ -74,7 +74,7 @@ export function ProblemStatements() {
           >
              <CarouselContent>
                 {challengeDomains.map((domain) => (
-                  <CarouselItem key={domain}>
+                  <CarouselItem key={domain} className="md:basis-1/2">
                     <div className="p-1">
                       <Card className="bg-card/50 backdrop-blur-sm border-primary/20 border-2 shadow-lg shadow-primary/10">
                         <CardHeader className="flex flex-col items-center text-center gap-4">
@@ -89,6 +89,8 @@ export function ProblemStatements() {
                   </CarouselItem>
                 ))}
              </CarouselContent>
+             <CarouselPrevious />
+             <CarouselNext />
           </Carousel>
         </div>
       );
