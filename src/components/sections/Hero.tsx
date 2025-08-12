@@ -1,4 +1,3 @@
-
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -94,8 +93,8 @@ export function Hero() {
         </h1>
         <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-4">
           Join innovators across the university for a{" "}
-          <b className="text-primary">non-stop 24-hour hackathon</b> to solve
-          challenges on Earth and in space.
+          <b className="text-primary text-2xl">non-stop 24-hour hackathon</b> to
+          solve challenges on Earth and in space.
         </p>
 
         <div className="flex justify-center items-center gap-4 mb-6">
@@ -139,5 +138,3 @@ export function Hero() {
     </section>
   );
 }
-
-    

@@ -18,26 +18,63 @@ import Annemarie from "@/assets/co-ordinators/annemarie.jpg";
 const facultyCoordinators = [
   {
     name: "Dr. Joseph Rodrigues",
-    role: "Faculty Advisor",
-    avatar: "",
-    hint: "woman portrait",
+    hint: "man portrait",
+    avatar:
+      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2394.jpg",
     email: "joseph.rodrigues@christuniversity.in",
-    phone: "+919420594564",
   },
   {
     name: "Ms. Minu Narayanan",
-    role: "Logistics & Operations",
-    avatar: "",
     hint: "woman portrait",
     email: "minu.narayanan@christuniversity.in",
-    phone: "+918095777925",
+  },
+  {
+    name: "Dr. Manikandan P",
+    hint: "man portrait",
+    avatar:
+      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E1162.jpg",
+    email: "manikandan.p@christuniversity.in",
+  },
+  {
+    name: "Dr. Hari Murthy",
+    hint: "man portrait",
+    avatar:
+      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2996.jpg",
+    email: "hari.murthy@christuniversity.in",
+  },
+  {
+    name: "Dr. Santhrupth B C",
+    hint: "man portrait",
+    avatar:
+      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E5873.jpg",
+    email: "santhrupth.bc@christuniversity.in",
+  },
+  {
+    name: "Dr. Albert Joseph Hefferan",
+    hint: "man portrait",
+    avatar:
+      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E4871.jpg",
+    email: "albertjoseph.hefferan@christuniversity.in",
+  },
+  {
+    name: "Dr. Benson K Money",
+    hint: "man portrait",
+    avatar:
+      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E1757.jpg",
+    email: "benson.money@christuniversity.in",
+  },
+  {
+    name: "Col. Sudhir M R",
+    hint: "man portrait",
+    avatar:
+      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2411.jpg",
+    email: "colonel.sudhir@christuniversity.in",
   },
 ];
 
 const studentCoordinators = [
   {
     name: "Manoj Reddy",
-    role: "Head Student Coordinator",
     avatar: Manoj.src,
     hint: "man portrait",
     email: "m.manoj@btech.christuniversity.in",
@@ -45,7 +82,6 @@ const studentCoordinators = [
   },
   {
     name: "Vishnu Nambiar",
-    role: "Technical Support Lead",
     avatar: Vishnu.src,
     hint: "man portrait",
     email: "vishnu.nambiar@btech.christuniversity.in",
@@ -53,7 +89,6 @@ const studentCoordinators = [
   },
   {
     name: "Adharsh Jolly",
-    role: "Participant Liason",
     avatar: Adharsh.src,
     hint: "man portrait",
     email: "adharsh.jolly@btech.christuniversity.in",
@@ -61,7 +96,6 @@ const studentCoordinators = [
   },
   {
     name: "Annmarie Vinish",
-    role: "Participant Liason",
     avatar: Annemarie.src,
     hint: "woman portrait",
     email: "annmarie.vinish@btech.christuniversity.in",
@@ -71,42 +105,36 @@ const studentCoordinators = [
 
 const CoordinatorCard = ({
   name,
-  role,
   avatar,
   hint,
   email,
   phone,
 }: {
   name: string;
-  role: string;
-  avatar: any;
+  avatar?: string;
   hint: string;
   email: string;
-  phone: string;
+  phone?: string;
 }) => (
   <Card className="text-center flex flex-col items-center p-6 bg-card/50 backdrop-blur-sm hover:border-primary border-2 border-transparent transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
     <Avatar className="w-24 h-24 mb-4 border-4 border-transparent group-hover:border-primary transition-all">
       <AvatarImage src={avatar} alt={name} data-ai-hint={hint} />
-      <AvatarFallback>
-        {name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")}
-      </AvatarFallback>
+      <AvatarFallback>{name.split(" ")[1][0]}</AvatarFallback>
     </Avatar>
     <CardTitle className="font-headline text-xl">{name}</CardTitle>
-    {/* <CardDescription>{role}</CardDescription> */}
     <CardContent className="mt-4 flex flex-col gap-2">
       <Button variant="outline" size="sm" asChild>
         <a href={`mailto:${email}`}>
           <Mail className="mr-2" /> Email
         </a>
       </Button>
-      <Button variant="outline" size="sm" asChild>
-        <a href={`tel:${phone}`}>
-          <Phone className="mr-2" /> Call
-        </a>
-      </Button>
+      {phone && (
+        <Button variant="outline" size="sm" asChild>
+          <a href={`tel:${phone}`}>
+            <Phone className="mr-2" /> Call
+          </a>
+        </Button>
+      )}
     </CardContent>
   </Card>
 );
@@ -130,7 +158,7 @@ export function Contact() {
             <h3 className="text-2xl font-headline font-bold text-center mb-8 text-primary">
               Faculty Coordinators
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
               {facultyCoordinators.map((person) => (
                 <CoordinatorCard key={person.name} {...person} />
               ))}
