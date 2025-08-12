@@ -62,7 +62,7 @@ export function ProblemStatements() {
   const renderNotReleased = () => {
     if (challengeDomains.length > 0) {
       return (
-        <div className="w-full max-w-4xl mx-auto">
+        <div className="w-full">
           <Carousel
             plugins={[autoplayPlugin.current]}
             className="w-full"
@@ -82,7 +82,7 @@ export function ProblemStatements() {
                             <CardTitle className="font-headline text-2xl">{domain}</CardTitle>
                         </CardHeader>
                         <CardContent className="text-center text-muted-foreground">
-                            This is one of the key domains for this year's challenge. Start thinking about what you can build!
+                            This is a key domain for this year's challenge. The final problem statement will be revealed soon.
                         </CardContent>
                       </Card>
                     </div>
@@ -128,7 +128,7 @@ export function ProblemStatements() {
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl md:text-4xl font-bold">The Challenges</h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
-            {problemsReleased ? "Tackle real-world problems on Earth and in space using open data from NASA and its partners." : "The challenge domains are being revealed. Get ready for liftoff!"}
+            {problemsReleased ? "Tackle real-world problems on Earth and in space using open data from NASA and its partners." : "The challenge domains are being revealed. Full problem statements will be released soon!"}
           </p>
         </div>
         {problemsReleased === null ? (
