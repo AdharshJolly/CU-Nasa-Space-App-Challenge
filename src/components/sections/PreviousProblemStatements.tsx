@@ -2,11 +2,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lightbulb } from "lucide-react";
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Domain } from '@/components/admin/DomainDialog';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import Autoplay from "embla-carousel-autoplay";
 
 export function PreviousProblemStatements() {
   const [domains, setDomains] = useState<Domain[]>([]);
@@ -30,25 +32,45 @@ export function PreviousProblemStatements() {
           </p>
         </div>
         <div className="max-w-4xl mx-auto">
-            {domains.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-4">
-                    {domains.map((domain) => (
-                        <Card key={domain.id} className="bg-card/50 border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm h-full flex flex-col">
-                            <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-2">
-                                <Lightbulb className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
-                                <div>
-                                    <CardTitle className="font-headline text-xl">
-                                    {domain.title}
-                                    </CardTitle>
-                                    <p className="text-muted-foreground text-sm mt-2">{domain.description}</p>
-                                </div>
-                            </CardHeader>
-                        </Card>
-                    ))}
-                </div>
-            ) : (
-              <p className="text-center text-muted-foreground">Loading previous challenge domains...</p>
-            )}
+          {domains.length > 0 ? (
+            <Carousel 
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              plugins={[
+                Autoplay({
+                  delay: 3000,
+                  stopOnInteraction: true,
+                }),
+              ]}
+              className="w-full"
+            >
+              <CarouselContent>
+                {domains.map((domain) => (
+                  <CarouselItem key={domain.id} className="md:basis-1/2">
+                    <div className="p-1 h-full">
+                      <Card className="bg-card/50 border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm h-full flex flex-col p-6">
+                        <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-2 p-0">
+                          <Lightbulb className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
+                          <div>
+                            <CardTitle className="font-headline text-xl">
+                              {domain.title}
+                            </CardTitle>
+                            <p className="text-muted-foreground text-sm mt-2">{domain.description}</p>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          ) : (
+            <p className="text-center text-muted-foreground">Loading previous challenge domains...</p>
+          )}
         </div>
       </div>
     </section>
