@@ -1,27 +1,30 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Award, Code, Lightbulb, Users } from "lucide-react";
 
 const perks = [
     {
       icon: <Award className="h-8 w-8 text-primary" />,
       title: "Qualify for Nationals",
-      description: "Top teams will get the chance to compete at the national level.",
+      description: "Top teams get the chance to compete at the national level.",
+      detailedDescription: "The winning teams from our event will be nominated for the NASA Space Apps Global Judging round, putting your project on an international stage."
     },
     {
       icon: <Users className="h-8 w-8 text-primary" />,
       title: "Network",
       description: "Connect with sponsors, mentors, and fellow space enthusiasts.",
+      detailedDescription: "Engage with industry experts from leading tech companies and space agencies, and collaborate with talented peers who share your passion."
     },
     {
       icon: <Lightbulb className="h-8 w-8 text-primary" />,
       title: "Learn & Grow",
       description: "Develop new skills and gain experience with real NASA data.",
+      detailedDescription: "Participate in workshops, get mentorship from professionals, and learn to work with massive datasets from NASA, enhancing your technical and problem-solving skills."
     },
     {
       icon: <Code className="h-8 w-8 text-primary" />,
       title: "Build Your Portfolio",
       description: "Create a tangible project to showcase to potential employers.",
+      detailedDescription: "You'll leave with a fully-fledged project for your resume or portfolio, demonstrating your ability to build a real-world application under a deadline."
     },
 ];
 
@@ -37,10 +40,18 @@ export function Perks() {
         </div>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {perks.map((perk) => (
-            <div key={perk.title} className="flex flex-col items-center text-center p-6 bg-card rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
-              <div className="mb-4">{perk.icon}</div>
-              <h3 className="font-headline text-xl font-semibold mb-2">{perk.title}</h3>
-              <p className="text-muted-foreground text-sm">{perk.description}</p>
+            <div key={perk.title} className="group relative overflow-hidden rounded-lg border-2 border-transparent bg-card p-6 text-center transition-all duration-300 hover:border-primary hover:shadow-2xl hover:shadow-primary/20">
+              <div className="flex flex-col items-center">
+                <div className="mb-4 text-primary transition-transform duration-300 group-hover:scale-110">
+                  {perk.icon}
+                </div>
+                <h3 className="font-headline text-xl font-semibold mb-2">{perk.title}</h3>
+                <p className="text-muted-foreground text-sm">{perk.description}</p>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 translate-y-full transform bg-card/80 p-6 backdrop-blur-sm transition-transform duration-500 ease-in-out group-hover:translate-y-0">
+                  <h3 className="font-headline text-xl font-semibold mb-2 text-primary">{perk.title}</h3>
+                  <p className="text-sm text-foreground">{perk.detailedDescription}</p>
+              </div>
             </div>
           ))}
         </div>
