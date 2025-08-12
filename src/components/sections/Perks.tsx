@@ -6,7 +6,7 @@ const perks = [
       icon: <Award className="h-8 w-8 text-primary" />,
       title: "Qualify for Nationals",
       description: "Top teams get the chance to compete at the national level.",
-      detailedDescription: "The winning teams from our event will be nominated for the next level: NASA Space Apps national level, putting your project on an national stage. Qualifying teams will be given an opportunity for felicitation at the Microsoft Campus"
+      detailedDescription: "The winning teams from our event will be nominated for the next level: NASA Space Apps national level, putting your project on a national stage. Qualifying teams will be given an opportunity for felicitation at the Microsoft Campus. Projects that meet NASA's standards have a chance to win a seeding fund of up to ₹25 crores."
     },
     {
       icon: <Users className="h-8 w-8 text-primary" />,
