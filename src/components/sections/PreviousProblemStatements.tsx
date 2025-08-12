@@ -14,47 +14,58 @@ import Autoplay from "embla-carousel-autoplay";
 
 
 export function PreviousProblemStatements() {
-  const [problems, setProblems] = useState<ProblemStatement[]>([]);
+  const [domains, setDomains] = useState<string[]>([]);
+  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
   
   useEffect(() => {
-    // This is a simplified fetch for previous problems. In a real app, you might fetch this from a static JSON file or a specific "previous_problems" collection.
-    const staticProblems: ProblemStatement[] = [
-        { id: "prev-1", title: "Global Fire Monitoring", category: "Earth Observation", description: "Develop a system to monitor and predict the spread of wildfires using satellite imagery and climate data." },
-        { id: "prev-2", title: "Lunar Rover Navigation", category: "Space Exploration", description: "Create an algorithm to help a rover navigate autonomously on the lunar surface, avoiding obstacles and conserving energy." },
-        { id: "prev-3", title: "Space Debris Tracker", category: "Robotics & Automation", description: "Design a solution to track and visualize orbital debris in real-time to help prevent satellite collisions." },
-        { id: "prev-4", title: "Life Support Systems", category: "Human Spaceflight", description: "Conceptualize a closed-loop life support system for a long-duration mission to Mars, focusing on water recycling and air revitalization." },
-    ];
-    setProblems(staticProblems);
+    const unsubscribeDomains = onSnapshot(doc(db, "settings", "challengeDomains"), (doc) => {
+        if (doc.exists() && doc.data().domains) {
+            setDomains(doc.data().domains.split(',').map((d: string) => d.trim()));
+        }
+    });
+
+    return () => unsubscribeDomains();
   }, []);
 
   return (
     <section id="previous-problems" className="py-12 md:py-24">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
-          <h2 className="font-headline text-3xl md:text-4xl font-bold">Previous Year's Challenges</h2>
+          <h2 className="font-headline text-3xl md:text-4xl font-bold">Previous Year's Challenge Domains</h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
-            Get inspired by challenges from the past to prepare for this year's event.
+            Get inspired by a few of the domains from past events to prepare for this year's challenges.
           </p>
         </div>
-        <div className="max-w-3xl mx-auto">
-            {problems.length > 0 ? (
-            <Accordion type="single" collapsible className="w-full space-y-2">
-                {problems.map((problem) => (
-                    <AccordionItem value={problem.id} key={problem.id} className="bg-card/50 backdrop-blur-sm rounded-lg px-4 border-b-0 hover:bg-card transition-colors">
-                        <AccordionTrigger className="font-headline text-lg hover:no-underline text-left">
-                            <div className="flex flex-col gap-1">
-                                <span className='text-primary text-sm'>{problem.category}</span>
-                                <span>{problem.title}</span>
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground">
-                            {problem.description}
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
+        <div className="max-w-4xl mx-auto">
+            {domains.length > 0 ? (
+                <Carousel 
+                    opts={{ align: "start", loop: true }}
+                    plugins={[plugin.current]}
+                    onMouseEnter={plugin.current.stop}
+                    onMouseLeave={plugin.current.reset}
+                    className="w-full"
+                >
+                    <CarouselContent>
+                        {domains.map((domain, index) => (
+                            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                                <div className="p-1">
+                                    <Card className="bg-card/50 border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm">
+                                        <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
+                                            <Lightbulb className="h-6 w-6 text-primary" />
+                                            <CardTitle className="font-headline text-lg">
+                                            {domain}
+                                            </CardTitle>
+                                        </CardHeader>
+                                    </Card>
+                                </div>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                </Carousel>
             ) : (
-            <p className="text-center text-muted-foreground">Loading previous challenges...</p>
+            <p className="text-center text-muted-foreground">Loading previous challenge domains...</p>
             )}
         </div>
       </div>
