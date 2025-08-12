@@ -3,25 +3,21 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lightbulb, SatelliteDish } from "lucide-react";
-import { Progress } from '../ui/progress';
-import { doc, onSnapshot, collection, query } from 'firebase/firestore';
+import { Lightbulb } from "lucide-react";
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { ProblemStatement } from '@/components/admin/ProblemStatementDialog';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import type { Domain } from '@/components/admin/DomainDialog';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 import Autoplay from "embla-carousel-autoplay";
 
-
 export function PreviousProblemStatements() {
-  const [domains, setDomains] = useState<string[]>([]);
-  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
+  const [domains, setDomains] = useState<Domain[]>([]);
+  const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
   
   useEffect(() => {
-    const unsubscribeDomains = onSnapshot(doc(db, "settings", "challengeDomains"), (doc) => {
-        if (doc.exists() && doc.data().domains) {
-            setDomains(doc.data().domains.split(',').map((d: string) => d.trim()));
-        }
+    const unsubscribeDomains = onSnapshot(query(collection(db, "domains")), (snapshot) => {
+        const domainsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Domain[];
+        setDomains(domainsData);
     });
 
     return () => unsubscribeDomains();
@@ -47,15 +43,18 @@ export function PreviousProblemStatements() {
                 >
                     <CarouselContent>
                         {domains.map((domain, index) => (
-                            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                                <div className="p-1">
-                                    <Card className="bg-card/50 border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm">
-                                        <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
-                                            <Lightbulb className="h-6 w-6 text-primary" />
+                            <CarouselItem key={index} className="md:basis-1/2">
+                                <div className="p-1 h-full">
+                                    <Card className="bg-card/50 border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 backdrop-blur-sm h-full flex flex-col">
+                                        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                                            <Lightbulb className="h-6 w-6 text-primary flex-shrink-0" />
                                             <CardTitle className="font-headline text-lg">
-                                            {domain}
+                                              {domain.title}
                                             </CardTitle>
                                         </CardHeader>
+                                        <CardContent>
+                                            <p className="text-muted-foreground text-sm">{domain.description}</p>
+                                        </CardContent>
                                     </Card>
                                 </div>
                             </CarouselItem>
@@ -65,7 +64,7 @@ export function PreviousProblemStatements() {
                     <CarouselNext />
                 </Carousel>
             ) : (
-            <p className="text-center text-muted-foreground">Loading previous challenge domains...</p>
+              <p className="text-center text-muted-foreground">Loading previous challenge domains...</p>
             )}
         </div>
       </div>

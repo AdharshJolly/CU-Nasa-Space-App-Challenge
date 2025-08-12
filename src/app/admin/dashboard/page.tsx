@@ -11,9 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone, Users, ShieldAlert, BadgeInfo } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone, Users, ShieldAlert, BadgeInfo, Lightbulb } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
+import { DomainDialog, type Domain } from "@/components/admin/DomainDialog";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -80,15 +81,16 @@ export default function AdminDashboard() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [problems, setProblems] = useState<ProblemStatement[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [domains, setDomains] = useState<Domain[]>([]);
   const [problemsReleased, setProblemsReleased] = useState(false);
   const [liveBannerText, setLiveBannerText] = useState("");
   const [isSavingBanner, setIsSavingBanner] = useState(false);
-  const [challengeDomains, setChallengeDomains] = useState("");
-  const [isSavingDomains, setIsSavingDomains] = useState(false);
   const [isProblemDialogOpen, setIsProblemDialogOpen] = useState(false);
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
+  const [isDomainDialogOpen, setIsDomainDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(null);
   const [editingTimelineEvent, setEditingTimelineEvent] = useState<TimelineEvent | null>(null);
+  const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -122,6 +124,11 @@ export default function AdminDashboard() {
         setTimelineEvents(eventsData);
     });
 
+    const unsubscribeDomains = onSnapshot(query(collection(db, "domains")), (snapshot) => {
+        const domainsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Domain[];
+        setDomains(domainsData);
+    });
+
     const unsubscribeSettings = onSnapshot(doc(db, "settings", "features"), (doc) => {
         if (doc.exists()) {
             setProblemsReleased(doc.data().problemsReleased);
@@ -131,12 +138,6 @@ export default function AdminDashboard() {
     const unsubscribeBanner = onSnapshot(doc(db, "settings", "liveBanner"), (doc) => {
         if (doc.exists()) {
             setLiveBannerText(doc.data().text);
-        }
-    });
-
-    const unsubscribeDomains = onSnapshot(doc(db, "settings", "challengeDomains"), (doc) => {
-        if (doc.exists()) {
-            setChallengeDomains(doc.data().domains || "");
         }
     });
 
@@ -194,24 +195,40 @@ export default function AdminDashboard() {
       }
   }
 
-  const handleSaveDomains = async () => {
-    setIsSavingDomains(true);
+  // Domain Handlers
+  const handleAddNewDomain = () => {
+    setEditingDomain(null);
+    setIsDomainDialogOpen(true);
+  };
+
+  const handleEditDomain = (domain: Domain) => {
+    setEditingDomain(domain);
+    setIsDomainDialogOpen(true);
+  };
+
+  const handleDeleteDomain = async (domainId: string) => {
     try {
-        await setDoc(doc(db, "settings", "challengeDomains"), { domains: challengeDomains });
-        toast({
-            title: "Success!",
-            description: "Challenge domains have been updated."
-        })
-    } catch(error) {
-         toast({
-            variant: "destructive",
-            title: "Update Failed",
-            description: "Could not update the domains. Please try again."
-        })
-    } finally {
-      setIsSavingDomains(false);
+        await deleteDoc(doc(db, "domains", domainId));
+        toast({ title: "Success", description: "Domain deleted." });
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "Could not delete domain." });
     }
-}
+  }
+
+  const handleSaveDomain = async (domainData: Omit<Domain, 'id'>) => {
+    try {
+        if (editingDomain) {
+            await updateDoc(doc(db, "domains", editingDomain.id), domainData);
+            toast({ title: "Success", description: "Domain updated." });
+        } else {
+            await addDoc(collection(db, "domains"), domainData);
+            toast({ title: "Success", description: "Domain added." });
+        }
+        setIsDomainDialogOpen(false);
+    } catch(error) {
+        toast({ variant: "destructive", title: "Save Failed", description: "Could not save domain." });
+    }
+  }
 
   // Problem Statement Handlers
   const handleAddNewProblem = () => {
@@ -435,30 +452,62 @@ export default function AdminDashboard() {
                 </Card>
 
                 <Card>
-                    <CardHeader>
-                         <div className="flex items-center gap-2">
-                             <BadgeInfo className="h-6 w-6" />
-                            <CardTitle>Challenge Domains</CardTitle>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                             <div className="flex items-center gap-2">
+                                <Lightbulb className="h-6 w-6" />
+                                <CardTitle>Previous Year Domains</CardTitle>
+                            </div>
+                            <CardDescription>Manage the example domains shown on the homepage.</CardDescription>
                         </div>
-                        <CardDescription>Enter a comma-separated list of domains to show before problems are released.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Textarea 
-                            placeholder="e.g., Earth Observation, Space Exploration, Robotics..."
-                            value={challengeDomains}
-                            onChange={(e) => setChallengeDomains(e.target.value)}
-                            disabled={isSavingDomains}
-                        />
-                        <Button onClick={handleSaveDomains} disabled={isSavingDomains}>
-                             {isSavingDomains ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Saving...
-                                </>
-                            ) : (
-                                "Save Domains"
-                            )}
+                        <Button onClick={handleAddNewDomain}>
+                            <PlusCircle className="mr-2"/> Add New Domain
                         </Button>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                             <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[30%]">Title</TableHead>
+                                    <TableHead>Description</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {domains.map((domain) => (
+                                    <TableRow key={domain.id}>
+                                        <TableCell className="font-medium">{domain.title}</TableCell>
+                                        <TableCell className="text-muted-foreground">{domain.description}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => handleEditDomain(domain)}>
+                                                <Pencil className="h-4 w-4"/>
+                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete this domain.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id)} className="bg-destructive hover:bg-destructive/90">
+                                                            Yes, delete it
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
 
@@ -651,8 +700,12 @@ export default function AdminDashboard() {
             onSave={handleSaveTimelineEvent}
             event={editingTimelineEvent}
         />
+        <DomainDialog
+            isOpen={isDomainDialogOpen}
+            onClose={() => setIsDomainDialogOpen(false)}
+            onSave={handleSaveDomain}
+            domain={editingDomain}
+        />
     </div>
   );
 }
-
-    
