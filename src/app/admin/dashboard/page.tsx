@@ -124,10 +124,23 @@ export default function AdminDashboard() {
         setTimelineEvents(eventsData);
     });
 
-    const unsubscribeDomains = onSnapshot(query(collection(db, "domains")), (snapshot) => {
-        const domainsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Domain[];
-        setDomains(domainsData);
-    });
+    const unsubscribeDomains = onSnapshot(query(collection(db, "domains")), 
+        (snapshot) => {
+            const domainsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Domain[];
+            setDomains(domainsData);
+        },
+        (error) => {
+            console.error("Firestore 'domains' listener error:", error);
+            if ((error as any).code === 'permission-denied') {
+                toast({
+                    variant: "destructive",
+                    title: "Firestore Permission Error",
+                    description: "Could not read 'domains'. Please update your Firestore security rules to allow reads for authenticated users on the 'domains' collection.",
+                    duration: 10000,
+                });
+            }
+        }
+    );
 
     const unsubscribeSettings = onSnapshot(doc(db, "settings", "features"), (doc) => {
         if (doc.exists()) {
@@ -149,7 +162,7 @@ export default function AdminDashboard() {
         unsubscribeBanner();
         unsubscribeDomains();
     };
-  }, [user]);
+  }, [user, toast]);
   
   const totalParticipants = teams.reduce((acc, team) => acc + team.members.length, 0);
 
