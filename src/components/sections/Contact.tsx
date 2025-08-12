@@ -17,11 +17,11 @@ const facultyCoordinators = [
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2394.jpg",
     email: "joseph.rodrigues@christuniversity.in",
   },
-  {
-    name: "Ms. Minu Narayanan",
-    hint: "woman portrait",
-    email: "minu.narayanan@christuniversity.in",
-  },
+  // {
+  //   name: "Ms. Minu Narayanan",
+  //   hint: "woman portrait",
+  //   email: "minu.narayanan@christuniversity.in",
+  // },
   {
     name: "Dr. Manikandan P",
     hint: "man portrait",
