@@ -43,7 +43,7 @@ export function Header() {
           : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
+      <div className="container mx-auto flex h-24 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-4">
           <div className="relative h-14 w-36">
             <Image
@@ -54,7 +54,7 @@ export function Header() {
             />
           </div>
           <Separator orientation="vertical" className="h-10" />
-          <div className="relative h-14 w-36">
+          <div className="relative h-18 w-44">
             <Image
               src={CULogo}
               alt="CHRIST University Logo"
