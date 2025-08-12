@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, CalendarDays, Users, Clock } from "lucide-react";
+import { MapPin, CalendarDays, Users } from "lucide-react";
 
 const aboutItems = [
   {
@@ -12,15 +12,6 @@ const aboutItems = [
     icon: <CalendarDays className="h-8 w-8 text-primary" />,
     title: "Date",
     description: "August 22-23, 2025",
-  },
-  {
-    icon: <Clock className="h-8 w-8 text-primary" />,
-    title: "Duration",
-    description: (
-      <>
-        A non-stop <b className="text-primary">24-Hour</b> hackathon.
-      </>
-    ),
   },
   {
     icon: <Users className="h-8 w-8 text-primary" />,
@@ -47,7 +38,7 @@ export function About() {
             free and open data.
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-3">
           {aboutItems.map((item, index) => (
             <Card
               key={index}

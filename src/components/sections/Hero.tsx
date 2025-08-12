@@ -10,7 +10,7 @@ import AstronautPole from "@/assets/spaceElements/AstronautWithFlagPole.png";
 import NasaLogo from "@/assets/logos/nasa.png";
 import CULogo from "@/assets/logos/christ_university.png";
 import MSFTLogo from "@/assets/logos/msft.png";
-import { MapPin, Sparkles } from "lucide-react";
+import { MapPin, Sparkles, Clock } from "lucide-react";
 
 const sponsors = [
   { name: "CHRIST University", logo: CULogo, hint: "host organization" },
@@ -97,20 +97,31 @@ export function Hero() {
           Earth and in space.
         </p>
 
-        <div
-          className="flex justify-center flex-nowrap items-center gap-2 mb-6 text-lg text-primary font-semibold backdrop-blur-sm bg-primary/10 py-2 px-4 rounded-lg border border-primary/20 max-w-max mx-auto cursor-pointer hover:bg-primary/15 transition-colors duration-300"
-          onClick={() =>
-            window.open(
-              "https://www.google.com/maps/dir//Mysore+Rd,+Kanmanike,+Kengeri,+Kumbalgodu,+Bengaluru,+Karnataka+560074/@12.863116,77.3554932,12z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3bae472f365fe219:0xcae219b3b46324db!2m2!1d77.4378951!2d12.8631289?entry=ttu&g_ep=EgoyMDI1MDgwNi4wIKXMDSoASAFQAw%3D%3D",
-              "_blank"
-            )
-          }
-        >
-          <MapPin className="h-5 w-5" />
-          <span className="flex-nowrap">
-            CHRIST (Deemed to be University), Bangalore Kengeri Campus
-          </span>
+        <div className="flex flex-wrap justify-center items-center gap-4 mb-6">
+          <div
+            className="flex justify-center flex-nowrap items-center gap-2 text-lg text-primary font-semibold backdrop-blur-sm bg-primary/10 py-2 px-4 rounded-lg border border-primary/20 cursor-pointer hover:bg-primary/15 transition-colors duration-300"
+            onClick={() =>
+              window.open(
+                "https://www.google.com/maps/dir//Mysore+Rd,+Kanmanike,+Kengeri,+Kumbalgodu,+Bengaluru,+Karnataka+560074/@12.863116,77.3554932,12z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3bae472f365fe219:0xcae219b3b46324db!2m2!1d77.4378951!2d12.8631289?entry=ttu&g_ep=EgoyMDI1MDgwNi4wIKXMDSoASAFQAw%3D%3D",
+                "_blank"
+              )
+            }
+          >
+            <MapPin className="h-5 w-5" />
+            <span className="flex-nowrap">
+              CHRIST (Deemed to be University), Bangalore Kengeri Campus
+            </span>
+          </div>
+           <div
+            className="flex justify-center flex-nowrap items-center gap-2 text-lg text-primary font-semibold backdrop-blur-sm bg-primary/10 py-2 px-4 rounded-lg border border-primary/20"
+          >
+            <Clock className="h-5 w-5" />
+            <span className="flex-nowrap">
+              A Non-Stop <b>24-Hour</b> Event
+            </span>
+          </div>
         </div>
+
 
         <div className="mb-6">
           <Countdown />
