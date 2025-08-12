@@ -1,5 +1,5 @@
 
-import { Award, Code, Lightbulb, Users, Rocket } from "lucide-react";
+import { Award, Code, Lightbulb, Users, Rocket, Building2 } from "lucide-react";
 
 const perks = [
     {
@@ -15,12 +15,6 @@ const perks = [
       detailedDescription: "Engage with industry experts from leading tech companies, space agencies and defence organisations like ISRO, DRDO, Microsoft, Roscosmos, JAXA, etc and collaborate with talented peers who share your passion."
     },
     {
-      icon: <Lightbulb className="h-8 w-8 text-primary" />,
-      title: "Learn & Grow",
-      description: "Develop new skills and gain experience with real NASA data.",
-      detailedDescription: "Participate in workshops, get mentorship from professionals and experts from ISRO and DRDO, and learn to work with massive datasets from NASA, ISRO, enhancing your technical and problem-solving skills."
-    },
-    {
       icon: <Code className="h-8 w-8 text-primary" />,
       title: "Build Your Portfolio",
       description: "Create a tangible project to showcase to potential employers.",
@@ -31,6 +25,18 @@ const perks = [
       title: "Launch Your Idea",
       description: "Win up to ₹25 Crores in seeding funds for your project.",
       detailedDescription: "Projects that meet NASA's high standards have the incredible opportunity to receive a seeding fund of up to ₹25 crores to transform your hackathon project into a real-world startup."
+    },
+    {
+        icon: <Lightbulb className="h-8 w-8 text-primary" />,
+        title: "Learn & Grow",
+        description: "Develop new skills and gain experience with real NASA data.",
+        detailedDescription: "Participate in workshops, get mentorship from professionals and experts from ISRO and DRDO, and learn to work with massive datasets from NASA, ISRO, enhancing your technical and problem-solving skills."
+    },
+    {
+        icon: <Building2 className="h-8 w-8 text-primary" />,
+        title: "Incubation Opportunity",
+        description: "Get dedicated support to turn your project into a business.",
+        detailedDescription: "Beyond funding, the best projects will receive guidance and mentorship through our incubation partners, helping you navigate the challenges of building a real-world product."
     }
 ];
 
@@ -44,7 +50,7 @@ export function Perks() {
             More than just a competition, it's an opportunity to accelerate your journey.
           </p>
         </div>
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {perks.map((perk) => (
             <div key={perk.title} className="group relative overflow-hidden rounded-lg border-2 border-transparent bg-card p-6 text-center transition-all duration-300 hover:border-primary hover:shadow-2xl hover:shadow-primary/20">
               <div className="flex flex-col items-center">
