@@ -6,19 +6,19 @@ const perks = [
       icon: <Award className="h-8 w-8 text-primary" />,
       title: "Qualify for Nationals",
       description: "Top teams get the chance to compete at the national level.",
-      detailedDescription: "The winning teams from our event will be nominated for the NASA Space Apps Global Judging round, putting your project on an international stage."
+      detailedDescription: "The winning teams from our event will be nominated for the next level: NASA Space Apps national level, putting your project on an national stage. Qualifying teams will be given an opportunity for felicitation at the Microsoft Campus"
     },
     {
       icon: <Users className="h-8 w-8 text-primary" />,
       title: "Network",
       description: "Connect with sponsors, mentors, and fellow space enthusiasts.",
-      detailedDescription: "Engage with industry experts from leading tech companies and space agencies, and collaborate with talented peers who share your passion."
+      detailedDescription: "Engage with industry experts from leading tech companies, space agencies and defence organisations like ISRO, DRDO, Microsoft, Roscosmos, JAXA, etc and collaborate with talented peers who share your passion."
     },
     {
       icon: <Lightbulb className="h-8 w-8 text-primary" />,
       title: "Learn & Grow",
       description: "Develop new skills and gain experience with real NASA data.",
-      detailedDescription: "Participate in workshops, get mentorship from professionals, and learn to work with massive datasets from NASA, enhancing your technical and problem-solving skills."
+      detailedDescription: "Participate in workshops, get mentorship from professionals and experts from ISRO and DRDO, and learn to work with massive datasets from NASA, ISRO, enhancing your technical and problem-solving skills."
     },
     {
       icon: <Code className="h-8 w-8 text-primary" />,
