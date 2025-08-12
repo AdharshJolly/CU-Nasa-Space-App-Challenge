@@ -11,7 +11,7 @@ import OutshadeLogo from "@/assets/logos/outshade.png";
 import VishvaLogo from "@/assets/logos/vishva.png";
 import AICLogo from "@/assets/logos/aic_dsu.png";
 
-const sponsors = [
+const collaborators = [
   { name: "NASA", logo: NasaLogo, hint: "space agency" },
   { name: "SUMVN", logo: SumvnLogo, hint: "rocket company" },
   { name: "Telengana Govt", logo: TelenganaGovtLogo, hint: "space agency" },
@@ -53,13 +53,13 @@ const sponsors = [
   },
 ];
 
-export function Sponsors() {
+export function Collaborators() {
   return (
-    <section id="sponsors" className="py-12 md:py-24">
+    <section id="collaborators" className="py-12 md:py-24">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl md:text-4xl font-bold">
-            Our Sponsors
+            In collaboration with
           </h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
             Powering the next generation of space innovation. We're grateful for
@@ -67,7 +67,7 @@ export function Sponsors() {
           </p>
         </div>
         <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-          {sponsors.map((sponsor) => (
+          {collaborators.map((sponsor) => (
             <div
               key={sponsor.name}
               className="relative h-32 min-w-44 transition-all duration-300 transform hover:scale-110"

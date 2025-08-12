@@ -39,10 +39,10 @@ export function Footer() {
               Rules
             </Link>
             <Link
-              href="#sponsors"
+              href="#collaborators"
               className="text-sm text-muted-foreground transition-colors hover:text-primary"
             >
-              Sponsors
+              Collaborators
             </Link>
           </div>
           <div className="flex flex-col gap-2 items-center md:items-start">

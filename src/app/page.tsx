@@ -7,7 +7,7 @@ import { Schedule } from "@/components/sections/Schedule";
 import { Rules } from "@/components/sections/Rules";
 import { Perks } from "@/components/sections/Perks";
 import { ProblemStatements } from "@/components/sections/ProblemStatements";
-import { Sponsors } from "@/components/sections/Sponsors";
+import { Collaborators } from "@/components/sections/Collaborators";
 import { Registration } from "@/components/sections/Registration";
 import { Contact } from "@/components/sections/Contact";
 import { AnimateOnScroll } from "@/components/AnimateOnScroll";
@@ -58,7 +58,7 @@ export default async function Home() {
           <Registration />
         </AnimateOnScroll>
         <AnimateOnScroll>
-          <Sponsors />
+          <Collaborators />
         </AnimateOnScroll>
         <AnimateOnScroll>
           <Contact />
