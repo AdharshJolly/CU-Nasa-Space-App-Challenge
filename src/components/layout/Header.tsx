@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -12,6 +13,8 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import SpaceAppLogo from "@/assets/logos/space_app_logo.png";
+import CULogo from "@/assets/logos/christ_university.png";
+import { Separator } from "../ui/separator";
 
 const navLinks = [
   { href: "#about", label: "About" },
@@ -41,8 +44,24 @@ export function Header() {
       }`}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src={SpaceAppLogo} height={70} width={180} alt="" />
+        <Link href="/" className="flex items-center gap-4">
+          <div className="relative h-14 w-36">
+            <Image
+              src={SpaceAppLogo}
+              alt="NASA Space Apps Challenge Logo"
+              fill
+              style={{ objectFit: "contain" }}
+            />
+          </div>
+          <Separator orientation="vertical" className="h-10" />
+          <div className="relative h-14 w-36">
+            <Image
+              src={CULogo}
+              alt="CHRIST University Logo"
+              fill
+              style={{ objectFit: "contain" }}
+            />
+          </div>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => (
