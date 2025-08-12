@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -13,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
 import Manoj from "@/assets/co-ordinators/manoj.jpeg";
 import Adharsh from "@/assets/co-ordinators/adharsh.jpg";
+import Vishnu from "@/assets/co-ordinators/vishnu.jpg";
 
 const facultyCoordinators = [
   {
@@ -45,7 +45,7 @@ const studentCoordinators = [
   {
     name: "Vishnu Nambiar",
     role: "Technical Support Lead",
-    avatar: "",
+    avatar: Vishnu.src,
     hint: "man portrait",
     email: "vishnu.nambiar@btech.christuniversity.in",
     phone: "+918848799780",
