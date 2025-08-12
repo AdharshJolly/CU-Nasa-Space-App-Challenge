@@ -54,7 +54,7 @@ export function Header() {
             />
           </div>
           <Separator orientation="vertical" className="h-10" />
-          <div className="relative h-18 w-44">
+          <div className="relative h-16 w-44">
             <Image
               src={CULogo}
               alt="CHRIST University Logo"
