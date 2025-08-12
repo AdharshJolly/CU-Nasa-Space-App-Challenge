@@ -10,7 +10,7 @@ import AstronautPole from "@/assets/spaceElements/AstronautWithFlagPole.png";
 import NasaLogo from "@/assets/logos/nasa.png";
 import CULogo from "@/assets/logos/christ_university.png";
 import MSFTLogo from "@/assets/logos/msft.png";
-import { MapPin, Sparkles, Clock } from "lucide-react";
+import { MapPin, Sparkles } from "lucide-react";
 
 const sponsors = [
   { name: "CHRIST University", logo: CULogo, hint: "host organization" },
@@ -93,11 +93,12 @@ export function Hero() {
           NASA International Space Apps Challenge 2025
         </h1>
         <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-4">
-          Join thousands of innovators across the globe to solve challenges on
-          Earth and in space.
+          Join thousands of innovators across the globe for a{" "}
+          <b className="text-primary">non-stop 24-hour hackathon</b> to solve
+          challenges on Earth and in space.
         </p>
 
-        <div className="flex flex-wrap justify-center items-center gap-4 mb-6">
+        <div className="flex justify-center items-center gap-4 mb-6">
           <div
             className="flex justify-center flex-nowrap items-center gap-2 text-lg text-primary font-semibold backdrop-blur-sm bg-primary/10 py-2 px-4 rounded-lg border border-primary/20 cursor-pointer hover:bg-primary/15 transition-colors duration-300"
             onClick={() =>
@@ -112,16 +113,7 @@ export function Hero() {
               CHRIST (Deemed to be University), Bangalore Kengeri Campus
             </span>
           </div>
-           <div
-            className="flex justify-center flex-nowrap items-center gap-2 text-lg text-primary font-semibold backdrop-blur-sm bg-primary/10 py-2 px-4 rounded-lg border border-primary/20"
-          >
-            <Clock className="h-5 w-5" />
-            <span className="flex-nowrap">
-              A Non-Stop <b>24-Hour</b> Event
-            </span>
-          </div>
         </div>
-
 
         <div className="mb-6">
           <Countdown />
@@ -147,3 +139,5 @@ export function Hero() {
     </section>
   );
 }
+
+    
