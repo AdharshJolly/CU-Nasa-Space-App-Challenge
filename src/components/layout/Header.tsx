@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -42,8 +43,8 @@ export function Header() {
           : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto flex h-[90px] items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-4">
+      <div className="container mx-auto flex h-auto min-h-[90px] items-center justify-between px-4 md:px-6 py-2">
+        <Link href="/" className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
           <div className="relative h-14 w-36">
             <Image
               src={SpaceAppLogo}
@@ -52,8 +53,8 @@ export function Header() {
               style={{ objectFit: "contain" }}
             />
           </div>
-          <Separator orientation="vertical" className="h-10" />
-          <div className="relative h-20 w-56">
+          <Separator orientation="vertical" className="h-10 hidden md:block" />
+          <div className="relative h-16 w-44">
             <Image
               src={CULogo}
               alt="CHRIST University Logo"

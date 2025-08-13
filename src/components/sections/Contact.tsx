@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -119,7 +120,7 @@ const CoordinatorCard = ({
   <Card className="text-center flex flex-col items-center p-6 bg-card/50 backdrop-blur-sm hover:border-primary border-2 border-transparent transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
     <Avatar className="w-24 h-24 mb-4 border-4 border-transparent group-hover:border-primary transition-all">
       <AvatarImage src={avatar} alt={name} data-ai-hint={hint} />
-      <AvatarFallback>{name.split(" ")[1][0]}</AvatarFallback>
+      <AvatarFallback>{name.split(" ").length > 1 ? name.split(" ")[0][0] + name.split(" ")[1][0] : name.split(" ")[0][0]}</AvatarFallback>
     </Avatar>
     <CardTitle className="font-headline text-xl">{name}</CardTitle>
     <CardContent className="mt-4 flex flex-col gap-2">
@@ -158,7 +159,7 @@ export function Contact() {
             <h3 className="text-2xl font-headline font-bold text-center mb-8 text-primary">
               Faculty Coordinators
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
               {facultyCoordinators.map((person) => (
                 <CoordinatorCard key={person.name} {...person} />
               ))}
