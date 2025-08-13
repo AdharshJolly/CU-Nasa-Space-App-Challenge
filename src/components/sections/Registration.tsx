@@ -49,7 +49,7 @@ const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 const memberSchema = z.object({
   name: z.string().trim().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }).trim(),
+  email: z.string().email({ message: "Please enter a valid email address." }).trim().min(1, { message: "Email is required."}),
   phone: z.string().regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
   }),
@@ -88,49 +88,7 @@ const formSchema = z
       message: "This team name is already taken. Please choose another.",
       path: ["teamName"],
     }
-  )
-  .refine(async (data, ctx) => {
-    const emails = data.members.map((m) => m.email).filter(Boolean);
-    if (emails.length === 0) return true;
-
-    try {
-        const q = query(
-            collection(db, "registrations"),
-            where("members", "array-contains-any", data.members.map(m => ({ email: m.email })))
-        );
-
-        const querySnapshot = await getDocs(q);
-
-        const existingEmails: string[] = [];
-        querySnapshot.forEach((doc) => {
-            const docMembers = doc.data().members as { email: string }[];
-            docMembers.forEach((member) => {
-                if (emails.includes(member.email)) {
-                    existingEmails.push(member.email);
-                }
-            });
-        });
-        
-        let hadError = false;
-        data.members.forEach((member, index) => {
-            if (member.email && existingEmails.includes(member.email)) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "This email is already registered.",
-                    path: [`members`, index, "email"],
-                });
-                hadError = true;
-            }
-        });
-
-        return !hadError;
-    } catch (error) {
-        console.error("Error checking for existing emails:", error);
-        // In case of a database error, we allow the submission to proceed
-        // to avoid blocking users. A server-side check would be a good failsafe.
-        return true;
-    }
-  });
+  );
 
 const schools = [
   "School of Architecture",
