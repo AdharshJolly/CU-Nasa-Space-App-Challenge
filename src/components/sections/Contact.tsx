@@ -1,13 +1,7 @@
 
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
@@ -24,11 +18,11 @@ const facultyCoordinators = [
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2394.jpg",
     email: "joseph.rodrigues@christuniversity.in",
   },
-  {
-    name: "Ms. Minu Narayanan",
-    hint: "woman portrait",
-    email: "minu.narayanan@christuniversity.in",
-  },
+  // {
+  //   name: "Ms. Minu Narayanan",
+  //   hint: "woman portrait",
+  //   email: "minu.narayanan@christuniversity.in",
+  // },
   {
     name: "Dr. Manikandan P",
     hint: "man portrait",
