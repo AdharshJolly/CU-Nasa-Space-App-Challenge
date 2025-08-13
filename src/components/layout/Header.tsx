@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -44,22 +43,29 @@ export function Header() {
       }`}
     >
       <div className="container mx-auto flex h-auto min-h-[90px] items-center justify-between px-4 md:px-6 py-2">
-        <Link href="/" className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
-          <div className="relative h-14 w-36">
+        <Link href="/" className="flex items-center gap-2 md:gap-4 min-w-0">
+          <div className="relative h-12 w-28 md:h-14 md:w-36 flex-shrink-0">
             <Image
               src={SpaceAppLogo}
               alt="NASA Space Apps Challenge Logo"
               fill
               style={{ objectFit: "contain" }}
+              sizes="(max-width: 768px) 96px, 144px"
+              priority
             />
           </div>
-          <Separator orientation="vertical" className="h-10 hidden md:block" />
-          <div className="relative h-16 w-44">
+          <Separator
+            orientation="vertical"
+            className="h-8 md:h-10 hidden md:block"
+          />
+          <div className="relative h-14 w-36 md:h-16 md:w-44 flex-shrink-0">
             <Image
               src={CULogo}
               alt="CHRIST University Logo"
               fill
               style={{ objectFit: "contain" }}
+              sizes="(max-width: 768px) 112px, 176px"
+              priority
             />
           </div>
         </Link>

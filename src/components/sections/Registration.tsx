@@ -1,4 +1,3 @@
-
 "use client";
 
 import { z } from "zod";
@@ -35,7 +34,15 @@ import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { generateTeamName } from "@/ai/flows/generate-team-name-flow";
 import { useState } from "react";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
@@ -123,16 +130,16 @@ const formSchema = z
   });
 
 const schools = [
-    "School of Architecture",
-    "School of Business and Management",
-    "School of Commerce, Finance and Accountancy",
-    "School of Education",
-    "School of Engineering and Technology",
-    "School of Humanities and Performing Arts",
-    "School of Law",
-    "School of Psychological Sciences, Education and Social Work",
-    "School of Sciences",
-    "School of Social Sciences"
+  "School of Architecture",
+  "School of Business and Management",
+  "School of Commerce, Finance and Accountancy",
+  "School of Education",
+  "School of Engineering and Technology",
+  "School of Humanities and Performing Arts",
+  "School of Law",
+  "School of Psychological Sciences, Education and Social Work",
+  "School of Sciences",
+  "School of Social Sciences",
 ];
 
 export function Registration() {
@@ -224,12 +231,20 @@ export function Registration() {
                 Ready to Launch?
               </CardTitle>
               <CardDescription className="max-w-2xl mx-auto text-lg pt-2 text-muted-foreground">
-                Secure your team's spot! This event is exclusively for students of CHRIST (Deemed to be University). Join innovators from your university and make your mark.
+                Secure your team's spot! This event is exclusively for students
+                of CHRIST (Deemed to be University). Join innovators from your
+                university and make your mark.
               </CardDescription>
 
               <div className="mt-4 max-w-2xl mx-auto text-base text-primary/80 bg-primary/10 p-4 rounded-lg border border-primary/20">
                 <p className="font-bold">Please Note:</p>
-                <p>A registration fee of <b className="text-primary">₹500 per team</b> is required to cover your snacks and wristbands. Your team's registration will only be confirmed after the payment is made. Payment details will be sent to the team lead's email.</p>
+                <p>
+                  A registration fee of{" "}
+                  <b className="text-primary">₹500 per team</b> is required to
+                  cover your snacks and other amenities. Your team's
+                  registration will only be confirmed after the payment is made.
+                  Payment details will be sent to the team lead's email.
+                </p>
               </div>
 
               <div className="flex justify-center pt-4">
@@ -239,8 +254,8 @@ export function Registration() {
                     members
                   </li>
                   <li className="flex items-center gap-2">
-                    <Rocket className="h-4 w-4 text-primary" /> Open to all skill
-                    levels
+                    <Rocket className="h-4 w-4 text-primary" /> Open to all
+                    skill levels
                   </li>
                   <li className="flex items-center gap-2">
                     <Rocket className="h-4 w-4 text-primary" /> In-person events
@@ -437,17 +452,23 @@ export function Registration() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>School</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a school" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {schools.map(school => (
-                                            <SelectItem key={school} value={school}>{school}</SelectItem>
-                                        ))}
-                                    </SelectContent>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                  disabled={isSubmitting}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select a school" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {schools.map((school) => (
+                                      <SelectItem key={school} value={school}>
+                                        {school}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
                                 </Select>
                                 <FormMessage />
                               </FormItem>
@@ -508,23 +529,35 @@ export function Registration() {
           </Card>
         </div>
       </section>
-      <AlertDialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+      <AlertDialog
+        open={isSuccessDialogOpen}
+        onOpenChange={setIsSuccessDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex justify-center items-center mb-4">
-                <Rocket className="h-12 w-12 text-primary animate-pulse" />
+              <Rocket className="h-12 w-12 text-primary animate-pulse" />
             </div>
-            <AlertDialogTitle className="text-center text-2xl font-headline">Registration Submitted!</AlertDialogTitle>
+            <AlertDialogTitle className="text-center text-2xl font-headline">
+              Registration Submitted!
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-center text-base">
-              Welcome aboard, astronauts! Your registration is provisionally complete. 
-              To finalize your spot, the team lead must complete the payment.
-              <br/><br/>
-              <b>Next Step:</b> Please check the team lead's email inbox for a message containing payment instructions and a link to the planning portal. There might be a slight delay in receiving this email.
+              Welcome aboard, astronauts! Your registration is provisionally
+              complete. To finalize your spot, the team lead must complete the
+              payment.
+              <br />
+              <br />
+              <b>Next Step:</b> Please check the team lead's email inbox for a
+              message containing payment instructions and a link to the planning
+              portal. There might be a slight delay in receiving this email.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setIsSuccessDialogOpen(false)} className="w-full">
-                Roger That!
+            <AlertDialogAction
+              onClick={() => setIsSuccessDialogOpen(false)}
+              className="w-full"
+            >
+              Roger That!
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
