@@ -15,6 +15,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2, Rocket, Trash, UserPlus, Wand2 } from "lucide-react";
 import { Separator } from "../ui/separator";
 import {
@@ -114,6 +121,19 @@ const formSchema = z
 
     return !hadError;
   });
+
+const schools = [
+    "School of Architecture",
+    "School of Business and Management",
+    "School of Commerce, Finance and Accountancy",
+    "School of Education",
+    "School of Engineering and Technology",
+    "School of Humanities and Performing Arts",
+    "School of Law",
+    "School of Psychological Sciences, Education and Social Work",
+    "School of Sciences",
+    "School of Social Sciences"
+];
 
 export function Registration() {
   const { toast } = useToast();
@@ -417,13 +437,18 @@ export function Registration() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>School</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. School of Engineering"
-                                    {...field}
-                                    disabled={isSubmitting}
-                                  />
-                                </FormControl>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a school" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {schools.map(school => (
+                                            <SelectItem key={school} value={school}>{school}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -507,5 +532,3 @@ export function Registration() {
     </>
   );
 }
-
-    
