@@ -1,3 +1,4 @@
+
 "use client";
 
 import { z } from "zod";
@@ -47,23 +48,25 @@ import {
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 const memberSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  name: z.string().trim().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email address." }).trim(),
   phone: z.string().regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
   }),
   registerNumber: z
     .string()
+    .trim()
     .min(1, { message: "Register number is required." }),
-  className: z.string().min(1, { message: "Class is required." }),
-  department: z.string().min(1, { message: "Department is required." }),
-  school: z.string().min(1, { message: "School is required." }),
+  className: z.string().trim().min(1, { message: "Class is required." }),
+  department: z.string().trim().min(1, { message: "Department is required." }),
+  school: z.string().min(1, { message: "Please select a school." }),
 });
 
 const formSchema = z
   .object({
     teamName: z
       .string()
+      .trim()
       .min(3, { message: "Team name must be at least 3 characters." })
       .max(25, { message: "Team name cannot be more than 25 characters." }),
     members: z
@@ -73,6 +76,7 @@ const formSchema = z
   })
   .refine(
     async (data) => {
+      if (!data.teamName) return true; // Don't run validation if field is empty
       const q = query(
         collection(db, "registrations"),
         where("teamName", "==", data.teamName)
@@ -86,47 +90,46 @@ const formSchema = z
     }
   )
   .refine(async (data, ctx) => {
-    const emails = data.members.map((m) => m.email);
-    const q = query(
-      collection(db, "registrations"),
-      where(
-        "members",
-        "array-contains-any",
-        data.members.map((m) => ({
-          email: m.email,
-          name: m.name,
-          phone: m.phone,
-          registerNumber: m.registerNumber,
-          className: m.className,
-          department: m.department,
-          school: m.school,
-        }))
-      )
-    );
-    const querySnapshot = await getDocs(q);
+    const emails = data.members.map((m) => m.email).filter(Boolean);
+    if (emails.length === 0) return true;
 
-    const existingEmails: string[] = [];
-    querySnapshot.forEach((doc) => {
-      doc.data().members.forEach((member: { email: string }) => {
-        if (emails.includes(member.email)) {
-          existingEmails.push(member.email);
-        }
-      });
-    });
+    try {
+        const q = query(
+            collection(db, "registrations"),
+            where("members", "array-contains-any", data.members.map(m => ({ email: m.email })))
+        );
 
-    let hadError = false;
-    data.members.forEach((member, index) => {
-      if (existingEmails.includes(member.email)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "This email is already registered.",
-          path: [`members`, index, "email"],
+        const querySnapshot = await getDocs(q);
+
+        const existingEmails: string[] = [];
+        querySnapshot.forEach((doc) => {
+            const docMembers = doc.data().members as { email: string }[];
+            docMembers.forEach((member) => {
+                if (emails.includes(member.email)) {
+                    existingEmails.push(member.email);
+                }
+            });
         });
-        hadError = true;
-      }
-    });
+        
+        let hadError = false;
+        data.members.forEach((member, index) => {
+            if (member.email && existingEmails.includes(member.email)) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "This email is already registered.",
+                    path: [`members`, index, "email"],
+                });
+                hadError = true;
+            }
+        });
 
-    return !hadError;
+        return !hadError;
+    } catch (error) {
+        console.error("Error checking for existing emails:", error);
+        // In case of a database error, we allow the submission to proceed
+        // to avoid blocking users. A server-side check would be a good failsafe.
+        return true;
+    }
   });
 
 const schools = [
@@ -148,6 +151,7 @@ export function Registration() {
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: 'onTouched', // Validate on blur
     defaultValues: {
       teamName: "",
       members: [
