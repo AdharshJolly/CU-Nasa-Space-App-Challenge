@@ -37,12 +37,12 @@ const facultyCoordinators = [
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2996.jpg",
     email: "hari.murthy@christuniversity.in",
   },
-  {
-    name: "Dr. Santhrupth B C",
-    hint: "man portrait",
-    avatar:
-      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E5873.jpg",
-    email: "santhrupth.bc@christuniversity.in",
+  //{
+  //  name: "Dr. Santhrupth B C",
+    //hint: "man portrait",
+    //avatar:
+    //  "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E5873.jpg",
+    //email: "santhrupth.bc@christuniversity.in",
   },
   {
     name: "Dr. Albert Joseph Hefferan",
