@@ -43,7 +43,7 @@ const facultyCoordinators = [
     //avatar:
     //  "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E5873.jpg",
     //email: "santhrupth.bc@christuniversity.in",
-  },
+  //},
   {
     name: "Dr. Albert Joseph Hefferan",
     hint: "man portrait",
