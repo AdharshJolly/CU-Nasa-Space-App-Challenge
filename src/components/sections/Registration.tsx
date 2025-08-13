@@ -209,9 +209,9 @@ export function Registration() {
                 <p>
                   A registration fee of{" "}
                   <b className="text-primary">₹500 per team</b> is required to
-                  cover your snacks and wristbands. Your team's registration
-                  will only be confirmed after the payment is made. Payment
-                  details will be sent to the team lead's email.
+                  cover your snacks and other amenities. Your team's
+                  registration will only be confirmed after the payment is made.
+                  Payment details will be sent to the team lead's email.
                 </p>
               </div>
 
