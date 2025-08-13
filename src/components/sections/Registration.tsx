@@ -1,4 +1,3 @@
-
 "use client";
 
 import { z } from "zod";
@@ -48,12 +47,15 @@ import {
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 const memberSchema = z.object({
-  name: z.string().trim().min(2, { message: "Name must be at least 2 characters." }),
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: "Name must be at least 2 characters." }),
   email: z
     .string()
     .email({ message: "Please enter a valid email address." })
     .trim()
-    .min(1, { message: "Email is required."}),
+    .min(1, { message: "Email is required." }),
   phone: z.string().regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
   }),
@@ -113,7 +115,7 @@ export function Registration() {
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: 'onTouched', // Validate on blur
+    mode: "onTouched", // Validate on blur
     defaultValues: {
       teamName: "",
       members: [
@@ -162,27 +164,27 @@ export function Registration() {
     }
   }
 
-  const handleGenerateName = async () => {
-    setIsGeneratingName(true);
-    try {
-      const { teamName } = await generateTeamName({
-        nonce: String(Math.random()),
-      });
-      form.setValue("teamName", teamName, { shouldValidate: true });
-      toast({
-        title: "Team Name Generated!",
-        description: `We've called you "${teamName}". Feel free to change it!`,
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Generation Failed",
-        description: "Could not generate a team name. Please try again.",
-      });
-    } finally {
-      setIsGeneratingName(false);
-    }
-  };
+  // const handleGenerateName = async () => {
+  //   setIsGeneratingName(true);
+  //   try {
+  //     const { teamName } = await generateTeamName({
+  //       nonce: String(Math.random()),
+  //     });
+  //     form.setValue("teamName", teamName, { shouldValidate: true });
+  //     toast({
+  //       title: "Team Name Generated!",
+  //       description: `We've called you "${teamName}". Feel free to change it!`,
+  //     });
+  //   } catch (error) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Generation Failed",
+  //       description: "Could not generate a team name. Please try again.",
+  //     });
+  //   } finally {
+  //     setIsGeneratingName(false);
+  //   }
+  // };
 
   return (
     <>
@@ -207,9 +209,9 @@ export function Registration() {
                 <p>
                   A registration fee of{" "}
                   <b className="text-primary">₹500 per team</b> is required to
-                  cover your snacks and wristbands. Your team's
-                  registration will only be confirmed after the payment is made.
-                  Payment details will be sent to the team lead's email.
+                  cover your snacks and wristbands. Your team's registration
+                  will only be confirmed after the payment is made. Payment
+                  details will be sent to the team lead's email.
                 </p>
               </div>
 
@@ -253,7 +255,7 @@ export function Registration() {
                               />
                             </FormControl>
                           </div>
-                          <Button
+                          {/* <Button
                             type="button"
                             variant="outline"
                             onClick={handleGenerateName}
@@ -270,7 +272,7 @@ export function Registration() {
                                 Generate Name
                               </>
                             )}
-                          </Button>
+                          </Button> */}
                         </div>
                         <FormMessage />
                       </FormItem>
