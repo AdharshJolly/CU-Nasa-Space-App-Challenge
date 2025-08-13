@@ -13,9 +13,13 @@ export function Footer() {
                 Space Apps Challenge
               </span>
             </Link>
-            <p className="max-w-xs text-sm text-muted-foreground">
+            <p className="max-w-xs text-sm text-muted-foreground mb-3">
               Exploring space, one challenge at a time. The largest
               international space and science hackathon.
+            </p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              Event conducted by Industry Institute Interaction Cell (IIIC) & 
+              CHRIST Incubation and Consultancy Foundation (CICF) a CHRIST (Deemed to be University), Bangalore Kengeri Campus
             </p>
           </div>
           <div className="flex flex-col gap-2 items-center md:items-start">
