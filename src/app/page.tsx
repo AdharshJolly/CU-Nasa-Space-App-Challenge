@@ -1,4 +1,3 @@
-
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
@@ -16,7 +15,6 @@ import { PreviousProblemStatements } from "@/components/sections/PreviousProblem
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-
 export default async function Home() {
   let problemsReleased = false;
   try {
@@ -25,7 +23,10 @@ export default async function Home() {
       problemsReleased = settingsDoc.data().problemsReleased;
     }
   } catch (error) {
-    console.error("Could not fetch settings from Firestore in build time.", error);
+    console.error(
+      "Could not fetch settings from Firestore in build time.",
+      error
+    );
   }
 
   return (
@@ -50,18 +51,18 @@ export default async function Home() {
           <ProblemStatements />
         </AnimateOnScroll>
         {!problemsReleased && (
-            <AnimateOnScroll>
-              <PreviousProblemStatements />
-            </AnimateOnScroll>
+          <AnimateOnScroll>
+            <PreviousProblemStatements />
+          </AnimateOnScroll>
         )}
         <AnimateOnScroll>
           <Registration />
         </AnimateOnScroll>
         <AnimateOnScroll>
-          <Collaborators />
+          <Contact />
         </AnimateOnScroll>
         <AnimateOnScroll>
-          <Contact />
+          <Collaborators />
         </AnimateOnScroll>
       </main>
       <Footer />
