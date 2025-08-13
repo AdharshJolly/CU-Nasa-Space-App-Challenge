@@ -49,7 +49,15 @@ const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 const memberSchema = z.object({
   name: z.string().trim().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }).trim().min(1, { message: "Email is required."}),
+  email: z
+    .string()
+    .email({ message: "Please enter a valid email address." })
+    .trim()
+    .min(1, { message: "Email is required."})
+    .refine(
+      (email) => email.endsWith('@christuniversity.in') || email.endsWith('@btech.christuniversity.in'),
+      { message: "Please use a valid CHRIST University email address." }
+    ),
   phone: z.string().regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
   }),
@@ -203,7 +211,7 @@ export function Registration() {
                 <p>
                   A registration fee of{" "}
                   <b className="text-primary">₹500 per team</b> is required to
-                  cover your snacks and other amenities. Your team's
+                  cover your snacks and wristbands. Your team's
                   registration will only be confirmed after the payment is made.
                   Payment details will be sent to the team lead's email.
                 </p>
