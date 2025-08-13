@@ -53,11 +53,7 @@ const memberSchema = z.object({
     .string()
     .email({ message: "Please enter a valid email address." })
     .trim()
-    .min(1, { message: "Email is required."})
-    .refine(
-      (email) => email.endsWith('@christuniversity.in') || email.endsWith('@btech.christuniversity.in'),
-      { message: "Please use a valid CHRIST University email address." }
-    ),
+    .min(1, { message: "Email is required."}),
   phone: z.string().regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
   }),
@@ -332,11 +328,11 @@ export function Registration() {
                             name={`members.${index}.email`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>CHRIST Email Address</FormLabel>
+                                <FormLabel>Email Address</FormLabel>
                                 <FormControl>
                                   <Input
                                     type="email"
-                                    placeholder="galileo.g@btech.christuniversity.in"
+                                    placeholder="galileo.g@example.com"
                                     {...field}
                                     disabled={isSubmitting}
                                   />
