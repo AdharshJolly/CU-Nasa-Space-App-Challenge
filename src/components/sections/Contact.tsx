@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import Manoj from "@/assets/co-ordinators/manoj.jpeg";
 import Adharsh from "@/assets/co-ordinators/adharsh.jpg";
 import Vishnu from "@/assets/co-ordinators/vishnu.jpg";
 import Annemarie from "@/assets/co-ordinators/annemarie.jpg";
+import MinuMam from "@/assets/co-ordinators/minu.jpg";
 
 const facultyCoordinators = [
   {
@@ -18,11 +18,12 @@ const facultyCoordinators = [
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2394.jpg",
     email: "joseph.rodrigues@christuniversity.in",
   },
-  // {
-  //   name: "Ms. Minu Narayanan",
-  //   hint: "woman portrait",
-  //   email: "minu.narayanan@christuniversity.in",
-  // },
+  {
+    name: "Ms. Minu Narayanan",
+    hint: "woman portrait",
+    avatar: MinuMam.src,
+    email: "minu.narayanan@christuniversity.in",
+  },
   {
     name: "Dr. Manikandan P",
     hint: "man portrait",
@@ -39,10 +40,10 @@ const facultyCoordinators = [
   },
   //{
   //  name: "Dr. Santhrupth B C",
-    //hint: "man portrait",
-    //avatar:
-    //  "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E5873.jpg",
-    //email: "santhrupth.bc@christuniversity.in",
+  //hint: "man portrait",
+  //avatar:
+  //  "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E5873.jpg",
+  //email: "santhrupth.bc@christuniversity.in",
   //},
   {
     name: "Dr. Albert Joseph Hefferan",
@@ -114,7 +115,11 @@ const CoordinatorCard = ({
   <Card className="text-center flex flex-col items-center p-6 bg-card/50 backdrop-blur-sm hover:border-primary border-2 border-transparent transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
     <Avatar className="w-24 h-24 mb-4 border-4 border-transparent group-hover:border-primary transition-all">
       <AvatarImage src={avatar} alt={name} data-ai-hint={hint} />
-      <AvatarFallback>{name.split(" ").length > 1 ? name.split(" ")[0][0] + name.split(" ")[1][0] : name.split(" ")[0][0]}</AvatarFallback>
+      <AvatarFallback>
+        {name.split(" ").length > 1
+          ? name.split(" ")[0][0] + name.split(" ")[1][0]
+          : name.split(" ")[0][0]}
+      </AvatarFallback>
     </Avatar>
     <CardTitle className="font-headline text-xl">{name}</CardTitle>
     <CardContent className="mt-4 flex flex-col gap-2">
