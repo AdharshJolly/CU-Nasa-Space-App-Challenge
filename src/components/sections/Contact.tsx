@@ -8,7 +8,6 @@ import Manoj from "@/assets/co-ordinators/manoj.jpeg";
 import Adharsh from "@/assets/co-ordinators/adharsh.jpg";
 import Vishnu from "@/assets/co-ordinators/vishnu.jpg";
 import Annemarie from "@/assets/co-ordinators/annemarie.jpg";
-import MinuMam from "@/assets/co-ordinators/minu.jpg";
 
 const facultyCoordinators = [
   {
@@ -21,7 +20,8 @@ const facultyCoordinators = [
   {
     name: "Ms. Minu Narayanan",
     hint: "woman portrait",
-    avatar: MinuMam.src,
+    avatar:
+      "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E9046.jpg",
     email: "minu.narayanan@christuniversity.in",
   },
   {
