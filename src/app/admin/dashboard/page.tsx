@@ -94,8 +94,10 @@ export default function AdminDashboard() {
   const [isExporting, setIsExporting] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
@@ -364,7 +366,7 @@ export default function AdminDashboard() {
   };
 
 
-  if (!user) {
+  if (!isClient || !user) {
     return <DashboardSkeleton />;
   }
 
