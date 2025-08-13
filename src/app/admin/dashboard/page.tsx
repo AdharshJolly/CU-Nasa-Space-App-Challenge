@@ -552,7 +552,9 @@ export default function AdminDashboard() {
                             <TableBody>
                                 {timelineEvents.map((event) => (
                                     <TableRow key={event.id}>
-                                        <TableCell className="font-medium">{format(new Date(event.date), "PPP")}</TableCell>
+                                        <TableCell className="font-medium">
+                                            {event.date ? format(new Date(event.date), "PPP") : "No date"}
+                                        </TableCell>
                                         <TableCell>{event.title}</TableCell>
                                         <TableCell className="text-muted-foreground">{event.description}</TableCell>
                                         <TableCell className="text-right">

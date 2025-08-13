@@ -18,40 +18,42 @@ import { format } from "date-fns";
 
 
 const timelineEventSchema = z.object({
-    date: z.string({
+    date: z.date({
         required_error: "A date is required.",
     }),
     title: z.string().min(5, "Title must be at least 5 characters."),
     description: z.string().min(10, "Description must be at least 10 characters."),
 });
 
-export type TimelineEvent = z.infer<typeof timelineEventSchema> & { id: string };
+export type TimelineEvent = z.infer<typeof timelineEventSchema> & { id: string; date: string };
 
 interface TimelineEventDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (data: Omit<TimelineEvent, 'id'>) => Promise<void>;
-    event: TimelineEvent | null;
+    event: { id: string, date: string, title: string, description: string } | null;
 }
 
 export function TimelineEventDialog({ isOpen, onClose, onSave, event }: TimelineEventDialogProps) {
   const form = useForm<z.infer<typeof timelineEventSchema>>({
     resolver: zodResolver(timelineEventSchema),
     defaultValues: {
-        date: "",
         title: "",
         description: "",
     }
   });
   
   useEffect(() => {
-    if (event) {
-        form.reset({
-            ...event,
-            date: event.date ? format(new Date(event.date), "PPP") : ""
-        });
-    } else {
-        form.reset({ date: "", title: "", description: "" });
+    if (isOpen) {
+        if (event) {
+            // Firestore timestamp might be a string, ensure it's a Date object
+            const eventDate = event.date ? new Date(event.date) : new Date();
+            // Adjust for timezone differences if the date is off by one day
+            eventDate.setMinutes(eventDate.getMinutes() + eventDate.getTimezoneOffset());
+            form.reset({ ...event, date: eventDate });
+        } else {
+            form.reset({ date: undefined, title: "", description: "" });
+        }
     }
   }, [event, form, isOpen])
 
@@ -60,7 +62,7 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
   const onSubmit = async (values: z.infer<typeof timelineEventSchema>) => {
     await onSave({
         ...values,
-        date: format(new Date(values.date), "yyyy-MM-dd")
+        date: format(values.date, "yyyy-MM-dd")
     });
     form.reset();
   };
@@ -94,7 +96,7 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
                                         disabled={isSubmitting}
                                         >
                                         {field.value ? (
-                                            format(new Date(field.value), "PPP")
+                                            format(field.value, "PPP")
                                         ) : (
                                             <span>Pick a date</span>
                                         )}
@@ -105,8 +107,8 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
                                     <PopoverContent className="w-auto p-0" align="start">
                                     <Calendar
                                         mode="single"
-                                        selected={field.value ? new Date(field.value) : undefined}
-                                        onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                                        selected={field.value}
+                                        onSelect={field.onChange}
                                         initialFocus
                                         disabled={isSubmitting}
                                     />
@@ -155,5 +157,3 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
     </Dialog>
   )
 }
-
-    
