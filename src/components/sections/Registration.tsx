@@ -43,6 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
+import { generateTeamName } from "@/ai/flows/generate-team-name-flow";
 
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
@@ -149,31 +150,59 @@ export function Registration() {
 
   const { isSubmitting } = form.formState;
 
+  const handleGenerateTeamName = async () => {
+    setIsGeneratingName(true);
+    try {
+      const response = await generateTeamName({
+        nonce: Math.random().toString(36).substring(7),
+      });
+      if (response.teamName) {
+        form.setValue("teamName", response.teamName, { shouldValidate: true });
+        toast({
+          title: "Team Name Generated!",
+          description: `We've called your team "${response.teamName}". Feel free to change it!`,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Name Generation Failed",
+        description: "Could not generate a team name. Please try again or enter one manually.",
+      });
+    } finally {
+      setIsGeneratingName(false);
+    }
+  };
+
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const docRef = await addDoc(collection(db, "registrations"), {
+      await addDoc(collection(db, "registrations"), {
         ...values,
         createdAt: Timestamp.now(),
       });
 
-      // Sync to Google Sheet automatically
-      await fetch('/api/sync-to-sheet', {
+      // Sync to Google Sheet automatically (fire-and-forget)
+      fetch('/api/sync-to-sheet', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ teamData: values }),
+      }).catch(error => {
+          // Optional: log error to console or a logging service if the background sync fails
+          console.error("Background sync to sheet failed:", error);
       });
 
       setIsSuccessDialogOpen(true);
       form.reset();
     } catch (e) {
-      console.error("Error adding document or syncing to sheet: ", e);
+      console.error("Error adding document: ", e);
       toast({
         variant: "destructive",
         title: "Registration Failed",
         description:
-          "There was a problem registering your team. Please try again or contact support.",
+          "There was a problem saving your registration. Please try again.",
       });
     }
   }
@@ -247,6 +276,21 @@ export function Registration() {
                               />
                             </FormControl>
                           </div>
+                           <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={handleGenerateTeamName}
+                            disabled={isSubmitting || isGeneratingName}
+                          >
+                            {isGeneratingName ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Generating...
+                              </>
+                            ) : (
+                              "Generate a Name"
+                            )}
+                          </Button>
                         </div>
                         <FormMessage />
                       </FormItem>
