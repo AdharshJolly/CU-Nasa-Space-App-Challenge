@@ -94,12 +94,12 @@ export function TeamsTable({ teams, onSyncToSheet, isSyncing, onExportToExcel, i
                     <CardContent className="p-2 text-sm">
                       <ul className="space-y-3">
                         {team.members.map((member, index) => (
-                          <li key={index}>
-                            <p className="font-semibold">{member.name}</p>
-                            <p className="text-muted-foreground">
+                          <li key={index} className="overflow-hidden">
+                            <p className="font-semibold truncate">{member.name}</p>
+                            <p className="text-muted-foreground truncate">
                               {member.email}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground truncate">
                               {member.registerNumber} | {member.className}
                             </p>
                           </li>
