@@ -62,6 +62,8 @@ export type DuplicateInfo = {
   teams: { teamName: string; memberName: string }[];
 };
 
+const SUPER_ADMIN_EMAIL = "adharsh.jolly@btech.christuniversity.in";
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -554,6 +556,8 @@ export default function AdminDashboard() {
   if (!isClient || !user) {
     return <DashboardSkeleton />;
   }
+  
+  const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -608,6 +612,7 @@ export default function AdminDashboard() {
             onExportToExcel={handleExportToExcel}
             isExporting={isExporting}
             onFindDuplicates={findDuplicates}
+            isSuperAdmin={isSuperAdmin}
           />
         </div>
       </main>

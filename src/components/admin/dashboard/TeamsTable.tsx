@@ -34,9 +34,10 @@ interface TeamsTableProps {
     onExportToExcel: () => void;
     isExporting: boolean;
     onFindDuplicates: () => void;
+    isSuperAdmin: boolean;
 }
 
-export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, isSyncing, onExportToExcel, isExporting, onFindDuplicates }: TeamsTableProps) {
+export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, isSyncing, onExportToExcel, isExporting, onFindDuplicates, isSuperAdmin }: TeamsTableProps) {
     return (
         <Card>
             <CardHeader className="flex flex-col gap-4">
@@ -52,14 +53,16 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
                   </CardDescription>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 flex-wrap justify-end">
-                   <Button
-                    variant="outline"
-                    onClick={onFindDuplicates}
-                    disabled={teams.length === 0}
-                  >
-                    <ScanSearch className="mr-2" />
-                    Find Duplicates
-                  </Button>
+                   {isSuperAdmin && (
+                    <Button
+                      variant="outline"
+                      onClick={onFindDuplicates}
+                      disabled={teams.length === 0}
+                    >
+                      <ScanSearch className="mr-2" />
+                      Find Duplicates
+                    </Button>
+                   )}
                   <Button
                     variant="secondary"
                     onClick={onSyncToSheet}
