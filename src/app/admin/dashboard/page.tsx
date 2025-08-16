@@ -59,7 +59,7 @@ interface Team {
 export type DuplicateInfo = {
   type: "Email" | "Phone" | "Register Number";
   value: string;
-  teams: { teamName: string; memberName: string }[];
+  teams: { teamId: string; teamName: string; memberName: string }[];
 };
 
 const SUPER_ADMIN_EMAIL = "adharsh.jolly@btech.christuniversity.in";
@@ -208,6 +208,13 @@ export default function AdminDashboard() {
       unsubscribeDomains();
     };
   }, [isClient, user, router, toast]);
+
+  useEffect(() => {
+    // Re-calculate duplicates whenever the teams data changes and the dialog is open
+    if (isDuplicatesDialogOpen) {
+      findDuplicates(false); // don't re-open the dialog
+    }
+  }, [teams, isDuplicatesDialogOpen]);
 
   const filteredTeams = useMemo(() => {
     if (!searchQuery) {
@@ -507,56 +514,89 @@ export default function AdminDashboard() {
       setIsExporting(false);
     }
   };
+  const findDuplicates = (openDialog = true) => {
+    const emailMap = new Map<
+      string,
+      { teamId: string; teamName: string; memberName: string }[]
+    >();
+    const phoneMap = new Map<
+      string,
+      { teamId: string; teamName: string; memberName: string }[]
+    >();
+    const regNoMap = new Map<
+      string,
+      { teamId: string; teamName: string; memberName: string }[]
+    >();
 
-  const findDuplicates = () => {
-    const emailMap = new Map<string, { teamName: string; memberName: string }[]>();
-    const phoneMap = new Map<string, { teamName: string; memberName: string }[]>();
-    const regNoMap = new Map<string, { teamName: string; memberName: string }[]>();
+    teams.forEach((team) => {
+      team.members.forEach((member) => {
+        const memberInfo = {
+          teamId: team.id,
+          teamName: team.teamName,
+          memberName: member.name,
+        };
 
-    teams.forEach(team => {
-        team.members.forEach(member => {
-            const memberInfo = { teamName: team.teamName, memberName: member.name };
+        // Check email
+        const emails = emailMap.get(member.email) || [];
+        emailMap.set(member.email, [...emails, memberInfo]);
 
-            // Check email
-            const emails = emailMap.get(member.email) || [];
-            emailMap.set(member.email, [...emails, memberInfo]);
+        // Check phone
+        const phones = phoneMap.get(member.phone) || [];
+        phoneMap.set(member.phone, [...phones, memberInfo]);
 
-            // Check phone
-            const phones = phoneMap.get(member.phone) || [];
-            phoneMap.set(member.phone, [...phones, memberInfo]);
-
-            // Check register number
-            const regNos = regNoMap.get(member.registerNumber) || [];
-            regNoMap.set(member.registerNumber, [...regNos, memberInfo]);
-        });
+        // Check register number
+        const regNos = regNoMap.get(member.registerNumber) || [];
+        regNoMap.set(member.registerNumber, [...regNos, memberInfo]);
+      });
     });
 
     const foundDuplicates: DuplicateInfo[] = [];
 
     emailMap.forEach((teams, value) => {
-        if (teams.length > 1) {
-            foundDuplicates.push({ type: 'Email', value, teams });
-        }
+      if (teams.length > 1) {
+        foundDuplicates.push({ type: "Email", value, teams });
+      }
     });
     phoneMap.forEach((teams, value) => {
-        if (teams.length > 1) {
-            foundDuplicates.push({ type: 'Phone', value, teams });
-        }
+      if (teams.length > 1) {
+        foundDuplicates.push({ type: "Phone", value, teams });
+      }
     });
     regNoMap.forEach((teams, value) => {
-        if (teams.length > 1) {
-            foundDuplicates.push({ type: 'Register Number', value, teams });
-        }
+      if (teams.length > 1) {
+        foundDuplicates.push({ type: "Register Number", value, teams });
+      }
     });
 
     setDuplicates(foundDuplicates);
-    setIsDuplicatesDialogOpen(true);
+    if (openDialog) {
+        setIsDuplicatesDialogOpen(true);
+    }
+  };
+
+  const handleDeleteTeam = async (teamId: string) => {
+    try {
+      await deleteDoc(doc(db, "registrations", teamId));
+      toast({
+        title: "Success",
+        description: "Team registration has been deleted.",
+      });
+      // The onSnapshot listener for teams will automatically update the UI.
+      // The useEffect for duplicates will re-calculate the list.
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not delete the team registration.",
+      });
+      console.error("Error deleting team:", error);
+    }
   };
 
   if (!isClient || !user) {
     return <DashboardSkeleton />;
   }
-  
+
   const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
 
   return (
@@ -611,7 +651,7 @@ export default function AdminDashboard() {
             isSyncing={isSyncing}
             onExportToExcel={handleExportToExcel}
             isExporting={isExporting}
-            onFindDuplicates={findDuplicates}
+            onFindDuplicates={() => findDuplicates(true)}
             isSuperAdmin={isSuperAdmin}
           />
         </div>
@@ -635,10 +675,11 @@ export default function AdminDashboard() {
         onSave={handleSaveDomain}
         domain={editingDomain}
       />
-       <DuplicatesDialog
+      <DuplicatesDialog
         isOpen={isDuplicatesDialogOpen}
         onClose={() => setIsDuplicatesDialogOpen(false)}
         duplicates={duplicates}
+        onDeleteTeam={handleDeleteTeam}
       />
     </div>
   );

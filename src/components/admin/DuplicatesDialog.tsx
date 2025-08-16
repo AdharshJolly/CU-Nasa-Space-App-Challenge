@@ -4,17 +4,21 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import type { DuplicateInfo } from "@/app/admin/dashboard/page";
-import { AlertCircle, ScanSearch } from "lucide-react";
+import { AlertCircle, ScanSearch, Trash2 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { ScrollArea } from "../ui/scroll-area";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface DuplicatesDialogProps {
     isOpen: boolean;
     onClose: () => void;
     duplicates: DuplicateInfo[];
+    onDeleteTeam: (teamId: string) => void;
 }
 
-export function DuplicatesDialog({ isOpen, onClose, duplicates }: DuplicatesDialogProps) {
+export function DuplicatesDialog({ isOpen, onClose, duplicates, onDeleteTeam }: DuplicatesDialogProps) {
+  if (!isOpen) return null;
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-2xl">
@@ -45,10 +49,33 @@ export function DuplicatesDialog({ isOpen, onClose, duplicates }: DuplicatesDial
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                                    <ul className="pl-6 space-y-2 text-muted-foreground">
                                         {duplicate.teams.map((team, teamIndex) => (
-                                            <li key={teamIndex}>
-                                                <span className="font-semibold text-foreground">{team.memberName}</span> in team <span className="font-semibold text-foreground">{team.teamName}</span>
+                                            <li key={teamIndex} className="flex justify-between items-center">
+                                                <span>
+                                                    <span className="font-semibold text-foreground">{team.memberName}</span> in team <span className="font-semibold text-foreground">{team.teamName}</span>
+                                                </span>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="destructive" size="icon" className="h-7 w-7">
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                This action cannot be undone. This will permanently delete the registration for team <b className="text-foreground">{team.teamName}</b>.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => onDeleteTeam(team.teamId)} className="bg-destructive hover:bg-destructive/90">
+                                                                Delete
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </li>
                                         ))}
                                     </ul>
