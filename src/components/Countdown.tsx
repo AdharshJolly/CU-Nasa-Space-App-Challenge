@@ -23,8 +23,6 @@ export function Countdown() {
   const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
-    // Set target date only on the client to avoid hydration mismatch
-    // Target: August 22, 2025, 10:00 AM IST (UTC+05:30)
     setTargetDate(new Date("2025-08-22T10:00:00+05:30"));
   }, []);
 
