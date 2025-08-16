@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -506,10 +505,16 @@ export default function AdminDashboard() {
       <DashboardHeader onLogout={handleLogout} />
 
       <main className="flex-1 p-4 md:p-8">
-        <div className="container mx-auto grid auto-rows-max grid-cols-1 gap-8">
-          <EventSnapshot teamsCount={teams.length} participantsCount={totalParticipants} />
-          
-          <SiteControls problemsReleased={problemsReleased} onReleaseToggle={handleReleaseToggle} />
+        <div className="container mx-auto grid px-0.5 auto-rows-max grid-cols-1 gap-8">
+          <EventSnapshot
+            teamsCount={teams.length}
+            participantsCount={totalParticipants}
+          />
+
+          <SiteControls
+            problemsReleased={problemsReleased}
+            onReleaseToggle={handleReleaseToggle}
+          />
 
           <LiveBanner
             liveBannerText={liveBannerText}
@@ -517,12 +522,12 @@ export default function AdminDashboard() {
             onSave={handleSaveBanner}
             isSaving={isSavingBanner}
           />
-          
-          <PreviousDomains 
-             domains={domains}
-             onAddNew={handleAddNewDomain}
-             onEdit={handleEditDomain}
-             onDelete={handleDeleteDomain}
+
+          <PreviousDomains
+            domains={domains}
+            onAddNew={handleAddNewDomain}
+            onEdit={handleEditDomain}
+            onDelete={handleDeleteDomain}
           />
 
           <TimelineControl
