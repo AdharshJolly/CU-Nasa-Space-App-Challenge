@@ -1,3 +1,4 @@
+
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
@@ -57,7 +58,7 @@ const generateEventSchema = () => {
       }
     },
     "image": [
-      "https://spaceappschrist.com/og-image.png"
+      "https://nasa.cuchallenge.live/og-image.png"
     ],
     "organizer": {
       "@type": "Organization",
@@ -75,11 +76,11 @@ const generateEventSchema = () => {
       "@type": "Offer",
       "price": "500",
       "priceCurrency": "INR",
-      "url": "https://spaceappschrist.com/#register",
+      "url": "https://nasa.cuchallenge.live/#register",
       "availability": "https://schema.org/InStock",
       "validFrom": "2025-06-01T00:00:00+05:30"
     },
-    "url": "https://spaceappschrist.com"
+    "url": "https://nasa.cuchallenge.live/"
   };
   return JSON.stringify(schema);
 };

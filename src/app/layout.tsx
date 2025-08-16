@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -15,11 +16,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: eventName,
     description: eventDescription,
-    url: "https://spaceappschrist.com", // Replace with your actual domain
+    url: "https://nasa.cuchallenge.live/", // Replace with your actual domain
     siteName: eventName,
     images: [
       {
-        url: 'https://spaceappschrist.com/og-image.png', // Replace with a link to a preview image
+        url: 'https://nasa.cuchallenge.live/og-image.png', // Replace with a link to a preview image
         width: 1200,
         height: 630,
         alt: 'NASA Space Apps Challenge Banner',
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: eventName,
     description: eventDescription,
-    // images: ['https://spaceappschrist.com/twitter-image.png'], // Replace with a link to a twitter-specific image
+    // images: ['https://nasa.cuchallenge.live/twitter-image.png'], // Replace with a link to a twitter-specific image
   },
   robots: {
     index: true,
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  metadataBase: new URL('https://spaceappschrist.com'), // Replace with your actual domain
+  metadataBase: new URL('https://nasa.cuchallenge.live/'), // Replace with your actual domain
 };
 
 export const viewport: Viewport = {

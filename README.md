@@ -1,3 +1,4 @@
+
 # NASA International Space Apps Challenge 2025 - CHRIST University, Bangalore
 
 This project is a modern, full-featured hackathon event website for the NASA International Space Apps Challenge 2025, hosted at CHRIST (Deemed to be University), Bangalore Kengeri Campus.
