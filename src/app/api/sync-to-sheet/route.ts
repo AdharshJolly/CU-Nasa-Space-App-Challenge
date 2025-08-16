@@ -4,6 +4,8 @@ import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {NextResponse} from 'next/server';
 
+export const dynamic = 'force-dynamic'; // Force Node.js runtime
+
 interface TeamMember {
     name: string;
     email: string;
