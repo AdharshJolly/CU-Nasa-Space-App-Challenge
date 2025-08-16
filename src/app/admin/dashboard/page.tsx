@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import {
@@ -78,6 +78,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     setIsClient(true);
@@ -196,6 +197,23 @@ export default function AdminDashboard() {
       unsubscribeDomains();
     };
   }, [isClient, user, router, toast]);
+
+  const filteredTeams = useMemo(() => {
+    if (!searchQuery) {
+      return teams;
+    }
+    return teams.filter((team) => {
+      const query = searchQuery.toLowerCase();
+      const teamNameMatch = team.teamName.toLowerCase().includes(query);
+      const memberMatch = team.members.some(
+        (member) =>
+          member.name.toLowerCase().includes(query) ||
+          member.email.toLowerCase().includes(query) ||
+          member.registerNumber.toLowerCase().includes(query)
+      );
+      return teamNameMatch || memberMatch;
+    });
+  }, [teams, searchQuery]);
 
   const totalParticipants = teams.reduce(
     (acc, team) => acc + team.members.length,
@@ -522,7 +540,9 @@ export default function AdminDashboard() {
           />
 
           <TeamsTable
-            teams={teams}
+            teams={filteredTeams}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
             onSyncToSheet={handleSyncToSheet}
             isSyncing={isSyncing}
             onExportToExcel={handleExportToExcel}
