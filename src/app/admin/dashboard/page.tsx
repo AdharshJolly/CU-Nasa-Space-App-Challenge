@@ -38,6 +38,7 @@ import { PreviousDomains } from "@/components/admin/dashboard/PreviousDomains";
 import { TimelineControl } from "@/components/admin/dashboard/TimelineControl";
 import { ProblemsControl } from "@/components/admin/dashboard/ProblemsControl";
 import { TeamsTable } from "@/components/admin/dashboard/TeamsTable";
+import { logActivity } from "@/lib/logger";
 
 interface TeamMember {
   name: string;
@@ -206,6 +207,7 @@ export default function AdminDashboard() {
     if (isDuplicatesDialogOpen) {
       findDuplicates(false); // don't re-open the dialog
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teams, isDuplicatesDialogOpen]);
 
   const filteredTeams = useMemo(() => {
@@ -231,7 +233,9 @@ export default function AdminDashboard() {
   );
 
   const handleLogout = async () => {
+    const userEmail = user?.email || 'unknown_user';
     await signOut(auth);
+    await logActivity('Admin Logout', { user: userEmail });
     router.push("/");
   };
 
@@ -249,6 +253,7 @@ export default function AdminDashboard() {
           checked ? "live" : "hidden"
         }.`,
       });
+      await logActivity('Toggled Problem Statement Release', { released: checked });
     } catch (error) {
       console.error("Error updating settings: ", error);
       toast({
@@ -262,11 +267,13 @@ export default function AdminDashboard() {
   const handleSaveBanner = async () => {
     setIsSavingBanner(true);
     try {
+      const oldText = (await doc(db, "settings", "liveBanner").get()).data()?.text || "";
       await setDoc(doc(db, "settings", "liveBanner"), { text: liveBannerText });
       toast({
         title: "Success!",
         description: "Live banner has been updated.",
       });
+      await logActivity('Live Banner Updated', { from: oldText, to: liveBannerText });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -291,8 +298,10 @@ export default function AdminDashboard() {
 
   const handleDeleteDomain = async (domainId: string) => {
     try {
+      const domainToDelete = domains.find(d => d.id === domainId);
       await deleteDoc(doc(db, "domains", domainId));
       toast({ title: "Success", description: "Domain deleted." });
+      await logActivity('Domain Deleted', { domainId, title: domainToDelete?.title });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -307,9 +316,11 @@ export default function AdminDashboard() {
       if (editingDomain) {
         await updateDoc(doc(db, "domains", editingDomain.id), domainData);
         toast({ title: "Success", description: "Domain updated." });
+        await logActivity('Domain Updated', { domainId: editingDomain.id, ...domainData });
       } else {
-        await addDoc(collection(db, "domains"), domainData);
+        const newDoc = await addDoc(collection(db, "domains"), domainData);
         toast({ title: "Success", description: "Domain added." });
+        await logActivity('Domain Added', { domainId: newDoc.id, ...domainData });
       }
       setIsDomainDialogOpen(false);
     } catch (error) {
@@ -334,8 +345,10 @@ export default function AdminDashboard() {
 
   const handleDeleteProblem = async (problemId: string) => {
     try {
+      const problemToDelete = problems.find(p => p.id === problemId);
       await deleteDoc(doc(db, "problems", problemId));
       toast({ title: "Success", description: "Problem statement deleted." });
+      await logActivity('Problem Deleted', { problemId, title: problemToDelete?.title });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -352,9 +365,12 @@ export default function AdminDashboard() {
       if (editingProblem) {
         await updateDoc(doc(db, "problems", editingProblem.id), problemData);
         toast({ title: "Success", description: "Problem statement updated." });
+        await logActivity('Problem Updated', { problemId: editingProblem.id, ...problemData });
+
       } else {
-        await addDoc(collection(db, "problems"), problemData);
+        const newDoc = await addDoc(collection(db, "problems"), problemData);
         toast({ title: "Success", description: "Problem statement added." });
+        await logActivity('Problem Added', { problemId: newDoc.id, ...problemData });
       }
       setIsProblemDialogOpen(false);
     } catch (error) {
@@ -379,8 +395,10 @@ export default function AdminDashboard() {
 
   const handleDeleteTimelineEvent = async (eventId: string) => {
     try {
+      const eventToDelete = timelineEvents.find(e => e.id === eventId);
       await deleteDoc(doc(db, "timeline", eventId));
       toast({ title: "Success", description: "Timeline event deleted." });
+      await logActivity('Timeline Event Deleted', { eventId, title: eventToDelete?.title });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -400,9 +418,11 @@ export default function AdminDashboard() {
           eventData
         );
         toast({ title: "Success", description: "Timeline event updated." });
+        await logActivity('Timeline Event Updated', { eventId: editingTimelineEvent.id, ...eventData });
       } else {
-        await addDoc(collection(db, "timeline"), eventData);
+        const newDoc = await addDoc(collection(db, "timeline"), eventData);
         toast({ title: "Success", description: "Timeline event added." });
+        await logActivity('Timeline Event Added', { eventId: newDoc.id, ...eventData });
       }
       setIsTimelineDialogOpen(false);
     } catch (error) {
@@ -442,6 +462,7 @@ export default function AdminDashboard() {
         title: "Sync Successful",
         description: `Successfully synced ${teams.length} teams to the Google Sheet.`,
       });
+      await logActivity('Manual Bulk Sync to Google Sheet', { teamCount: teams.length });
     } catch (error) {
       console.error("Failed to sync to sheet:", error);
       toast({
@@ -495,6 +516,7 @@ export default function AdminDashboard() {
         title: "Export Successful",
         description: "The team data has been downloaded as an Excel file.",
       });
+      await logActivity('Exported Registrations to Excel', { teamCount: teams.length });
     } catch (error) {
       console.error("Failed to export to Excel:", error);
       toast({
@@ -563,16 +585,19 @@ export default function AdminDashboard() {
     setDuplicates(foundDuplicates);
     if (openDialog) {
         setIsDuplicatesDialogOpen(true);
+        logActivity('Duplicate Scan Performed', { found: foundDuplicates.length });
     }
   };
 
   const handleDeleteTeam = async (teamId: string) => {
     try {
+      const teamToDelete = teams.find(t => t.id === teamId);
       await deleteDoc(doc(db, "registrations", teamId));
       toast({
         title: "Success",
         description: "Team registration has been deleted.",
       });
+      await logActivity('Team Deleted', { teamId, teamName: teamToDelete?.teamName });
       // The onSnapshot listener for teams will automatically update the UI.
       // The useEffect for duplicates will re-calculate the list.
     } catch (error) {
@@ -597,7 +622,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <DashboardHeader onLogout={handleLogout} />
+      <DashboardHeader onLogout={handleLogout} isSuperAdmin={isSuperAdmin} />
 
       <main className="flex-1 p-4 md:p-8">
         <div className="container mx-auto grid px-0.5 auto-rows-max grid-cols-1 gap-8">

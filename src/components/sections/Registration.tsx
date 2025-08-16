@@ -44,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { generateTeamName } from "@/ai/flows/generate-team-name-flow";
+import { logActivity } from "@/lib/logger";
 
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
@@ -177,10 +178,13 @@ export function Registration() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await addDoc(collection(db, "registrations"), {
+      const docRef = await addDoc(collection(db, "registrations"), {
         ...values,
         createdAt: Timestamp.now(),
       });
+
+      // Log the registration activity
+      await logActivity('Team Registered', { teamName: values.teamName, registrationId: docRef.id });
 
       // Sync to Google Sheet automatically (fire-and-forget)
       fetch('/api/sync-to-sheet', {
