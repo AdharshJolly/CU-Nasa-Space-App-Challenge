@@ -22,41 +22,75 @@ interface Team {
 // Define maximum number of members a team can have, for header generation
 const MAX_MEMBERS = 5;
 
+// Function to get header row
+function getHeaderRow() {
+    const headerRow = ["Team Name"];
+    for(let i = 1; i <= MAX_MEMBERS; i++) {
+        headerRow.push(`Member ${i} Name`, `Member ${i} Email`, `Member ${i} Phone`, `Member ${i} Register Number`, `Member ${i} Class`, `Member ${i} Department`, `Member ${i} School`);
+    }
+    return headerRow;
+}
+
+
 // Function to ensure header exists
 async function ensureHeader(sheets: any, spreadsheetId: string) {
     const range = 'A1:Z1';
-    const response = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range,
-    });
-    if (!response.data.values || response.data.values.length === 0) {
-        // Header is missing, let's write it
-        const headerRow = ["Team Name"];
-        for(let i = 1; i <= MAX_MEMBERS; i++) {
-            headerRow.push(`Member ${i} Name`, `Member ${i} Email`, `Member ${i} Phone`, `Member ${i} Register Number`, `Member ${i} Class`, `Member ${i} Department`, `Member ${i} School`);
-        }
-        
-        await sheets.spreadsheets.values.update({
+    try {
+        const response = await sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: 'A1',
-            valueInputOption: 'USER_ENTERED',
-            requestBody: {
-                values: [headerRow],
-            },
+            range,
         });
+        if (!response.data.values || response.data.values.length === 0) {
+            await sheets.spreadsheets.values.update({
+                spreadsheetId,
+                range: 'A1',
+                valueInputOption: 'USER_ENTERED',
+                requestBody: {
+                    values: [getHeaderRow()],
+                },
+            });
+        }
+    } catch(error) {
+        // If sheet is empty, it might throw an error. In that case, we write the header.
+        if ((error as any).code === 400) {
+             await sheets.spreadsheets.values.update({
+                spreadsheetId,
+                range: 'A1',
+                valueInputOption: 'USER_ENTERED',
+                requestBody: {
+                    values: [getHeaderRow()],
+                },
+            });
+        } else {
+            throw error;
+        }
     }
+}
+
+
+function transformTeamToRow(team: Team) {
+    const row: (string | null)[] = [team.teamName];
+    for (let i = 0; i < MAX_MEMBERS; i++) {
+        const member = team.members[i];
+        if (member) {
+            row.push(member.name, member.email, member.phone, member.registerNumber, member.className, member.department, member.school);
+        } else {
+            row.push(null, null, null, null, null, null, null);
+        }
+    }
+    return row;
 }
 
 export async function POST(req: Request) {
     try {
-        const { teamData } = (await req.json()) as { teamData: Team };
+        const { teamData, teamsData } = (await req.json()) as { teamData?: Team, teamsData?: Team[] };
         const { GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY, GOOGLE_SHEET_ID } = process.env;
         
         if (!GOOGLE_SHEETS_CLIENT_EMAIL || !GOOGLE_SHEETS_PRIVATE_KEY || !GOOGLE_SHEET_ID) {
             throw new Error("Google Sheets API credentials or Sheet ID are not set in environment variables.");
         }
         
-        if (!teamData) {
+        if (!teamData && !teamsData) {
             throw new Error("No team data provided in the request body.");
         }
 
@@ -69,29 +103,45 @@ export async function POST(req: Request) {
         });
 
         const sheets = google.sheets({ version: 'v4', auth });
-
+        
         await ensureHeader(sheets, GOOGLE_SHEET_ID);
 
-        const row: (string | null)[] = [teamData.teamName];
-        for (let i = 0; i < MAX_MEMBERS; i++) {
-            const member = teamData.members[i];
-            if (member) {
-                row.push(member.name, member.email, member.phone, member.registerNumber, member.className, member.department, member.school);
-            } else {
-                row.push(null, null, null, null, null, null, null);
-            }
+        // Handle automatic sync for a single new team
+        if (teamData) {
+             const row = transformTeamToRow(teamData);
+             await sheets.spreadsheets.values.append({
+                spreadsheetId: GOOGLE_SHEET_ID,
+                range: 'A1', 
+                valueInputOption: 'USER_ENTERED',
+                requestBody: {
+                    values: [row],
+                },
+            });
+            return NextResponse.json({ message: 'Sync successful!' });
         }
         
-        await sheets.spreadsheets.values.append({
-            spreadsheetId: GOOGLE_SHEET_ID,
-            range: 'A1', // Appending to the sheet, it will find the next empty row
-            valueInputOption: 'USER_ENTERED',
-            requestBody: {
-                values: [row],
-            },
-        });
+        // Handle manual bulk sync for all teams
+        if (teamsData) {
+            // Clear existing data (but not the header)
+            await sheets.spreadsheets.values.clear({
+                spreadsheetId: GOOGLE_SHEET_ID,
+                range: 'A2:Z', // Clear from the second row downwards
+            });
 
-        return NextResponse.json({ message: 'Sync successful!' });
+            if (teamsData.length > 0) {
+                const rows = teamsData.map(transformTeamToRow);
+                await sheets.spreadsheets.values.update({
+                    spreadsheetId: GOOGLE_SHEET_ID,
+                    range: 'A2',
+                    valueInputOption: 'USER_ENTERED',
+                    requestBody: {
+                        values: rows,
+                    },
+                });
+            }
+            return NextResponse.json({ message: 'Bulk sync successful!' });
+        }
+
 
     } catch (error) {
         console.error('Error syncing to Google Sheet:', error);
