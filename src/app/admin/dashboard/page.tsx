@@ -407,7 +407,7 @@ export default function AdminDashboard() {
         toast({ title: "Success", description: "Problem statement added." });
       }
       setIsProblemDialogOpen(false);
-    } catch (error) {
+    } catch (error) => {
       toast({
         variant: "destructive",
         title: "Save Failed",
@@ -564,7 +564,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
+        <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
             <Rocket className="h-7 w-7 text-primary" />
             <span className="font-headline text-xl md:text-2xl font-bold text-foreground">
@@ -572,13 +572,13 @@ export default function AdminDashboard() {
             </span>
           </div>
           <Button variant="ghost" onClick={handleLogout}>
-            <LogOut className="mr-2" /> Logout
+            <LogOut className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Logout</span>
           </Button>
         </div>
       </header>
 
       <main className="flex-1 p-4 md:p-8">
-        <div className="container mx-auto grid gap-8">
+        <div className="container mx-auto grid auto-rows-max grid-cols-1 gap-8">
           <Card>
             <CardHeader>
               <CardTitle>Event Snapshot</CardTitle>
