@@ -133,7 +133,27 @@ export default function AdminLogs() {
                     <CardDescription>A chronological record of all actions performed on the site.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
+                    {/* Mobile View */}
+                    <div className="md:hidden space-y-4">
+                        {logs.length > 0 ? (
+                            logs.map(log => (
+                                <Card key={log.id} className="p-4">
+                                    <div className="space-y-2">
+                                        <p className="font-semibold text-foreground">{log.action}</p>
+                                        <p className="text-sm text-muted-foreground">{formatDate(log.timestamp)}</p>
+                                        <p className="text-sm font-mono text-primary/80 truncate">{log.userEmail}</p>
+                                        <p className="text-xs text-muted-foreground bg-secondary/30 p-2 rounded-md font-mono break-all">{JSON.stringify(log.details)}</p>
+                                    </div>
+                                </Card>
+                            ))
+                        ) : (
+                             <div className="text-center py-8 text-muted-foreground">
+                                No log entries found.
+                            </div>
+                        )}
+                    </div>
+                    {/* Desktop View */}
+                    <Table className="hidden md:table">
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[25%]">Timestamp</TableHead>
