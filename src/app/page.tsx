@@ -1,4 +1,3 @@
-
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
@@ -16,71 +15,109 @@ import { PreviousProblemStatements } from "@/components/sections/PreviousProblem
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-const facultyCoordinators = [
-  { name: "Dr. Joseph Rodrigues", email: "joseph.rodrigues@christuniversity.in" },
+type Coordinator = {
+  name: string;
+  email: string;
+  phone?: string;
+};
+
+const facultyCoordinators: Coordinator[] = [
+  {
+    name: "Dr. Joseph Rodrigues",
+    email: "joseph.rodrigues@christuniversity.in",
+  },
   { name: "Ms. Minu Narayanan", email: "minu.narayanan@christuniversity.in" },
   { name: "Dr. Manikandan P", email: "manikandan.p@christuniversity.in" },
   { name: "Dr. Hari Murthy", email: "hari.murthy@christuniversity.in" },
-  { name: "Dr. Albert Joseph Hefferan", email: "albertjoseph.hefferan@christuniversity.in" },
+  {
+    name: "Dr. Albert Joseph Hefferan",
+    email: "albertjoseph.hefferan@christuniversity.in",
+  },
   { name: "Dr. Benson K Money", email: "benson.money@christuniversity.in" },
   { name: "Col. Sudhir M R", email: "colonel.sudhir@christuniversity.in" },
 ];
 
-const studentCoordinators = [
-  { name: "Manoj Reddy", email: "m.manoj@btech.christuniversity.in", phone: "+918618627856" },
-  { name: "Vishnu Nambiar", email: "vishnu.nambiar@btech.christuniversity.in", phone: "+918848799780" },
-  { name: "Adharsh Jolly", email: "adharsh.jolly@btech.christuniversity.in", phone: "+919431703182" },
-  { name: "Annmarie Vinish", email: "annmarie.vinish@btech.christuniversity.in", phone: "+918921323033" },
+const studentCoordinators: Coordinator[] = [
+  {
+    name: "Manoj Reddy",
+    email: "m.manoj@btech.christuniversity.in",
+    phone: "+918618627856",
+  },
+  {
+    name: "Vishnu Nambiar",
+    email: "vishnu.nambiar@btech.christuniversity.in",
+    phone: "+918848799780",
+  },
+  {
+    name: "Adharsh Jolly",
+    email: "adharsh.jolly@btech.christuniversity.in",
+    phone: "+919431703182",
+  },
+  {
+    name: "Annmarie Vinish",
+    email: "annmarie.vinish@btech.christuniversity.in",
+    phone: "+918921323033",
+  },
 ];
 
-const allCoordinators = [...facultyCoordinators, ...studentCoordinators];
+const allCoordinators: Coordinator[] = [
+  ...facultyCoordinators,
+  ...studentCoordinators,
+];
 
 const generateEventSchema = () => {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Hackathon",
-    "name": "NASA International Space Apps Challenge 2025 at CHRIST University",
-    "description": "The NASA International Space Apps Challenge is a 24-hour global hackathon where teams of technologists, scientists, designers, artists, educators, entrepreneurs, developers, and students collaborate and engage with publicly available data to design and build innovative solutions for global challenges.",
-    "startDate": "2025-08-22T10:00:00+05:30",
-    "endDate": "2025-08-23T18:00:00+05:30",
-    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-    "eventStatus": "https://schema.org/EventScheduled",
-    "location": {
+    name: "NASA International Space Apps Challenge 2025 at CHRIST University",
+    description:
+      "The NASA International Space Apps Challenge is a 24-hour global hackathon where teams of technologists, scientists, designers, artists, educators, entrepreneurs, developers, and students collaborate and engage with publicly available data to design and build innovative solutions for global challenges.",
+    startDate: "2025-08-22T10:00:00+05:30",
+    endDate: "2025-08-23T18:00:00+05:30",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    location: {
       "@type": "Place",
-      "name": "CHRIST (Deemed to be University), Bangalore Kengeri Campus",
-      "address": {
+      name: "CHRIST (Deemed to be University), Bangalore Kengeri Campus",
+      address: {
         "@type": "PostalAddress",
-        "streetAddress": "Mysore Rd, Kanmanike, Kumbalgodu",
-        "addressLocality": "Bengaluru",
-        "postalCode": "560074",
-        "addressRegion": "Karnataka",
-        "addressCountry": "IN"
-      }
+        streetAddress: "Mysore Rd, Kanmanike, Kumbalgodu",
+        addressLocality: "Bengaluru",
+        postalCode: "560074",
+        addressRegion: "Karnataka",
+        addressCountry: "IN",
+      },
     },
-    "image": [
-      "https://nasa.cuchallenge.live/og-image.png"
-    ],
-    "organizer": {
+    image: ["https://nasa.cuchallenge.live/og-image.png"],
+    organizer: {
       "@type": "Organization",
-      "name": "CHRIST (Deemed to be University)",
-      "url": "https://christuniversity.in/"
+      name: "CHRIST (Deemed to be University)",
+      url: "https://christuniversity.in/",
     },
-    "performer": allCoordinators.map(coord => ({
-      "@type": "Person",
-      "name": coord.name,
-      "jobTitle": coord.phone ? "Student Coordinator" : "Faculty Coordinator",
-      "email": coord.email,
-      "telephone": coord.phone || undefined,
-    })),
-    "offers": {
+    performer: [
+      ...facultyCoordinators.map((coord) => ({
+        "@type": "Person",
+        name: coord.name,
+        jobTitle: "Faculty Coordinator",
+        email: coord.email,
+      })),
+      ...studentCoordinators.map((coord) => ({
+        "@type": "Person",
+        name: coord.name,
+        jobTitle: "Student Coordinator",
+        email: coord.email,
+        telephone: coord.phone,
+      })),
+    ],
+    offers: {
       "@type": "Offer",
-      "price": "500",
-      "priceCurrency": "INR",
-      "url": "https://nasa.cuchallenge.live/#register",
-      "availability": "https://schema.org/InStock",
-      "validFrom": "2025-06-01T00:00:00+05:30"
+      price: "500",
+      priceCurrency: "INR",
+      url: "https://nasa.cuchallenge.live/#register",
+      availability: "https://schema.org/InStock",
+      validFrom: "2025-06-01T00:00:00+05:30",
     },
-    "url": "https://nasa.cuchallenge.live/"
+    url: "https://nasa.cuchallenge.live/",
   };
   return JSON.stringify(schema);
 };
@@ -99,10 +136,57 @@ export default async function Home() {
     );
   }
 
-  const jsonLd = generateEventSchema();
+  const eventSchema = {
+    "@context": "https://schema.org",
+    "@type": "Hackathon",
+    name: "NASA International Space Apps Challenge 2025 at CHRIST University",
+    description:
+      "The NASA International Space Apps Challenge is a 24-hour global hackathon where teams of technologists, scientists, designers, artists, educators, entrepreneurs, developers, and students collaborate and engage with publicly available data to design and build innovative solutions for global challenges.",
+    startDate: "2025-08-22T10:00:00+05:30",
+    endDate: "2025-08-23T18:00:00+05:30",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    location: {
+      "@type": "Place",
+      name: "CHRIST (Deemed to be University), Bangalore Kengeri Campus",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Mysore Rd, Kanmanike, Kumbalgodu",
+        addressLocality: "Bengaluru",
+        postalCode: "560074",
+        addressRegion: "Karnataka",
+        addressCountry: "IN",
+      },
+    },
+    image: ["https://nasa.cuchallenge.live/og-image.png"],
+    organizer: {
+      "@type": "Organization",
+      name: "CHRIST (Deemed to be University)",
+      url: "https://christuniversity.in/",
+    },
+    performer: allCoordinators.map((coord) => ({
+      "@type": "Person",
+      name: coord.name,
+      jobTitle: coord.phone ? "Student Coordinator" : "Faculty Coordinator",
+      email: coord.email,
+      telephone: coord.phone || undefined,
+    })),
+    offers: {
+      "@type": "Offer",
+      price: "500",
+      priceCurrency: "INR",
+      url: "https://nasa.cuchallenge.live/#register",
+      availability: "https://schema.org/InStock",
+      validFrom: "2025-06-01T00:00:00+05:30",
+    },
+    url: "https://nasa.cuchallenge.live/",
+  };
+
+  const jsonLd = JSON.stringify(eventSchema);
 
   return (
     <>
+      <link rel="canonical" href="https://nasa.cuchallenge.live/" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd }}
