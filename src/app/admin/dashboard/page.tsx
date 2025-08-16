@@ -1,81 +1,136 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { collection, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, query, doc, orderBy, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  doc,
+  orderBy,
+  Timestamp,
+} from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone, Users, ShieldAlert, BadgeInfo, Lightbulb, RefreshCw } from "lucide-react";
-import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
-import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
+import {
+  LogOut,
+  Rocket,
+  Settings,
+  Pencil,
+  Trash2,
+  PlusCircle,
+  CalendarDays,
+  Download,
+  Loader2,
+  Megaphone,
+  Users,
+  ShieldAlert,
+  BadgeInfo,
+  Lightbulb,
+  RefreshCw,
+} from "lucide-react";
+import {
+  ProblemStatementDialog,
+  type ProblemStatement,
+} from "@/components/admin/ProblemStatementDialog";
+import {
+  TimelineEventDialog,
+  type TimelineEvent,
+} from "@/components/admin/TimelineEventDialog";
 import { DomainDialog, type Domain } from "@/components/admin/DomainDialog";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
 interface TeamMember {
-    name: string;
-    email: string;
-    phone: string;
-    registerNumber: string;
-    className: string;
-    department: string;
-    school: string;
+  name: string;
+  email: string;
+  phone: string;
+  registerNumber: string;
+  className: string;
+  department: string;
+  school: string;
 }
 
 interface Team {
-    id: string;
-    teamName: string;
-    members: TeamMember[];
-    createdAt?: Timestamp;
+  id: string;
+  teamName: string;
+  members: TeamMember[];
+  createdAt?: Timestamp;
 }
 
 const DashboardSkeleton = () => (
-    <div className="flex min-h-dvh flex-col bg-background">
-        <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-             <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-                <div className="flex items-center gap-2">
-                    <Rocket className="h-7 w-7 text-primary" />
-                    <Skeleton className="h-7 w-48" />
-                </div>
-                <Skeleton className="h-10 w-28" />
-            </div>
-        </header>
-        <main className="flex-1 p-4 md:p-8">
-            <div className="container mx-auto grid gap-8 animate-pulse">
-                <Card>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-1/3 mb-2" />
-                        <Skeleton className="h-4 w-2/3" />
-                    </CardHeader>
-                    <CardContent className="grid gap-4 md:grid-cols-2">
-                         <Skeleton className="h-24 w-full" />
-                         <Skeleton className="h-24 w-full" />
-                    </CardContent>
-                </Card>
-                {[...Array(3)].map((_, i) => (
-                    <Card key={i}>
-                        <CardHeader>
-                             <Skeleton className="h-6 w-1/4 mb-2" />
-                             <Skeleton className="h-4 w-1/2" />
-                        </CardHeader>
-                        <CardContent>
-                            <Skeleton className="h-20 w-full" />
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        </main>
-    </div>
-)
+  <div className="flex min-h-dvh flex-col bg-background">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
+      <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-2">
+          <Rocket className="h-7 w-7 text-primary" />
+          <Skeleton className="h-7 w-48" />
+        </div>
+        <Skeleton className="h-10 w-28" />
+      </div>
+    </header>
+    <main className="flex-1 p-4 md:p-8">
+      <div className="container mx-auto grid gap-8 animate-pulse">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/3 mb-2" />
+            <Skeleton className="h-4 w-2/3" />
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </CardContent>
+        </Card>
+        {[...Array(3)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-6 w-1/4 mb-2" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-20 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </main>
+  </div>
+);
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -89,8 +144,11 @@ export default function AdminDashboard() {
   const [isProblemDialogOpen, setIsProblemDialogOpen] = useState(false);
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const [isDomainDialogOpen, setIsDomainDialogOpen] = useState(false);
-  const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(null);
-  const [editingTimelineEvent, setEditingTimelineEvent] = useState<TimelineEvent | null>(null);
+  const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(
+    null
+  );
+  const [editingTimelineEvent, setEditingTimelineEvent] =
+    useState<TimelineEvent | null>(null);
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -114,128 +172,162 @@ export default function AdminDashboard() {
     });
 
     if (!user) return () => unsubscribeAuth();
-    
+
     // Fetch all registrations without ordering by a potentially non-existent field
     const teamsQuery = query(collection(db, "registrations"));
     const unsubscribeTeams = onSnapshot(teamsQuery, (snapshot) => {
-        const teamsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Team[];
-        
-        // Sort on the client-side to ensure all data is displayed
-        teamsData.sort((a, b) => {
-          const aTime = a.createdAt?.toMillis() || 0;
-          const bTime = b.createdAt?.toMillis() || 0;
-          return aTime - bTime;
-        });
+      const teamsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Team[];
 
-        setTeams(teamsData);
+      // Sort on the client-side to ensure all data is displayed
+      teamsData.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis() || 0;
+        const bTime = b.createdAt?.toMillis() || 0;
+        return aTime - bTime;
+      });
+
+      setTeams(teamsData);
     });
 
-    const unsubscribeProblems = onSnapshot(query(collection(db, "problems")), (snapshot) => {
-        const problemsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ProblemStatement[];
+    const unsubscribeProblems = onSnapshot(
+      query(collection(db, "problems")),
+      (snapshot) => {
+        const problemsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as ProblemStatement[];
         setProblems(problemsData);
-    });
-    
-    const unsubscribeTimeline = onSnapshot(query(collection(db, "timeline"), orderBy("date")), (snapshot) => {
-      const eventsData = snapshot.docs.map(doc => {
+      }
+    );
+
+    const unsubscribeTimeline = onSnapshot(
+      query(collection(db, "timeline"), orderBy("date")),
+      (snapshot) => {
+        const eventsData = snapshot.docs.map((doc) => {
           const data = doc.data();
           const eventDate = data.date ? new Date(data.date) : null;
           if (eventDate) {
-              eventDate.setMinutes(eventDate.getMinutes() + eventDate.getTimezoneOffset());
+            eventDate.setMinutes(
+              eventDate.getMinutes() + eventDate.getTimezoneOffset()
+            );
           }
           return {
-              id: doc.id,
-              date: eventDate ? eventDate.toISOString().split('T')[0] : "", // Store as yyyy-mm-dd string
-              title: data.title,
-              description: data.description,
+            id: doc.id,
+            date: eventDate ? eventDate.toISOString().split("T")[0] : "", // Store as yyyy-mm-dd string
+            title: data.title,
+            description: data.description,
           };
-      }) as TimelineEvent[];
-      setTimelineEvents(eventsData);
-    });
-
-    const unsubscribeDomains = onSnapshot(query(collection(db, "domains")), 
-        (snapshot) => {
-            const domainsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Domain[];
-            setDomains(domainsData);
-        },
-        (error) => {
-            console.error("Firestore 'domains' listener error:", error);
-            if ((error as any).code === 'permission-denied') {
-                toast({
-                    variant: "destructive",
-                    title: "Firestore Permission Error",
-                    description: "Could not read 'domains'. Please update your Firestore security rules to allow reads for authenticated users on the 'domains' collection.",
-                    duration: 10000,
-                });
-            }
-        }
+        }) as TimelineEvent[];
+        setTimelineEvents(eventsData);
+      }
     );
 
-    const unsubscribeSettings = onSnapshot(doc(db, "settings", "features"), (doc) => {
-        if (doc.exists()) {
-            setProblemsReleased(doc.data().problemsReleased);
+    const unsubscribeDomains = onSnapshot(
+      query(collection(db, "domains")),
+      (snapshot) => {
+        const domainsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Domain[];
+        setDomains(domainsData);
+      },
+      (error) => {
+        console.error("Firestore 'domains' listener error:", error);
+        if ((error as any).code === "permission-denied") {
+          toast({
+            variant: "destructive",
+            title: "Firestore Permission Error",
+            description:
+              "Could not read 'domains'. Please update your Firestore security rules to allow reads for authenticated users on the 'domains' collection.",
+            duration: 10000,
+          });
         }
-    });
+      }
+    );
 
-    const unsubscribeBanner = onSnapshot(doc(db, "settings", "liveBanner"), (doc) => {
+    const unsubscribeSettings = onSnapshot(
+      doc(db, "settings", "features"),
+      (doc) => {
         if (doc.exists()) {
-            setLiveBannerText(doc.data().text);
+          setProblemsReleased(doc.data().problemsReleased);
         }
-    });
+      }
+    );
+
+    const unsubscribeBanner = onSnapshot(
+      doc(db, "settings", "liveBanner"),
+      (doc) => {
+        if (doc.exists()) {
+          setLiveBannerText(doc.data().text);
+        }
+      }
+    );
 
     return () => {
-        unsubscribeAuth();
-        unsubscribeTeams();
-        unsubscribeProblems();
-        unsubscribeSettings();
-        unsubscribeTimeline();
-        unsubscribeBanner();
-        unsubscribeDomains();
+      unsubscribeAuth();
+      unsubscribeTeams();
+      unsubscribeProblems();
+      unsubscribeSettings();
+      unsubscribeTimeline();
+      unsubscribeBanner();
+      unsubscribeDomains();
     };
   }, [isClient, user, router, toast]);
-  
-  const totalParticipants = teams.reduce((acc, team) => acc + team.members.length, 0);
+
+  const totalParticipants = teams.reduce(
+    (acc, team) => acc + team.members.length,
+    0
+  );
 
   const handleLogout = async () => {
     await signOut(auth);
-    router.push("/admin");
+    router.push("/");
   };
 
   const handleReleaseToggle = async (checked: boolean) => {
-      try {
-          await setDoc(doc(db, "settings", "features"), { problemsReleased: checked }, { merge: true });
-          setProblemsReleased(checked);
-          toast({
-              title: "Success!",
-              description: `Problem statements are now ${checked ? 'live' : 'hidden'}.`
-          })
-      } catch (error) {
-          console.error("Error updating settings: ", error);
-          toast({
-              variant: "destructive",
-              title: "Update Failed",
-              description: "Could not update the setting. Please try again."
-          })
-      }
-  }
+    try {
+      await setDoc(
+        doc(db, "settings", "features"),
+        { problemsReleased: checked },
+        { merge: true }
+      );
+      setProblemsReleased(checked);
+      toast({
+        title: "Success!",
+        description: `Problem statements are now ${
+          checked ? "live" : "hidden"
+        }.`,
+      });
+    } catch (error) {
+      console.error("Error updating settings: ", error);
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not update the setting. Please try again.",
+      });
+    }
+  };
 
   const handleSaveBanner = async () => {
-      setIsSavingBanner(true);
-      try {
-          await setDoc(doc(db, "settings", "liveBanner"), { text: liveBannerText });
-          toast({
-              title: "Success!",
-              description: "Live banner has been updated."
-          })
-      } catch(error) {
-           toast({
-              variant: "destructive",
-              title: "Update Failed",
-              description: "Could not update the banner. Please try again."
-          })
-      } finally {
-        setIsSavingBanner(false);
-      }
-  }
+    setIsSavingBanner(true);
+    try {
+      await setDoc(doc(db, "settings", "liveBanner"), { text: liveBannerText });
+      toast({
+        title: "Success!",
+        description: "Live banner has been updated.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not update the banner. Please try again.",
+      });
+    } finally {
+      setIsSavingBanner(false);
+    }
+  };
 
   // Domain Handlers
   const handleAddNewDomain = () => {
@@ -250,27 +342,35 @@ export default function AdminDashboard() {
 
   const handleDeleteDomain = async (domainId: string) => {
     try {
-        await deleteDoc(doc(db, "domains", domainId));
-        toast({ title: "Success", description: "Domain deleted." });
+      await deleteDoc(doc(db, "domains", domainId));
+      toast({ title: "Success", description: "Domain deleted." });
     } catch (error) {
-        toast({ variant: "destructive", title: "Error", description: "Could not delete domain." });
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not delete domain.",
+      });
     }
-  }
+  };
 
-  const handleSaveDomain = async (domainData: Omit<Domain, 'id'>) => {
+  const handleSaveDomain = async (domainData: Omit<Domain, "id">) => {
     try {
-        if (editingDomain) {
-            await updateDoc(doc(db, "domains", editingDomain.id), domainData);
-            toast({ title: "Success", description: "Domain updated." });
-        } else {
-            await addDoc(collection(db, "domains"), domainData);
-            toast({ title: "Success", description: "Domain added." });
-        }
-        setIsDomainDialogOpen(false);
-    } catch(error) {
-        toast({ variant: "destructive", title: "Save Failed", description: "Could not save domain." });
+      if (editingDomain) {
+        await updateDoc(doc(db, "domains", editingDomain.id), domainData);
+        toast({ title: "Success", description: "Domain updated." });
+      } else {
+        await addDoc(collection(db, "domains"), domainData);
+        toast({ title: "Success", description: "Domain added." });
+      }
+      setIsDomainDialogOpen(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: "Could not save domain.",
+      });
     }
-  }
+  };
 
   // Problem Statement Handlers
   const handleAddNewProblem = () => {
@@ -285,28 +385,38 @@ export default function AdminDashboard() {
 
   const handleDeleteProblem = async (problemId: string) => {
     try {
-        await deleteDoc(doc(db, "problems", problemId));
-        toast({ title: "Success", description: "Problem statement deleted." });
+      await deleteDoc(doc(db, "problems", problemId));
+      toast({ title: "Success", description: "Problem statement deleted." });
     } catch (error) {
-        toast({ variant: "destructive", title: "Error", description: "Could not delete problem statement." });
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not delete problem statement.",
+      });
     }
-  }
+  };
 
-  const handleSaveProblem = async (problemData: Omit<ProblemStatement, 'id'>) => {
+  const handleSaveProblem = async (
+    problemData: Omit<ProblemStatement, "id">
+  ) => {
     try {
-        if (editingProblem) {
-            await updateDoc(doc(db, "problems", editingProblem.id), problemData);
-            toast({ title: "Success", description: "Problem statement updated." });
-        } else {
-            await addDoc(collection(db, "problems"), problemData);
-            toast({ title: "Success", description: "Problem statement added." });
-        }
-        setIsProblemDialogOpen(false);
-    } catch(error) {
-        toast({ variant: "destructive", title: "Save Failed", description: "Could not save problem." });
+      if (editingProblem) {
+        await updateDoc(doc(db, "problems", editingProblem.id), problemData);
+        toast({ title: "Success", description: "Problem statement updated." });
+      } else {
+        await addDoc(collection(db, "problems"), problemData);
+        toast({ title: "Success", description: "Problem statement added." });
+      }
+      setIsProblemDialogOpen(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: "Could not save problem.",
+      });
     }
-  }
-  
+  };
+
   // Timeline Event Handlers
   const handleAddNewTimelineEvent = () => {
     setEditingTimelineEvent(null);
@@ -317,121 +427,134 @@ export default function AdminDashboard() {
     setEditingTimelineEvent(event);
     setIsTimelineDialogOpen(true);
   };
-  
+
   const handleDeleteTimelineEvent = async (eventId: string) => {
     try {
-        await deleteDoc(doc(db, "timeline", eventId));
-        toast({ title: "Success", description: "Timeline event deleted." });
+      await deleteDoc(doc(db, "timeline", eventId));
+      toast({ title: "Success", description: "Timeline event deleted." });
     } catch (error) {
-        toast({ variant: "destructive", title: "Error", description: "Could not delete timeline event." });
-    }
-  }
-
-  const handleSaveTimelineEvent = async (eventData: Omit<TimelineEvent, 'id'>) => {
-    try {
-        if (editingTimelineEvent) {
-            await updateDoc(doc(db, "timeline", editingTimelineEvent.id), eventData);
-            toast({ title: "Success", description: "Timeline event updated." });
-        } else {
-            await addDoc(collection(db, "timeline"), eventData);
-            toast({ title: "Success", description: "Timeline event added." });
-        }
-        setIsTimelineDialogOpen(false);
-    } catch(error) {
-        toast({ variant: "destructive", title: "Save Failed", description: "Could not save timeline event." });
-    }
-  }
-
-  const handleSyncToSheet = async () => {
-    if (teams.length === 0) {
-        toast({
-            variant: "destructive",
-            title: "No Data",
-            description: "There are no registered teams to sync.",
-        });
-        return;
-    }
-    setIsSyncing(true);
-    try {
-        const response = await fetch('/api/sync-to-sheet', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ teamsData: teams }),
-        });
-
-        if (!response.ok) {
-            const { error } = await response.json();
-            throw new Error(error || "Failed to sync to Google Sheet.");
-        }
-
-        toast({
-            title: "Sync Successful",
-            description: `Successfully synced ${teams.length} teams to the Google Sheet.`,
-        });
-    } catch (error) {
-        console.error("Failed to sync to sheet:", error);
-        toast({
-            variant: "destructive",
-            title: "Sync Failed",
-            description: (error as Error).message || "An unknown error occurred during sync.",
-        });
-    } finally {
-        setIsSyncing(false);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not delete timeline event.",
+      });
     }
   };
 
+  const handleSaveTimelineEvent = async (
+    eventData: Omit<TimelineEvent, "id">
+  ) => {
+    try {
+      if (editingTimelineEvent) {
+        await updateDoc(
+          doc(db, "timeline", editingTimelineEvent.id),
+          eventData
+        );
+        toast({ title: "Success", description: "Timeline event updated." });
+      } else {
+        await addDoc(collection(db, "timeline"), eventData);
+        toast({ title: "Success", description: "Timeline event added." });
+      }
+      setIsTimelineDialogOpen(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: "Could not save timeline event.",
+      });
+    }
+  };
+
+  const handleSyncToSheet = async () => {
+    if (teams.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Data",
+        description: "There are no registered teams to sync.",
+      });
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const response = await fetch("/api/sync-to-sheet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ teamsData: teams }),
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error || "Failed to sync to Google Sheet.");
+      }
+
+      toast({
+        title: "Sync Successful",
+        description: `Successfully synced ${teams.length} teams to the Google Sheet.`,
+      });
+    } catch (error) {
+      console.error("Failed to sync to sheet:", error);
+      toast({
+        variant: "destructive",
+        title: "Sync Failed",
+        description:
+          (error as Error).message || "An unknown error occurred during sync.",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const handleExportToExcel = async () => {
     if (teams.length === 0) {
-        toast({
-            variant: "destructive",
-            title: "No Data",
-            description: "There are no registered teams to export.",
-        });
-        return;
+      toast({
+        variant: "destructive",
+        title: "No Data",
+        description: "There are no registered teams to export.",
+      });
+      return;
     }
     setIsExporting(true);
     try {
-        const XLSX = await import("xlsx");
-        
-        const transformedData = teams.map(team => {
-            const row: {[key: string]: any} = { 
-                "Team Name": team.teamName,
-             };
-            
-            team.members.forEach((member, index) => {
-                const memberNumber = index + 1;
-                row[`Member ${memberNumber} Name`] = member.name;
-                row[`Member ${memberNumber} Email`] = member.email;
-                row[`Member ${memberNumber} Phone`] = member.phone;
-                row[`Member ${memberNumber} Register Number`] = member.registerNumber;
-                row[`Member ${memberNumber} Class`] = member.className;
-                row[`Member ${memberNumber} Department`] = member.department;
-                row[`Member ${memberNumber} School`] = member.school;
-            });
+      const XLSX = await import("xlsx");
 
-            return row;
+      const transformedData = teams.map((team) => {
+        const row: { [key: string]: any } = {
+          "Team Name": team.teamName,
+        };
+
+        team.members.forEach((member, index) => {
+          const memberNumber = index + 1;
+          row[`Member ${memberNumber} Name`] = member.name;
+          row[`Member ${memberNumber} Email`] = member.email;
+          row[`Member ${memberNumber} Phone`] = member.phone;
+          row[`Member ${memberNumber} Register Number`] = member.registerNumber;
+          row[`Member ${memberNumber} Class`] = member.className;
+          row[`Member ${memberNumber} Department`] = member.department;
+          row[`Member ${memberNumber} School`] = member.school;
         });
 
-        const worksheet = XLSX.utils.json_to_sheet(transformedData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
-        XLSX.writeFile(workbook, "registered_teams.xlsx");
-        toast({
-            title: "Export Successful",
-            description: "The team data has been downloaded as an Excel file.",
-        });
+        return row;
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(transformedData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
+      XLSX.writeFile(workbook, "registered_teams.xlsx");
+      toast({
+        title: "Export Successful",
+        description: "The team data has been downloaded as an Excel file.",
+      });
     } catch (error) {
-        console.error("Failed to export to Excel:", error);
-        toast({
-            variant: "destructive",
-            title: "Export Failed",
-            description: "Could not generate the Excel file. Please try again.",
-        });
+      console.error("Failed to export to Excel:", error);
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: "Could not generate the Excel file. Please try again.",
+      });
     } finally {
-        setIsExporting(false);
+      setIsExporting(false);
     }
   };
 
@@ -441,502 +564,655 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-        <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-             <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-                <div className="flex items-center gap-2">
-                    <Rocket className="h-7 w-7 text-primary" />
-                    <span className="font-headline text-xl md:text-2xl font-bold text-foreground">Admin Dashboard</span>
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-2">
+            <Rocket className="h-7 w-7 text-primary" />
+            <span className="font-headline text-xl md:text-2xl font-bold text-foreground">
+              Admin Dashboard
+            </span>
+          </div>
+          <Button variant="ghost" onClick={handleLogout}>
+            <LogOut className="mr-2" /> Logout
+          </Button>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 md:p-8">
+        <div className="container mx-auto grid gap-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Event Snapshot</CardTitle>
+              <CardDescription>
+                A quick overview of your event's registration status.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              <Card className="p-4">
+                <div className="flex items-center gap-4">
+                  <Users className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="text-2xl font-bold">{teams.length}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Teams Registered
+                    </p>
+                  </div>
                 </div>
-                <Button variant="ghost" onClick={handleLogout}>
-                    <LogOut className="mr-2" /> Logout
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-4">
+                  <Users className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="text-2xl font-bold">{totalParticipants}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Total Participants
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Settings className="h-6 w-6" />
+                <CardTitle>Site Controls</CardTitle>
+              </div>
+              <CardDescription>
+                Control feature visibility on the main website.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-4 rounded-md border p-4">
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    Release Problem Statements
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Make the challenges visible to all participants on the main
+                    page.
+                  </p>
+                </div>
+                <Switch
+                  id="release-problems"
+                  checked={problemsReleased}
+                  onCheckedChange={handleReleaseToggle}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Megaphone className="h-6 w-6" />
+                <CardTitle>Live Banner</CardTitle>
+              </div>
+              <CardDescription>
+                Update the announcement banner at the top of the site. Leave
+                empty to hide it.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                placeholder="Enter banner text here..."
+                value={liveBannerText}
+                onChange={(e) => setLiveBannerText(e.target.value)}
+                disabled={isSavingBanner}
+              />
+              <Button onClick={handleSaveBanner} disabled={isSavingBanner}>
+                {isSavingBanner ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Banner"
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-6 w-6" />
+                  <CardTitle>Previous Year Domains</CardTitle>
+                </div>
+                <CardDescription>
+                  Manage the example domains shown on the homepage.
+                </CardDescription>
+              </div>
+              <Button onClick={handleAddNewDomain}>
+                <PlusCircle className="mr-2" /> Add New Domain
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="md:hidden space-y-4">
+                {domains.map((domain) => (
+                  <Card key={domain.id} className="p-4">
+                    <CardHeader className="p-2">
+                      <CardTitle className="text-base">
+                        {domain.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-2 text-sm text-muted-foreground">
+                      {domain.description}
+                    </CardContent>
+                    <CardFooter className="p-2 flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditDomain(domain)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete this domain.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteDomain(domain.id)}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+              <Table className="hidden md:table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[30%]">Title</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {domains.map((domain) => (
+                    <TableRow key={domain.id}>
+                      <TableCell className="font-medium">
+                        {domain.title}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {domain.description}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditDomain(domain)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Are you absolutely sure?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete this domain.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteDomain(domain.id)}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Yes, delete it
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-6 w-6" />
+                  <CardTitle>Event Timeline</CardTitle>
+                </div>
+                <CardDescription>
+                  Manage the event schedule shown on the homepage.
+                </CardDescription>
+              </div>
+              <Button onClick={handleAddNewTimelineEvent}>
+                <PlusCircle className="mr-2" /> Add New Event
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="md:hidden space-y-4">
+                {timelineEvents.map((event) => (
+                  <Card key={event.id} className="p-4">
+                    <CardHeader className="p-2">
+                      <CardTitle className="text-base">{event.title}</CardTitle>
+                      <CardDescription>
+                        {event.date
+                          ? format(new Date(event.date), "PPP")
+                          : "No date"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-2 text-sm text-muted-foreground">
+                      {event.description}
+                    </CardContent>
+                    <CardFooter className="p-2 flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditTimelineEvent(event)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete this timeline event.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() =>
+                                handleDeleteTimelineEvent(event.id)
+                              }
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+              <Table className="hidden md:table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[25%]">Date</TableHead>
+                    <TableHead className="w-[30%]">Title</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {timelineEvents.map((event) => (
+                    <TableRow key={event.id}>
+                      <TableCell className="font-medium">
+                        {event.date
+                          ? format(new Date(event.date), "PPP")
+                          : "No date"}
+                      </TableCell>
+                      <TableCell>{event.title}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {event.description}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditTimelineEvent(event)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Are you absolutely sure?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete this timeline event.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() =>
+                                  handleDeleteTimelineEvent(event.id)
+                                }
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Yes, delete it
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="h-6 w-6" />
+                  <CardTitle>Problem Statements</CardTitle>
+                </div>
+                <CardDescription>
+                  Add, edit, or delete challenge statements.
+                </CardDescription>
+              </div>
+              <Button onClick={handleAddNewProblem}>
+                <PlusCircle className="mr-2" /> Add New Problem
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="md:hidden space-y-4">
+                {problems.map((problem) => (
+                  <Card key={problem.id} className="p-4">
+                    <CardHeader className="p-2">
+                      <CardTitle className="text-base">
+                        {problem.title}
+                      </CardTitle>
+                      <CardDescription>{problem.category}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-2 text-sm text-muted-foreground">
+                      {problem.description}
+                    </CardContent>
+                    <CardFooter className="p-2 flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditProblem(problem)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete this problem.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteProblem(problem.id)}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+              <Table className="hidden md:table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[30%]">Title</TableHead>
+                    <TableHead className="w-[20%]">Category</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {problems.map((problem) => (
+                    <TableRow key={problem.id}>
+                      <TableCell className="font-medium">
+                        {problem.title}
+                      </TableCell>
+                      <TableCell>{problem.category}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {problem.description}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditProblem(problem)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <div className="flex items-center gap-2">
+                                <ShieldAlert className="h-6 w-6 text-destructive" />
+                                <AlertDialogTitle>
+                                  Are you absolutely sure?
+                                </AlertDialogTitle>
+                              </div>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete this problem statement.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteProblem(problem.id)}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Yes, delete it
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Users className="h-6 w-6" />
+                  <CardTitle>Registered Teams</CardTitle>
+                </div>
+                <CardDescription>
+                  A list of all teams registered for the Space Apps Challenge.
+                  Sync is automatic, with manual override options.
+                </CardDescription>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={handleSyncToSheet}
+                  disabled={teams.length === 0 || isSyncing}
+                >
+                  {isSyncing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2" />
+                      Sync to Google Sheet
+                    </>
+                  )}
                 </Button>
-            </div>
-        </header>
-
-        <main className="flex-1 p-4 md:p-8">
-            <div className="container mx-auto grid gap-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Event Snapshot</CardTitle>
-                        <CardDescription>A quick overview of your event's registration status.</CardDescription>
+                <Button
+                  onClick={handleExportToExcel}
+                  disabled={teams.length === 0 || isExporting}
+                >
+                  {isExporting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Exporting...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2" />
+                      Download as Excel
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="md:hidden space-y-4">
+                {teams.map((team) => (
+                  <Card key={team.id} className="p-4">
+                    <CardHeader className="p-2">
+                      <CardTitle className="text-base">
+                        {team.teamName}
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid gap-4 md:grid-cols-2">
-                         <Card className="p-4">
-                            <div className="flex items-center gap-4">
-                                <Users className="h-8 w-8 text-primary" />
-                                <div>
-                                    <p className="text-2xl font-bold">{teams.length}</p>
-                                    <p className="text-sm text-muted-foreground">Teams Registered</p>
-                                </div>
-                            </div>
-                        </Card>
-                        <Card className="p-4">
-                            <div className="flex items-center gap-4">
-                                <Users className="h-8 w-8 text-primary" />
-                                <div>
-                                    <p className="text-2xl font-bold">{totalParticipants}</p>
-                                    <p className="text-sm text-muted-foreground">Total Participants</p>
-                                </div>
-                            </div>
-                        </Card>
+                    <CardContent className="p-2 text-sm">
+                      <ul className="space-y-3">
+                        {team.members.map((member, index) => (
+                          <li key={index}>
+                            <p className="font-semibold">{member.name}</p>
+                            <p className="text-muted-foreground">
+                              {member.email}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {member.registerNumber} | {member.className}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
                     </CardContent>
-                </Card>
-
-                 <Card>
-                    <CardHeader>
-                         <div className="flex items-center gap-2">
-                             <Settings className="h-6 w-6" />
-                            <CardTitle>Site Controls</CardTitle>
-                        </div>
-                        <CardDescription>Control feature visibility on the main website.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center space-x-4 rounded-md border p-4">
-                            <div className="flex-1 space-y-1">
-                                <p className="text-sm font-medium leading-none">Release Problem Statements</p>
-                                <p className="text-sm text-muted-foreground">
-                                Make the challenges visible to all participants on the main page.
-                                </p>
-                            </div>
-                            <Switch
-                                id="release-problems"
-                                checked={problemsReleased}
-                                onCheckedChange={handleReleaseToggle}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                 <Card>
-                    <CardHeader>
-                         <div className="flex items-center gap-2">
-                             <Megaphone className="h-6 w-6" />
-                            <CardTitle>Live Banner</CardTitle>
-                        </div>
-                        <CardDescription>Update the announcement banner at the top of the site. Leave empty to hide it.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Textarea 
-                            placeholder="Enter banner text here..."
-                            value={liveBannerText}
-                            onChange={(e) => setLiveBannerText(e.target.value)}
-                            disabled={isSavingBanner}
-                        />
-                        <Button onClick={handleSaveBanner} disabled={isSavingBanner}>
-                             {isSavingBanner ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Saving...
-                                </>
-                            ) : (
-                                "Save Banner"
-                            )}
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                             <div className="flex items-center gap-2">
-                                <Lightbulb className="h-6 w-6" />
-                                <CardTitle>Previous Year Domains</CardTitle>
-                            </div>
-                            <CardDescription>Manage the example domains shown on the homepage.</CardDescription>
-                        </div>
-                        <Button onClick={handleAddNewDomain}>
-                            <PlusCircle className="mr-2"/> Add New Domain
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="md:hidden space-y-4">
-                            {domains.map((domain) => (
-                                <Card key={domain.id} className="p-4">
-                                    <CardHeader className="p-2">
-                                        <CardTitle className="text-base">{domain.title}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="p-2 text-sm text-muted-foreground">
-                                        {domain.description}
-                                    </CardContent>
-                                    <CardFooter className="p-2 flex justify-end gap-2">
-                                        <Button variant="ghost" size="icon" onClick={() => handleEditDomain(domain)}>
-                                            <Pencil className="h-4 w-4"/>
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                    <Trash2 className="h-4 w-4"/>
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>This will permanently delete this domain.</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDeleteDomain(domain.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
-                        <Table className="hidden md:table">
-                             <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[30%]">Title</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {domains.map((domain) => (
-                                    <TableRow key={domain.id}>
-                                        <TableCell className="font-medium">{domain.title}</TableCell>
-                                        <TableCell className="text-muted-foreground">{domain.description}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEditDomain(domain)}>
-                                                <Pencil className="h-4 w-4"/>
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                        <Trash2 className="h-4 w-4"/>
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                        This action cannot be undone. This will permanently delete this domain.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id)} className="bg-destructive hover:bg-destructive/90">
-                                                            Yes, delete it
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                 <Card>
-                    <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                             <div className="flex items-center gap-2">
-                                <CalendarDays className="h-6 w-6" />
-                                <CardTitle>Event Timeline</CardTitle>
-                            </div>
-                            <CardDescription>Manage the event schedule shown on the homepage.</CardDescription>
-                        </div>
-                        <Button onClick={handleAddNewTimelineEvent}>
-                            <PlusCircle className="mr-2"/> Add New Event
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="md:hidden space-y-4">
-                            {timelineEvents.map((event) => (
-                                <Card key={event.id} className="p-4">
-                                    <CardHeader className="p-2">
-                                        <CardTitle className="text-base">{event.title}</CardTitle>
-                                        <CardDescription>{event.date ? format(new Date(event.date), "PPP") : "No date"}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="p-2 text-sm text-muted-foreground">
-                                        {event.description}
-                                    </CardContent>
-                                    <CardFooter className="p-2 flex justify-end gap-2">
-                                         <Button variant="ghost" size="icon" onClick={() => handleEditTimelineEvent(event)}>
-                                            <Pencil className="h-4 w-4"/>
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                    <Trash2 className="h-4 w-4"/>
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>This will permanently delete this timeline event.</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDeleteTimelineEvent(event.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
-                        <Table className="hidden md:table">
-                             <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[25%]">Date</TableHead>
-                                    <TableHead className="w-[30%]">Title</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {timelineEvents.map((event) => (
-                                    <TableRow key={event.id}>
-                                        <TableCell className="font-medium">
-                                          {event.date ? format(new Date(event.date), "PPP") : "No date"}
-                                        </TableCell>
-                                        <TableCell>{event.title}</TableCell>
-                                        <TableCell className="text-muted-foreground">{event.description}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEditTimelineEvent(event)}>
-                                                <Pencil className="h-4 w-4"/>
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                        <Trash2 className="h-4 w-4"/>
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                        This action cannot be undone. This will permanently delete this timeline event.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteTimelineEvent(event.id)} className="bg-destructive hover:bg-destructive/90">
-                                                            Yes, delete it
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <ShieldAlert className="h-6 w-6" />
-                                <CardTitle>Problem Statements</CardTitle>
-                            </div>
-                            <CardDescription>Add, edit, or delete challenge statements.</CardDescription>
-                        </div>
-                        <Button onClick={handleAddNewProblem}>
-                            <PlusCircle className="mr-2"/> Add New Problem
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="md:hidden space-y-4">
-                            {problems.map((problem) => (
-                                <Card key={problem.id} className="p-4">
-                                    <CardHeader className="p-2">
-                                        <CardTitle className="text-base">{problem.title}</CardTitle>
-                                        <CardDescription>{problem.category}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="p-2 text-sm text-muted-foreground">
-                                        {problem.description}
-                                    </CardContent>
-                                    <CardFooter className="p-2 flex justify-end gap-2">
-                                        <Button variant="ghost" size="icon" onClick={() => handleEditProblem(problem)}>
-                                            <Pencil className="h-4 w-4"/>
-                                        </Button>
-                                         <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                    <Trash2 className="h-4 w-4"/>
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>This will permanently delete this problem.</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDeleteProblem(problem.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
-                        <Table className="hidden md:table">
-                             <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[30%]">Title</TableHead>
-                                    <TableHead className="w-[20%]">Category</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {problems.map((problem) => (
-                                    <TableRow key={problem.id}>
-                                        <TableCell className="font-medium">{problem.title}</TableCell>
-                                        <TableCell>{problem.category}</TableCell>
-                                        <TableCell className="text-muted-foreground">{problem.description}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEditProblem(problem)}>
-                                                <Pencil className="h-4 w-4"/>
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                        <Trash2 className="h-4 w-4"/>
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                         <div className="flex items-center gap-2">
-                                                            <ShieldAlert className="h-6 w-6 text-destructive"/>
-                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        </div>
-                                                        <AlertDialogDescription>
-                                                        This action cannot be undone. This will permanently delete this problem statement.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteProblem(problem.id)} className="bg-destructive hover:bg-destructive/90">
-                                                            Yes, delete it
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <Users className="h-6 w-6" />
-                                <CardTitle>Registered Teams</CardTitle>
-                            </div>
-                            <CardDescription>A list of all teams registered for the Space Apps Challenge. Sync is automatic, with manual override options.</CardDescription>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                            <Button variant="secondary" onClick={handleSyncToSheet} disabled={teams.length === 0 || isSyncing}>
-                                {isSyncing ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Syncing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <RefreshCw className="mr-2" />
-                                        Sync to Google Sheet
-                                    </>
-                                )}
-                            </Button>
-                            <Button onClick={handleExportToExcel} disabled={teams.length === 0 || isExporting}>
-                                {isExporting ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Exporting...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Download className="mr-2" />
-                                        Download as Excel
-                                    </>
-                                )}
-                            </Button>
-                         </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="md:hidden space-y-4">
-                             {teams.map((team) => (
-                                <Card key={team.id} className="p-4">
-                                    <CardHeader className="p-2">
-                                        <CardTitle className="text-base">{team.teamName}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="p-2 text-sm">
-                                        <ul className="space-y-3">
-                                            {team.members.map((member, index) => (
-                                                <li key={index}>
-                                                    <p className="font-semibold">{member.name}</p>
-                                                    <p className="text-muted-foreground">{member.email}</p>
-                                                    <p className="text-xs text-muted-foreground">{member.registerNumber} | {member.className}</p>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                        <Table className="hidden md:table">
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Team Name</TableHead>
-                                    <TableHead>Members</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {teams.map((team) => (
-                                    <TableRow key={team.id}>
-                                        <TableCell className="font-medium">{team.teamName}</TableCell>
-                                        <TableCell>
-                                            <ul className="list-disc pl-5">
-                                                {team.members.map((member, index) => (
-                                                    <li key={index} className="mb-1">
-                                                        {member.name} ({member.email}, {member.phone})
-                                                        <br />
-                                                        <span className="text-xs text-muted-foreground">
-                                                            RegNo: {member.registerNumber} | Class: {member.className} | Dept: {member.department} | School: {member.school}
-                                                        </span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-            </div>
-        </main>
-        <ProblemStatementDialog
-            isOpen={isProblemDialogOpen}
-            onClose={() => setIsProblemDialogOpen(false)}
-            onSave={handleSaveProblem}
-            problem={editingProblem}
-        />
-         <TimelineEventDialog
-            isOpen={isTimelineDialogOpen}
-            onClose={() => setIsTimelineDialogOpen(false)}
-            onSave={handleSaveTimelineEvent}
-            event={editingTimelineEvent}
-        />
-        <DomainDialog
-            isOpen={isDomainDialogOpen}
-            onClose={() => setIsDomainDialogOpen(false)}
-            onSave={handleSaveDomain}
-            domain={editingDomain}
-        />
+                  </Card>
+                ))}
+              </div>
+              <Table className="hidden md:table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Team Name</TableHead>
+                    <TableHead>Members</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teams.map((team) => (
+                    <TableRow key={team.id}>
+                      <TableCell className="font-medium">
+                        {team.teamName}
+                      </TableCell>
+                      <TableCell>
+                        <ul className="list-disc pl-5">
+                          {team.members.map((member, index) => (
+                            <li key={index} className="mb-1">
+                              {member.name} ({member.email}, {member.phone})
+                              <br />
+                              <span className="text-xs text-muted-foreground">
+                                RegNo: {member.registerNumber} | Class:{" "}
+                                {member.className} | Dept: {member.department} |
+                                School: {member.school}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+      <ProblemStatementDialog
+        isOpen={isProblemDialogOpen}
+        onClose={() => setIsProblemDialogOpen(false)}
+        onSave={handleSaveProblem}
+        problem={editingProblem}
+      />
+      <TimelineEventDialog
+        isOpen={isTimelineDialogOpen}
+        onClose={() => setIsTimelineDialogOpen(false)}
+        onSave={handleSaveTimelineEvent}
+        event={editingTimelineEvent}
+      />
+      <DomainDialog
+        isOpen={isDomainDialogOpen}
+        onClose={() => setIsDomainDialogOpen(false)}
+        onSave={handleSaveDomain}
+        domain={editingDomain}
+      />
     </div>
   );
 }
