@@ -5,66 +5,58 @@ This project is a modern, full-featured hackathon event website for the NASA Int
 
 ## 🌟 Features
 
-- **Landing Page**: Engaging hero section with event details, sponsors, and animated space-themed visuals.
-- **Event Information**: About, schedule/timeline, rules, perks, and live updates.
-- **Online Registration**: Dynamic registration form with team management and validation.
-- **Problem Statements**: Real-time display of hackathon challenges (auto-updates as released).
-- **Sponsors Showcase**: Logos and info for all event sponsors and partners.
-- **Countdown Timer**: Live countdown to the event start.
-- **Contact/Queries**: Section for contacting organizers and coordinators.
-- **Admin Tools**: (For organizers) Add/edit problem statements and timeline events (see `src/components/admin/`).
+- **Engaging Landing Page**: A visually appealing hero section with event details, key sponsors, and animated space-themed visuals.
+- **Comprehensive Event Information**: Sections for About, Schedule/Timeline, Rules, Perks, and Live Updates.
+- **Dynamic Online Registration**: A robust registration form with team management, real-time validation, AI-powered team name generation, and automated Google Sheet syncing.
+- **Live Problem Statements**: Real-time display of hackathon challenges, which can be toggled live from the admin dashboard.
+- **Sponsors & Collaborators Showcase**: A dedicated section to display logos for all event sponsors and partners.
+- **Live Countdown Timer**: A real-time countdown to the event's start to build excitement.
+- **Contact/Queries Section**: A detailed section for contacting faculty and student coordinators.
+- **Advanced Admin Dashboard**: A secure area for organizers to manage problem statements, timeline events, and other site content. It also includes tools to export registration data to Excel and manually sync to Google Sheets.
 
 ## 🛠️ Tech Stack
 
 - **Next.js 14** (App Router, Server Components)
 - **TypeScript**
-- **Tailwind CSS** (with custom space theme)
-- **Firebase** (Firestore for data, Auth for admin, Hosting)
-- **Genkit AI** (for team name generation, etc.)
-- **Radix UI** (accessible UI components)
+- **Tailwind CSS** (with a custom space-themed design system)
+- **Firebase** (Firestore for the database, Auth for admin access)
+- **Genkit AI** (for AI-powered team name generation)
+- **Shadcn/UI** & **Radix UI** (for accessible and reusable UI components)
+- **Google Sheets API** (for automated and manual data syncing)
 
 ## 🚀 Quick Start
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-2. **Set up environment variables:**
-   - Copy `.env.example` to `.env.local` and fill in your Firebase credentials.
-3. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-4. **Open [http://localhost:9002](http://localhost:9002) in your browser.**
+1.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+2.  **Set up environment variables:**
+    -   Copy `.env.example` to `.env.local` and fill in your Firebase and Google Sheets API credentials.
+3.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+4.  **Open [https://nasa.cuchallenge.live/](https://nasa.cuchallenge.live/) in your browser.**
 
 ## 📁 Project Structure
 
-- `src/app/` - Main app pages and layout
-- `src/components/sections/` - All major homepage/event sections (Hero, About, Schedule, Rules, Perks, ProblemStatements, Sponsors, Registration, Contact)
-- `src/components/admin/` - Admin dialogs for managing event data
-- `src/lib/firebase.ts` - Firebase config and initialization
-- `src/ai/` - Genkit AI flows (e.g., team name generation)
-- `assets/` - Logos, images, and space illustrations
+- `src/app/` - Main application pages, layouts, and API routes.
+- `src/components/sections/` - All major homepage sections (Hero, About, Schedule, etc.).
+- `src/components/admin/` - Components for the admin dashboard, including dialogs for managing data.
+- `src/lib/` - Utility functions and Firebase configuration.
+- `src/ai/` - Genkit AI flows, such as the team name generator.
+- `public/` - Static assets, including images and `sitemap.xml`.
 
 ## 🎨 Style Guide
 
 - **Primary color:** #192A56 (dark navy blue)
 - **Background:** #0A122A (almost black)
 - **Accent:** #43B1F0 (electric blue)
-- **Fonts:** 'Space Grotesk' for headlines, 'Inter' for body
-- **Space-themed icons and subtle animations**
+- **Fonts:** 'Space Grotesk' for headlines, 'Inter' for body text.
 
 ## 🙋 Contact & Support
 
-For queries, contact the organizing team via the Contact section on the website or email:
-
-- Dr. Joseph Rodriguez (Faculty Advisor): joseph.rodrigues@christuniversity.in
-- Ms. Minu Narayanan (Logistics): minu.narayanan@christuniversity.in
-
-Student Coordinators:
-
-- Manoj Reddy: +91 9876543210
-- Adharsh Jolly: +91 9876543211
+For any queries, please use the Contact section on the website or reach out to the coordinators directly.
 
 ---
 
