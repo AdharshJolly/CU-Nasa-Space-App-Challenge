@@ -113,9 +113,18 @@ export default function AdminDashboard() {
     });
 
     if (!user) return () => unsubscribeAuth();
-
-    const unsubscribeTeams = onSnapshot(query(collection(db, "registrations"), orderBy("createdAt", "asc")), (snapshot) => {
+    
+    // Fetch all registrations without ordering by a potentially non-existent field
+    const unsubscribeTeams = onSnapshot(query(collection(db, "registrations")), (snapshot) => {
         const teamsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Team[];
+        
+        // Sort on the client-side to ensure all data is displayed
+        teamsData.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis() || 0;
+          const bTime = b.createdAt?.toMillis() || 0;
+          return aTime - bTime;
+        });
+
         setTeams(teamsData);
     });
 
@@ -127,9 +136,13 @@ export default function AdminDashboard() {
     const unsubscribeTimeline = onSnapshot(query(collection(db, "timeline"), orderBy("date")), (snapshot) => {
       const eventsData = snapshot.docs.map(doc => {
           const data = doc.data();
+          const eventDate = data.date ? new Date(data.date) : null;
+          if (eventDate) {
+              eventDate.setMinutes(eventDate.getMinutes() + eventDate.getTimezoneOffset());
+          }
           return {
               id: doc.id,
-              date: data.date, // Keep as string from Firestore
+              date: eventDate ? eventDate.toISOString().split('T')[0] : "", // Store as yyyy-mm-dd string
               title: data.title,
               description: data.description,
           };
