@@ -113,16 +113,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribeTeams = onSnapshot(query(collection(db, "registrations")), (snapshot) => {
+    const unsubscribeTeams = onSnapshot(query(collection(db, "registrations"), orderBy("createdAt", "asc")), (snapshot) => {
         const teamsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Team[];
-        
-        // Sort teams client-side
-        teamsData.sort((a, b) => {
-            const dateA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
-            const dateB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
-            return dateB - dateA; // Newest first
-        });
-
         setTeams(teamsData);
     });
 
@@ -341,7 +333,6 @@ export default function AdminDashboard() {
         const transformedData = teams.map(team => {
             const row: {[key: string]: any} = { 
                 "Team Name": team.teamName,
-                "Registered At": team.createdAt ? format(team.createdAt.toDate(), 'PPpp') : 'N/A'
              };
             
             team.members.forEach((member, index) => {
@@ -853,9 +844,6 @@ export default function AdminDashboard() {
                                 <Card key={team.id} className="p-4">
                                     <CardHeader className="p-2">
                                         <CardTitle className="text-base">{team.teamName}</CardTitle>
-                                        <CardDescription>
-                                            Registered: {team.createdAt ? format(team.createdAt.toDate(), 'PP') : 'N/A'}
-                                        </CardDescription>
                                     </CardHeader>
                                     <CardContent className="p-2 text-sm">
                                         <ul className="space-y-3">
@@ -876,7 +864,6 @@ export default function AdminDashboard() {
                                 <TableRow>
                                     <TableHead>Team Name</TableHead>
                                     <TableHead>Members</TableHead>
-                                    <TableHead>Registered At</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -895,9 +882,6 @@ export default function AdminDashboard() {
                                                     </li>
                                                 ))}
                                             </ul>
-                                        </TableCell>
-                                        <TableCell>
-                                            {team.createdAt ? format(team.createdAt.toDate(), 'PPpp') : 'N/A'}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -928,5 +912,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-    
