@@ -99,6 +99,11 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
@@ -106,11 +111,8 @@ export default function AdminDashboard() {
         router.push("/admin");
       }
     });
-    return () => unsubscribeAuth();
-  }, [router]);
 
-  useEffect(() => {
-    if (!user) return;
+    if (!user) return () => unsubscribeAuth();
 
     const unsubscribeTeams = onSnapshot(query(collection(db, "registrations"), orderBy("createdAt", "asc")), (snapshot) => {
         const teamsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Team[];
@@ -123,8 +125,16 @@ export default function AdminDashboard() {
     });
     
     const unsubscribeTimeline = onSnapshot(query(collection(db, "timeline"), orderBy("date")), (snapshot) => {
-        const eventsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TimelineEvent));
-        setTimelineEvents(eventsData);
+      const eventsData = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+              id: doc.id,
+              date: data.date, // Keep as string from Firestore
+              title: data.title,
+              description: data.description,
+          };
+      }) as TimelineEvent[];
+      setTimelineEvents(eventsData);
     });
 
     const unsubscribeDomains = onSnapshot(query(collection(db, "domains")), 
@@ -158,6 +168,7 @@ export default function AdminDashboard() {
     });
 
     return () => {
+        unsubscribeAuth();
         unsubscribeTeams();
         unsubscribeProblems();
         unsubscribeSettings();
@@ -165,7 +176,7 @@ export default function AdminDashboard() {
         unsubscribeBanner();
         unsubscribeDomains();
     };
-  }, [user, toast]);
+  }, [isClient, user, router, toast]);
   
   const totalParticipants = teams.reduce((acc, team) => acc + team.members.length, 0);
 
@@ -624,7 +635,7 @@ export default function AdminDashboard() {
                                 {timelineEvents.map((event) => (
                                     <TableRow key={event.id}>
                                         <TableCell className="font-medium">
-                                            {event.date ? format(new Date(event.date), "PPP") : "No date"}
+                                          {event.date ? format(new Date(event.date), "PPP") : "No date"}
                                         </TableCell>
                                         <TableCell>{event.title}</TableCell>
                                         <TableCell className="text-muted-foreground">{event.description}</TableCell>
@@ -860,5 +871,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-    
