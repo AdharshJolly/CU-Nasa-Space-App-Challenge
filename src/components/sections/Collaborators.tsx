@@ -12,44 +12,60 @@ import VishvaLogo from "@/assets/logos/vishva.png";
 import AICLogo from "@/assets/logos/aic_dsu.png";
 
 const collaborators = [
-  { name: "NASA", logo: NasaLogo, hint: "space agency" },
-  { name: "SUMVN", logo: SumvnLogo, hint: "rocket company" },
-  { name: "Telengana Govt", logo: TelenganaGovtLogo, hint: "space agency" },
-  { name: "RICH", logo: RichLogo, hint: "tech company" },
+  {
+    name: "NASA",
+    logo: NasaLogo,
+    hint: "United States government agency for space exploration and aeronautics",
+  },
+  {
+    name: "SUMVN",
+    logo: SumvnLogo,
+    hint: "Domain name and web services provider",
+  },
+  {
+    name: "Telengana Government",
+    logo: TelenganaGovtLogo,
+    hint: "State government of Telangana, India",
+  },
+  {
+    name: "RICH",
+    logo: RichLogo,
+    hint: "Research and Innovation Circle of Hyderabad, fostering innovation and entrepreneurship",
+  },
   {
     name: "Microsoft",
     logo: MSFTLogo,
-    hint: "space agency",
+    hint: "Global technology company, software and cloud solutions",
   },
   {
-    name: "AI Innovators Hub",
+    name: "Microsoft AI Innovators Hub",
     logo: MSFTInnovatorsLogo,
-    hint: "cloud provider",
+    hint: "Microsoft initiative supporting AI innovation and startups",
   },
   {
     name: "Women Innovators",
     logo: WomenInnovatorLogo,
-    hint: "cloud provider",
+    hint: "Platform supporting women entrepreneurs and innovators",
   },
   {
     name: "Dhruva",
     logo: DhruvaLogo,
-    hint: "cloud provider",
+    hint: "Indian private space technology company, satellite and launch solutions",
   },
   {
     name: "Outshade",
     logo: OutshadeLogo,
-    hint: "cloud provider",
+    hint: "Digital transformation and technology solutions company",
   },
   {
     name: "Vishva",
     logo: VishvaLogo,
-    hint: "cloud provider",
+    hint: "Technology company",
   },
   {
     name: "AIC DSU",
     logo: AICLogo,
-    hint: "cloud provider",
+    hint: "Startup incubator at Dayananda Sagar University",
   },
 ];
 
