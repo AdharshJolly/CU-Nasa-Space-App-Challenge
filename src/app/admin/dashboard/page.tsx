@@ -62,8 +62,6 @@ export type DuplicateInfo = {
   teams: { teamId: string; teamName: string; memberName: string }[];
 };
 
-const SUPER_ADMIN_EMAIL = "adharsh.jolly@btech.christuniversity.in";
-
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -591,7 +589,11 @@ export default function AdminDashboard() {
     return <DashboardSkeleton />;
   }
 
-  const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
+  const superAdminEmails = (process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS || '')
+    .split(',')
+    .map(email => email.trim());
+
+  const isSuperAdmin = user.email ? superAdminEmails.includes(user.email) : false;
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
