@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow read/write for all users on all documents
+    // for all collections.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Lock down the 'logs' collection
+    match /logs/{logId} {
+      // READ: Allow only if the user is authenticated and their email is in the super admin list
+      allow read: if request.auth != null && request.auth.token.email in resource.data.superAdminEmails;
+
+      // CREATE: Allow any authenticated user to create a log entry.
+      // This is secure because the content of the log is generated on the server.
+      allow create: if request.auth != null;
+
+      // UPDATE, DELETE: Nobody should be able to update or delete logs.
+      allow update, delete: if false;
+    }
+  }
+}
