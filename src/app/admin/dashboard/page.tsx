@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -26,6 +27,7 @@ import {
   type TimelineEvent,
 } from "@/components/admin/TimelineEventDialog";
 import { DomainDialog, type Domain } from "@/components/admin/DomainDialog";
+import { DuplicatesDialog } from "@/components/admin/DuplicatesDialog";
 
 import { DashboardSkeleton } from "@/components/admin/dashboard/DashboardSkeleton";
 import { DashboardHeader } from "@/components/admin/dashboard/DashboardHeader";
@@ -54,6 +56,12 @@ interface Team {
   createdAt?: Timestamp;
 }
 
+export type DuplicateInfo = {
+  type: "Email" | "Phone" | "Register Number";
+  value: string;
+  teams: { teamName: string; memberName: string }[];
+};
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -78,6 +86,8 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [duplicates, setDuplicates] = useState<DuplicateInfo[]>([]);
+  const [isDuplicatesDialogOpen, setIsDuplicatesDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -496,6 +506,51 @@ export default function AdminDashboard() {
     }
   };
 
+  const findDuplicates = () => {
+    const emailMap = new Map<string, { teamName: string; memberName: string }[]>();
+    const phoneMap = new Map<string, { teamName: string; memberName: string }[]>();
+    const regNoMap = new Map<string, { teamName: string; memberName: string }[]>();
+
+    teams.forEach(team => {
+        team.members.forEach(member => {
+            const memberInfo = { teamName: team.teamName, memberName: member.name };
+
+            // Check email
+            const emails = emailMap.get(member.email) || [];
+            emailMap.set(member.email, [...emails, memberInfo]);
+
+            // Check phone
+            const phones = phoneMap.get(member.phone) || [];
+            phoneMap.set(member.phone, [...phones, memberInfo]);
+
+            // Check register number
+            const regNos = regNoMap.get(member.registerNumber) || [];
+            regNoMap.set(member.registerNumber, [...regNos, memberInfo]);
+        });
+    });
+
+    const foundDuplicates: DuplicateInfo[] = [];
+
+    emailMap.forEach((teams, value) => {
+        if (teams.length > 1) {
+            foundDuplicates.push({ type: 'Email', value, teams });
+        }
+    });
+    phoneMap.forEach((teams, value) => {
+        if (teams.length > 1) {
+            foundDuplicates.push({ type: 'Phone', value, teams });
+        }
+    });
+    regNoMap.forEach((teams, value) => {
+        if (teams.length > 1) {
+            foundDuplicates.push({ type: 'Register Number', value, teams });
+        }
+    });
+
+    setDuplicates(foundDuplicates);
+    setIsDuplicatesDialogOpen(true);
+  };
+
   if (!isClient || !user) {
     return <DashboardSkeleton />;
   }
@@ -552,6 +607,7 @@ export default function AdminDashboard() {
             isSyncing={isSyncing}
             onExportToExcel={handleExportToExcel}
             isExporting={isExporting}
+            onFindDuplicates={findDuplicates}
           />
         </div>
       </main>
@@ -573,6 +629,11 @@ export default function AdminDashboard() {
         onClose={() => setIsDomainDialogOpen(false)}
         onSave={handleSaveDomain}
         domain={editingDomain}
+      />
+       <DuplicatesDialog
+        isOpen={isDuplicatesDialogOpen}
+        onClose={() => setIsDuplicatesDialogOpen(false)}
+        duplicates={duplicates}
       />
     </div>
   );

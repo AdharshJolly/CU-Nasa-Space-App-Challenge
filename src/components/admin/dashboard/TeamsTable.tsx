@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, Loader2, RefreshCw, Search, Users } from "lucide-react";
+import { Download, Loader2, RefreshCw, Search, Users, ScanSearch } from "lucide-react";
 import type { Timestamp } from "firebase/firestore";
 import { Input } from "@/components/ui/input";
 
@@ -33,9 +33,10 @@ interface TeamsTableProps {
     isSyncing: boolean;
     onExportToExcel: () => void;
     isExporting: boolean;
+    onFindDuplicates: () => void;
 }
 
-export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, isSyncing, onExportToExcel, isExporting }: TeamsTableProps) {
+export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, isSyncing, onExportToExcel, isExporting, onFindDuplicates }: TeamsTableProps) {
     return (
         <Card>
             <CardHeader className="flex flex-col gap-4">
@@ -50,7 +51,15 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
                     Sync is automatic, with manual override options.
                   </CardDescription>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 flex-wrap justify-end">
+                   <Button
+                    variant="outline"
+                    onClick={onFindDuplicates}
+                    disabled={teams.length === 0}
+                  >
+                    <ScanSearch className="mr-2" />
+                    Find Duplicates
+                  </Button>
                   <Button
                     variant="secondary"
                     onClick={onSyncToSheet}
