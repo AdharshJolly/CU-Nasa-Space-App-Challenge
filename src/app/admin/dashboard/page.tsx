@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -173,7 +174,6 @@ export default function AdminDashboard() {
 
     if (!user) return () => unsubscribeAuth();
 
-    // Fetch all registrations without ordering by a potentially non-existent field
     const teamsQuery = query(collection(db, "registrations"));
     const unsubscribeTeams = onSnapshot(teamsQuery, (snapshot) => {
       const teamsData = snapshot.docs.map((doc) => ({
@@ -181,7 +181,6 @@ export default function AdminDashboard() {
         ...doc.data(),
       })) as Team[];
 
-      // Sort on the client-side to ensure all data is displayed
       teamsData.sort((a, b) => {
         const aTime = a.createdAt?.toMillis() || 0;
         const bTime = b.createdAt?.toMillis() || 0;
