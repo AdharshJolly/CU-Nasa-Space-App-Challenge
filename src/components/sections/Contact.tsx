@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -13,28 +12,28 @@ import Annemarie from "@/assets/co-ordinators/annemarie.jpg";
 const facultyCoordinators = [
   {
     name: "Dr. Joseph Rodrigues",
-    hint: "man portrait",
+    hint: "faculty coordinator, Christ University, male portrait, event contact",
     avatar:
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2394.jpg",
     email: "joseph.rodrigues@christuniversity.in",
   },
   {
     name: "Ms. Minu Narayanan",
-    hint: "woman portrait",
+    hint: "faculty coordinator, Christ University, female portrait, event contact",
     avatar:
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E9046.jpg",
     email: "minu.narayanan@christuniversity.in",
   },
   {
     name: "Dr. Manikandan P",
-    hint: "man portrait",
+    hint: "faculty coordinator, Christ University, male portrait, event contact",
     avatar:
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E1162.jpg",
     email: "manikandan.p@christuniversity.in",
   },
   {
     name: "Dr. Hari Murthy",
-    hint: "man portrait",
+    hint: "faculty coordinator, Christ University, male portrait, event contact",
     avatar:
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2996.jpg",
     email: "hari.murthy@christuniversity.in",
@@ -48,21 +47,21 @@ const facultyCoordinators = [
   //},
   {
     name: "Dr. Albert Joseph Hefferan",
-    hint: "man portrait",
+    hint: "faculty coordinator, Christ University, male portrait, event contact",
     avatar:
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E4871.jpg",
     email: "albertjoseph.hefferan@christuniversity.in",
   },
   {
     name: "Dr. Benson K Money",
-    hint: "man portrait",
+    hint: "faculty coordinator, Christ University, male portrait, event contact",
     avatar:
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E1757.jpg",
     email: "benson.money@christuniversity.in",
   },
   {
     name: "Col. Sudhir M R",
-    hint: "man portrait",
+    hint: "faculty coordinator, Christ University, male portrait, event contact",
     avatar:
       "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E2411.jpg",
     email: "colonel.sudhir@christuniversity.in",
@@ -73,28 +72,28 @@ const studentCoordinators = [
   {
     name: "Manoj Reddy",
     avatar: Manoj.src,
-    hint: "man portrait",
+    hint: "student coordinator, Christ University, male portrait, event contact, phone, email",
     email: "m.manoj@btech.christuniversity.in",
     phone: "+918618627856",
   },
   {
     name: "Vishnu Nambiar",
     avatar: Vishnu.src,
-    hint: "man portrait",
+    hint: "student coordinator, Christ University, male portrait, event contact, phone, email",
     email: "vishnu.nambiar@btech.christuniversity.in",
     phone: "+918848799780",
   },
   {
     name: "Adharsh Jolly",
     avatar: Adharsh.src,
-    hint: "man portrait",
+    hint: "student coordinator, Christ University, male portrait, event contact, phone, email",
     email: "adharsh.jolly@btech.christuniversity.in",
     phone: "+919431703182",
   },
   {
     name: "Annmarie Vinish",
     avatar: Annemarie.src,
-    hint: "woman portrait",
+    hint: "student coordinator, Christ University, female portrait, event contact, phone, email",
     email: "annmarie.vinish@btech.christuniversity.in",
     phone: "+918921323033",
   },
