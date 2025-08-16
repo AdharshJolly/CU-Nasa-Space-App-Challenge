@@ -407,7 +407,7 @@ export default function AdminDashboard() {
         toast({ title: "Success", description: "Problem statement added." });
       }
       setIsProblemDialogOpen(false);
-    } catch (error) => {
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Save Failed",
