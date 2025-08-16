@@ -15,6 +15,7 @@ import {
   doc,
   orderBy,
   Timestamp,
+  getDoc,
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -267,7 +268,8 @@ export default function AdminDashboard() {
   const handleSaveBanner = async () => {
     setIsSavingBanner(true);
     try {
-      const oldText = (await doc(db, "settings", "liveBanner").get()).data()?.text || "";
+      const bannerDoc = await getDoc(doc(db, "settings", "liveBanner"));
+      const oldText = bannerDoc.exists() ? bannerDoc.data().text : "";
       await setDoc(doc(db, "settings", "liveBanner"), { text: liveBannerText });
       toast({
         title: "Success!",
