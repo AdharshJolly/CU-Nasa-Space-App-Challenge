@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Rocket, Trash, UserPlus, Wand2 } from "lucide-react";
+import { Loader2, Rocket, Trash, UserPlus } from "lucide-react";
 import { Separator } from "../ui/separator";
 import {
   Card,
@@ -31,9 +31,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { generateTeamName } from "@/ai/flows/generate-team-name-flow";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -57,10 +56,7 @@ const memberSchema = z.object({
     .string()
     .email({ message: "Please enter a valid email address." })
     .trim()
-    .min(1, { message: "Email is required." })
-    .refine(email => email.endsWith('@btech.christuniversity.in') || email.endsWith('@christuniversity.in'), {
-        message: "Please use a valid CHRIST University email address.",
-    }),
+    .min(1, { message: "Email is required." }),
   phone: z.string().trim().min(1, { message: "Phone number is required." }).regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
   }),
@@ -155,44 +151,32 @@ export function Registration() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await addDoc(collection(db, "registrations"), {
-          ...values,
-          createdAt: new Date(),
+      const docRef = await addDoc(collection(db, "registrations"), {
+        ...values,
+        createdAt: Timestamp.now(),
       });
+
+      // Sync to Google Sheet automatically
+      await fetch('/api/sync-to-sheet', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ teamData: values }),
+      });
+
       setIsSuccessDialogOpen(true);
       form.reset();
     } catch (e) {
-      console.error("Error adding document: ", e);
+      console.error("Error adding document or syncing to sheet: ", e);
       toast({
         variant: "destructive",
         title: "Registration Failed",
         description:
-          "There was a problem registering your team. Please try again.",
+          "There was a problem registering your team. Please try again or contact support.",
       });
     }
   }
-
-  // const handleGenerateName = async () => {
-  //   setIsGeneratingName(true);
-  //   try {
-  //     const { teamName } = await generateTeamName({
-  //       nonce: String(Math.random()),
-  //     });
-  //     form.setValue("teamName", teamName, { shouldValidate: true });
-  //     toast({
-  //       title: "Team Name Generated!",
-  //       description: `We've called you "${teamName}". Feel free to change it!`,
-  //     });
-  //   } catch (error) {
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Generation Failed",
-  //       description: "Could not generate a team name. Please try again.",
-  //     });
-  //   } finally {
-  //     setIsGeneratingName(false);
-  //   }
-  // };
 
   return (
     <>
@@ -263,24 +247,6 @@ export function Registration() {
                               />
                             </FormControl>
                           </div>
-                          {/* <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleGenerateName}
-                            disabled={isSubmitting || isGeneratingName}
-                          >
-                            {isGeneratingName ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Generating...
-                              </>
-                            ) : (
-                              <>
-                                <Wand2 className="mr-2 h-4 w-4" />
-                                Generate Name
-                              </>
-                            )}
-                          </Button> */}
                         </div>
                         <FormMessage />
                       </FormItem>
@@ -541,5 +507,3 @@ export function Registration() {
     </>
   );
 }
-
-    

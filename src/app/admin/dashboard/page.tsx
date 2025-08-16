@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone, Users, ShieldAlert, BadgeInfo, Lightbulb, RefreshCw } from "lucide-react";
+import { LogOut, Rocket, Settings, Pencil, Trash2, PlusCircle, CalendarDays, Download, Loader2, Megaphone, Users, ShieldAlert, BadgeInfo, Lightbulb } from "lucide-react";
 import { ProblemStatementDialog, type ProblemStatement } from "@/components/admin/ProblemStatementDialog";
 import { TimelineEventDialog, type TimelineEvent } from "@/components/admin/TimelineEventDialog";
 import { DomainDialog, type Domain } from "@/components/admin/DomainDialog";
@@ -93,7 +93,6 @@ export default function AdminDashboard() {
   const [editingTimelineEvent, setEditingTimelineEvent] = useState<TimelineEvent | null>(null);
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
@@ -366,44 +365,6 @@ export default function AdminDashboard() {
         });
     } finally {
         setIsExporting(false);
-    }
-  };
-
-  const handleSyncToSheet = async () => {
-    if (teams.length === 0) {
-        toast({
-            variant: "destructive",
-            title: "No Data",
-            description: "There are no registered teams to sync.",
-        });
-        return;
-    }
-    setIsSyncing(true);
-    try {
-        const response = await fetch('/api/sync-to-sheet', {
-            method: 'POST',
-        });
-        const result = await response.json();
-        if (!response.ok) {
-            throw new Error(result.error || 'Failed to sync to Google Sheet.');
-        }
-        toast({
-            title: "Sync Successful",
-            description: "The team data has been synced to your Google Sheet.",
-        });
-
-    } catch (error) {
-        let errorMessage = "Could not sync data. Please try again.";
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-        toast({
-            variant: "destructive",
-            title: "Sync Failed",
-            description: errorMessage,
-        });
-    } finally {
-        setIsSyncing(false);
     }
   };
 
@@ -807,22 +768,9 @@ export default function AdminDashboard() {
                                 <Users className="h-6 w-6" />
                                 <CardTitle>Registered Teams</CardTitle>
                             </div>
-                            <CardDescription>A list of all teams registered for the Space Apps Challenge.</CardDescription>
+                            <CardDescription>A list of all teams registered for the Space Apps Challenge. Data is synced to Google Sheets automatically.</CardDescription>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-2">
-                            <Button onClick={handleSyncToSheet} disabled={teams.length === 0 || isSyncing}>
-                                {isSyncing ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Syncing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <RefreshCw className="mr-2" />
-                                        Sync to Google Sheet
-                                    </>
-                                )}
-                            </Button>
                             <Button onClick={handleExportToExcel} disabled={teams.length === 0 || isExporting}>
                                 {isExporting ? (
                                     <>
