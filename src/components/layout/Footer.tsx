@@ -69,4 +69,4 @@ export function Footer() {
       </div>
     </footer>
   );
-}//simple comment
+}
