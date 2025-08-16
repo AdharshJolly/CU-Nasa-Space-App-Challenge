@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { collection, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, query, doc, orderBy } from "firebase/firestore";
+import { collection, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, query, doc, orderBy, Timestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -35,6 +35,7 @@ interface Team {
     id: string;
     teamName: string;
     members: TeamMember[];
+    createdAt?: Timestamp;
 }
 
 const DashboardSkeleton = () => (
@@ -114,6 +115,14 @@ export default function AdminDashboard() {
 
     const unsubscribeTeams = onSnapshot(query(collection(db, "registrations")), (snapshot) => {
         const teamsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Team[];
+        
+        // Sort teams client-side
+        teamsData.sort((a, b) => {
+            const dateA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
+            const dateB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
+            return dateB - dateA; // Newest first
+        });
+
         setTeams(teamsData);
     });
 
@@ -330,7 +339,10 @@ export default function AdminDashboard() {
         const XLSX = await import("xlsx");
         
         const transformedData = teams.map(team => {
-            const row: {[key: string]: any} = { "Team Name": team.teamName };
+            const row: {[key: string]: any} = { 
+                "Team Name": team.teamName,
+                "Registered At": team.createdAt ? format(team.createdAt.toDate(), 'PPpp') : 'N/A'
+             };
             
             team.members.forEach((member, index) => {
                 const memberNumber = index + 1;
@@ -841,6 +853,9 @@ export default function AdminDashboard() {
                                 <Card key={team.id} className="p-4">
                                     <CardHeader className="p-2">
                                         <CardTitle className="text-base">{team.teamName}</CardTitle>
+                                        <CardDescription>
+                                            Registered: {team.createdAt ? format(team.createdAt.toDate(), 'PP') : 'N/A'}
+                                        </CardDescription>
                                     </CardHeader>
                                     <CardContent className="p-2 text-sm">
                                         <ul className="space-y-3">
@@ -861,6 +876,7 @@ export default function AdminDashboard() {
                                 <TableRow>
                                     <TableHead>Team Name</TableHead>
                                     <TableHead>Members</TableHead>
+                                    <TableHead>Registered At</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -879,6 +895,9 @@ export default function AdminDashboard() {
                                                     </li>
                                                 ))}
                                             </ul>
+                                        </TableCell>
+                                        <TableCell>
+                                            {team.createdAt ? format(team.createdAt.toDate(), 'PPpp') : 'N/A'}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -909,3 +928,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+    

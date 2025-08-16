@@ -1,3 +1,4 @@
+
 "use client";
 
 import { z } from "zod";
@@ -50,13 +51,17 @@ const memberSchema = z.object({
   name: z
     .string()
     .trim()
+    .min(1, { message: "Name is required." })
     .min(2, { message: "Name must be at least 2 characters." }),
   email: z
     .string()
     .email({ message: "Please enter a valid email address." })
     .trim()
-    .min(1, { message: "Email is required." }),
-  phone: z.string().regex(indianPhoneNumberRegex, {
+    .min(1, { message: "Email is required." })
+    .refine(email => email.endsWith('@btech.christuniversity.in') || email.endsWith('@christuniversity.in'), {
+        message: "Please use a valid CHRIST University email address.",
+    }),
+  phone: z.string().trim().min(1, { message: "Phone number is required." }).regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
   }),
   registerNumber: z
@@ -150,7 +155,10 @@ export function Registration() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await addDoc(collection(db, "registrations"), values);
+      await addDoc(collection(db, "registrations"), {
+          ...values,
+          createdAt: new Date(),
+      });
       setIsSuccessDialogOpen(true);
       form.reset();
     } catch (e) {
@@ -533,3 +541,5 @@ export function Registration() {
     </>
   );
 }
+
+    
