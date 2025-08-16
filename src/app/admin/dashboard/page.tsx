@@ -140,15 +140,9 @@ export default function AdminDashboard() {
       (snapshot) => {
         const eventsData = snapshot.docs.map((doc) => {
           const data = doc.data();
-          const eventDate = data.date ? new Date(data.date) : null;
-          if (eventDate) {
-            eventDate.setMinutes(
-              eventDate.getMinutes() + eventDate.getTimezoneOffset()
-            );
-          }
           return {
             id: doc.id,
-            date: eventDate ? eventDate.toISOString().split("T")[0] : "", // Store as yyyy-mm-dd string
+            date: data.date, // Keep as yyyy-mm-dd string
             title: data.title,
             description: data.description,
           };

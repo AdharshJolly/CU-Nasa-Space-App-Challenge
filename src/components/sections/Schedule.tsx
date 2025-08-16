@@ -7,6 +7,7 @@ import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { TimelineEvent } from "@/components/admin/TimelineEventDialog";
 import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 export function Schedule() {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
@@ -14,15 +15,28 @@ export function Schedule() {
   useEffect(() => {
     const q = query(collection(db, "timeline"), orderBy("date"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const eventsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as TimelineEvent[];
+      const eventsData = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          date: data.date, // This is a "yyyy-mm-dd" string
+          title: data.title,
+          description: data.description,
+        };
+      }) as TimelineEvent[];
       setTimelineEvents(eventsData);
     });
 
     return () => unsubscribe();
   }, []);
+
+  const formatDateInUTC = (dateString: string) => {
+    if (!dateString) return "No date";
+    // Create a date object, assuming the string is already in UTC (yyyy-mm-dd)
+    const date = new Date(`${dateString}T00:00:00Z`);
+    // Format it in UTC to avoid timezone shifts in display
+    return format(toZonedTime(date, "UTC"), "PPP");
+  };
 
   return (
     <section
@@ -48,7 +62,7 @@ export function Schedule() {
                   {index % 2 === 0 && (
                     <div className="bg-card p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
                       <p className="text-primary font-bold">
-                        {format(new Date(event.date), "PPP")}
+                        {formatDateInUTC(event.date)}
                       </p>
                       <h3 className="font-headline text-xl font-semibold mt-1">
                         {event.title}
@@ -66,7 +80,7 @@ export function Schedule() {
                   {index % 2 !== 0 && (
                     <div className="bg-card p-6 rounded-lg border-2 border-transparent hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
                       <p className="text-primary font-bold">
-                        {format(new Date(event.date), "PPP")}
+                        {formatDateInUTC(event.date)}
                       </p>
                       <h3 className="font-headline text-xl font-semibold mt-1">
                         {event.title}
