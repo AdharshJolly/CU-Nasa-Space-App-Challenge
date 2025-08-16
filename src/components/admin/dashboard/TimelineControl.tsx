@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { CalendarDays, Pencil, PlusCircle, Trash2 } from "lucide-react";
 import type { TimelineEvent } from "@/components/admin/TimelineEventDialog";
 import { format } from "date-fns";
+import { utcToZonedTime } from "date-fns-tz";
 
 interface TimelineControlProps {
     timelineEvents: TimelineEvent[];
@@ -15,6 +16,14 @@ interface TimelineControlProps {
     onEdit: (event: TimelineEvent) => void;
     onDelete: (id: string) => void;
 }
+
+const formatDateInUTC = (dateString: string) => {
+    if (!dateString) return "No date";
+    // Create a date object, assuming the string is already in UTC (yyyy-mm-dd)
+    const date = new Date(`${dateString}T00:00:00Z`);
+    // Format it in UTC to avoid timezone shifts in display
+    return format(utcToZonedTime(date, 'UTC'), "PPP");
+};
 
 export function TimelineControl({ timelineEvents, onAddNew, onEdit, onDelete }: TimelineControlProps) {
     return (
@@ -40,9 +49,7 @@ export function TimelineControl({ timelineEvents, onAddNew, onEdit, onDelete }: 
                     <CardHeader className="p-2">
                       <CardTitle className="text-base">{event.title}</CardTitle>
                       <CardDescription>
-                        {event.date
-                          ? format(new Date(event.date), "PPP")
-                          : "No date"}
+                        {formatDateInUTC(event.date)}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="p-2 text-sm text-muted-foreground">
@@ -101,9 +108,7 @@ export function TimelineControl({ timelineEvents, onAddNew, onEdit, onDelete }: 
                   {timelineEvents.map((event) => (
                     <TableRow key={event.id}>
                       <TableCell className="font-medium">
-                        {event.date
-                          ? format(new Date(event.date), "PPP")
-                          : "No date"}
+                        {formatDateInUTC(event.date)}
                       </TableCell>
                       <TableCell>{event.title}</TableCell>
                       <TableCell className="text-muted-foreground">

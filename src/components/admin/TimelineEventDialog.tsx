@@ -46,10 +46,10 @@ export function TimelineEventDialog({ isOpen, onClose, onSave, event }: Timeline
   useEffect(() => {
     if (isOpen) {
         if (event) {
-            // Firestore timestamp might be a string, ensure it's a Date object
-            const eventDate = event.date ? new Date(event.date) : new Date();
-            // Adjust for timezone differences if the date is off by one day
-            eventDate.setMinutes(eventDate.getMinutes() + eventDate.getTimezoneOffset());
+            // When editing, create a date from the yyyy-mm-dd string.
+            // Appending 'T00:00:00Z' ensures it's parsed as a UTC date,
+            // preventing the browser from shifting it to the local timezone.
+            const eventDate = event.date ? new Date(`${event.date}T00:00:00Z`) : new Date();
             form.reset({ ...event, date: eventDate });
         } else {
             form.reset({ date: undefined, title: "", description: "" });
