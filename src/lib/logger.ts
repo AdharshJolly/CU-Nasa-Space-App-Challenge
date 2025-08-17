@@ -18,12 +18,11 @@ export async function logActivity(userEmail: string | null, action: string, deta
 
     try {
         if (!adminDb) {
-            throw new Error("Admin DB not initialized. Cannot log activity.");
+            console.error("Admin DB not initialized. Cannot log activity.");
+            return;
         }
         await addDoc(collection(adminDb, 'logs'), logItem);
     } catch (error) {
-        console.error('Failed to log activity:', error);
-        // Depending on requirements, you might want to re-throw the error
-        // or handle it in another way (e.g., send to another logging service).
+        console.error('Failed to log activity to Firestore:', error);
     }
 }
