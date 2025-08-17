@@ -45,18 +45,22 @@ async function attemptRetry() {
     if (isInitialized && adminDb) {
         console.log("Firebase Admin re-initialized successfully. Flushing queue...");
         await flushQueue();
+        if (logQueue.length === 0) {
+          isRetrying = false; // Stop retrying if queue is empty
+        }
     } else {
         console.log("Firebase Admin re-initialization failed. Logs will remain in queue.");
     }
     
-    // Set a timeout to allow for another retry attempt after a delay
-    setTimeout(() => {
-        isRetrying = false;
-        // If there are still items in the queue, trigger another attempt
-        if (logQueue.length > 0) {
-            attemptRetry();
-        }
-    }, 5000); // Retry every 5 seconds
+    // Set a timeout to allow for another retry attempt after a delay only if there are still items in the queue.
+    if(logQueue.length > 0) {
+      setTimeout(() => {
+          isRetrying = false;
+          attemptRetry();
+      }, 5000); // Retry every 5 seconds
+    } else {
+      isRetrying = false;
+    }
 }
 
 
@@ -80,12 +84,16 @@ export async function logActivity(userEmail: string | null, action: string, deta
        } catch (error) {
            console.error('Error writing log to Firestore, adding to queue:', error);
            logQueue.push(logItem);
-           attemptRetry();
+           if(!isRetrying) {
+             attemptRetry();
+           }
        }
     } else {
         // If DB is not ready, queue the log and start the retry mechanism
         console.log(`Firebase Admin not ready. Queuing log for action: ${action}`);
         logQueue.push(logItem);
-        attemptRetry();
+        if(!isRetrying) {
+          attemptRetry();
+        }
     }
 }
