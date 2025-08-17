@@ -18,9 +18,6 @@ export type UserRole = typeof USER_ROLES[number];
 
 const userSchema = z.object({
     email: z.string().email("Please enter a valid email."),
-    // Password is optional. It is only required if the user doesn't already exist.
-    // The backend will handle this logic.
-    password: z.string().min(6, "Password must be at least 6 characters.").optional().or(z.literal('')),
     role: z.enum(USER_ROLES, {
         required_error: "Please select a role for the user.",
     }),
@@ -39,7 +36,6 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
     resolver: zodResolver(userSchema),
     defaultValues: {
         email: "",
-        password: "",
         role: "volunteer",
     }
   });
@@ -49,10 +45,9 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
         form.reset({
             email: user.email,
             role: user.role,
-            password: ""
         });
     } else {
-        form.reset({ email: "", password: "", role: "volunteer" });
+        form.reset({ email: "", role: "volunteer" });
     }
   }, [user, form, isOpen])
 
@@ -69,7 +64,9 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
             <DialogHeader>
                 <DialogTitle>{user ? "Edit User" : "Add or Import User"}</DialogTitle>
                 <DialogDescription>
-                    {user ? "Update the user's role." : "Create a new user or assign a role to an existing user."}
+                    {user 
+                        ? "Update the user's role." 
+                        : "Create a new user or assign a role to an existing user. New users will receive an email to set their password."}
                 </DialogDescription>
             </DialogHeader>
              <Form {...form}>
@@ -87,24 +84,6 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
                             </FormItem>
                         )}
                     />
-                    {!user && (
-                         <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Password</FormLabel>
-                                    <FormControl>
-                                        <Input type="password" placeholder="••••••••" {...field} disabled={isSubmitting}/>
-                                    </FormControl>
-                                    <FormMessage />
-                                    <p className="text-xs text-muted-foreground pt-1">
-                                        Only required if creating a brand new user. Leave blank if the user already exists.
-                                    </p>
-                                </FormItem>
-                            )}
-                        />
-                    )}
                      <FormField
                         control={form.control}
                         name="role"

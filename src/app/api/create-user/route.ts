@@ -35,7 +35,7 @@ export async function POST(req: Request) {
         const auth = getAuth();
         const db = getFirestore();
 
-        const { email, password, role, uid } = await req.json();
+        const { email, role, uid } = await req.json();
 
         if (!email || !role) {
             return NextResponse.json({ error: 'Email and role are required' }, { status: 400 });
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
             // Update role in Firestore
             await db.collection('users').doc(uid).update({ role });
             
-            return NextResponse.json({ message: 'User updated successfully', uid });
+            return NextResponse.json({ message: 'User updated successfully', uid, isNewUser: false });
 
         } else { // This is a create or "import" operation
             try {
@@ -64,18 +64,14 @@ export async function POST(req: Request) {
                     createdAt: existingUser.metadata.creationTime,
                 }, { merge: true });
 
-                return NextResponse.json({ message: `Existing user ${email} updated with new role.`, uid: existingUser.uid });
+                return NextResponse.json({ message: `Existing user ${email} updated with new role.`, uid: existingUser.uid, isNewUser: false });
 
             } catch (error: any) {
                  if (error.code === 'auth/user-not-found') {
-                    // User does not exist, so create them
-                    if (!password || password.length < 6) {
-                        return NextResponse.json({ error: 'Password is required and must be at least 6 characters long for new users.' }, { status: 400 });
-                    }
+                    // User does not exist, so create them without a password
                     const newUserRecord = await auth.createUser({
                         email,
-                        password,
-                        emailVerified: true, 
+                        emailVerified: false, // User will verify when setting password
                     });
             
                     await auth.setCustomUserClaims(newUserRecord.uid, { role });
@@ -87,7 +83,8 @@ export async function POST(req: Request) {
                         createdAt: new Date().toISOString(),
                     });
             
-                    return NextResponse.json({ message: 'User created successfully', uid: newUserRecord.uid });
+                    // The client will now trigger the password reset email
+                    return NextResponse.json({ message: 'User created successfully', uid: newUserRecord.uid, isNewUser: true });
                  } else {
                     // Re-throw other errors
                     throw error;
@@ -97,10 +94,6 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error('Error creating/updating user:', error);
-        // Provide more specific error messages
-        if (error.code === 'auth/invalid-password') {
-             return NextResponse.json({ error: 'The password must be a string with at least six characters.' }, { status: 400 });
-        }
         return NextResponse.json({ error: error.message || 'An unknown error occurred' }, { status: 500 });
     }
 }

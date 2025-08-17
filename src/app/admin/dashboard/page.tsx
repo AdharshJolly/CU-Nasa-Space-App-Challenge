@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { onAuthStateChanged, signOut, type User, sendPasswordResetEmail } from "firebase/auth";
 import {
   collection,
   onSnapshot,
@@ -100,7 +100,6 @@ export default function AdminDashboard() {
   const [isClient, setIsClient] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [duplicates, setDuplicates] = useState<DuplicateInfo[]>([]);
-  const [isDuplicatesDialogOpen, setIsDuplicatesDialogOpen] = useState(false);
   const [superAdminEmails, setSuperAdminEmails] = useState<string[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
@@ -528,14 +527,15 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveUser = async (data: { email: string, password?: string, role: UserRole }) => {
+  const handleSaveUser = async (data: { email: string, role: UserRole }) => {
+    const isEditing = !!editingUser;
+
     try {
         const response = await fetch('/api/create-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: data.email,
-                password: data.password,
                 role: data.role,
                 // Pass editing user's uid if it exists
                 uid: editingUser ? editingUser.uid : undefined 
@@ -547,11 +547,23 @@ export default function AdminDashboard() {
             throw new Error(errorData.error || 'Failed to save user.');
         }
 
-        toast({
-            title: "Success!",
-            description: editingUser ? `User ${data.email} updated.` : `User ${data.email} created/imported.`
-        });
-        await logActivity(user?.email, editingUser ? 'User Updated' : 'User Created', { targetUser: data.email, role: data.role });
+        const result = await response.json();
+
+        // If a new user was created, send them a password reset email.
+        if (result.isNewUser) {
+            await sendPasswordResetEmail(auth, data.email);
+            toast({
+                title: "User Created!",
+                description: `${data.email} has been created. A password setup email has been sent to them.`
+            });
+        } else {
+             toast({
+                title: "Success!",
+                description: isEditing ? `User ${data.email} updated.` : `Existing user ${data.email} updated with new role.`
+            });
+        }
+
+        await logActivity(user?.email, isEditing ? 'User Updated' : 'User Created/Imported', { targetUser: data.email, role: data.role });
         
         setIsUserDialogOpen(false);
         setEditingUser(null);
