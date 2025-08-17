@@ -15,33 +15,30 @@ export const DashboardSkeleton = () => (
       </header>
       <main className="flex-1 p-4 md:p-8">
         <div className="container mx-auto grid gap-8 animate-pulse">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-1/3 mb-2" />
-              <Skeleton className="h-4 w-2/3" />
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </CardContent>
-          </Card>
+          {/* Card Skeleton Structure */}
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                  <Skeleton className="h-6 w-1/3 mb-2" />
+                  <Skeleton className="h-4 w-2/3" />
+              </div>
+              <div className="p-6 pt-0 grid gap-4 md:grid-cols-2">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+              </div>
+          </div>
           {[...Array(3)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-1/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
+             <div key={i} className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                 <div className="flex flex-col space-y-1.5 p-6">
+                      <Skeleton className="h-6 w-1/4 mb-2" />
+                      <Skeleton className="h-4 w-1/2" />
+                 </div>
+                 <div className="p-6 pt-0">
+                      <Skeleton className="h-20 w-full" />
+                 </div>
+             </div>
           ))}
         </div>
       </main>
     </div>
   );
   
-  // Dummy Card components to avoid linting errors for undefined components
-  const Card = ({ children }: { children: React.ReactNode }) => <div className="card">{children}</div>;
-  const CardHeader = ({ children }: { children: React.ReactNode }) => <div className="card-header">{children}</div>;
-  const CardContent = ({ children }: { children: React.ReactNode }) => <div className="card-content">{children}</div>;

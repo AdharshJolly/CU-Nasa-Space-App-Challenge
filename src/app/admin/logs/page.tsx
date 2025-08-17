@@ -54,6 +54,7 @@ export default function AdminLogs() {
       } else {
         router.push("/admin");
       }
+      setIsLoading(false);
     });
 
     return () => unsubscribeAuth();
@@ -61,7 +62,6 @@ export default function AdminLogs() {
 
   useEffect(() => {
     if (!isSuperAdmin) {
-        setIsLoading(false);
         return;
     }
 
@@ -72,7 +72,6 @@ export default function AdminLogs() {
         ...doc.data(),
       })) as Log[];
       setLogs(logsData);
-      setIsLoading(false);
     }, (error) => {
         console.error("Error fetching logs:", error);
         toast({
@@ -80,7 +79,6 @@ export default function AdminLogs() {
             title: "Error",
             description: "Could not fetch activity logs.",
         });
-        setIsLoading(false);
     });
 
     return () => unsubscribeLogs();

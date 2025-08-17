@@ -98,19 +98,13 @@ export default function AdminDashboard() {
   const [isSyncing, setIsSyncing] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [duplicates, setDuplicates] = useState<DuplicateInfo[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isClient) return;
-
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
         if (currentUser) {
             const idTokenResult = await currentUser.getIdTokenResult();
@@ -130,10 +124,11 @@ export default function AdminDashboard() {
         } else {
             router.push("/admin");
         }
+        setIsLoading(false);
     });
 
     return () => unsubscribeAuth();
-}, [isClient, router, toast]);
+}, [router, toast]);
 
 
   useEffect(() => {
@@ -758,7 +753,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (!isClient || !user) {
+  if (isLoading || !user) {
     return <DashboardSkeleton />;
   }
 
