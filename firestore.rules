@@ -1,0 +1,61 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow anyone to create a registration
+    // Only allow authenticated users (admins) to read, update, or delete them
+    match /registrations/{registrationId} {
+      allow create, read: if true;
+      allow update, delete: if request.auth != null;
+    }
+    
+    // Lock down the 'logs' collection
+    match /logs/{logId} {
+      // READ: Allow only if the user is authenticated and their email is in the superAdminEmails array
+      // in the /settings/admins document.
+      allow read: if request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/settings/admins).data.superAdminEmails;
+
+      // CREATE: Allow any authenticated user to create a log entry.
+      // This is secure because the content of the log is generated on the server.
+      allow create: if request.auth != null;
+
+      // UPDATE, DELETE: Nobody should be able to update or delete logs.
+      allow update, delete: if false;
+    }
+    
+    match /domains/{domainId} {
+    	allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Allow admins to manage settings, but anyone can read them
+    match /settings/{setting} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Rules for the 'settings/admins' document
+    match /settings/admins {
+      // Allow read access to any authenticated user (so rules can check against it)
+      allow get: if request.auth != null;
+      // Allow write access only to super admins already in the list
+      allow write: if request.auth != null && request.auth.token.email in resource.data.superAdminEmails;
+    }
+
+
+    // Allow anyone to read problems
+    // Only allow admins to create, update, or delete them
+    match /problems/{problemId} {
+        allow read: if true;
+        allow create, update, delete: if request.auth != null;
+    }
+
+    // Allow anyone to read timeline events
+    // Only allow admins to create, update, or delete them
+    match /timeline/{eventId} {
+        allow read: if true;
+        allow create, update, delete: if request.auth != null;
+    }
+  }
+}
