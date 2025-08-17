@@ -86,6 +86,7 @@ export default function AdminDashboard() {
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const [isDomainDialogOpen, setIsDomainDialogOpen] = useState(false);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [isDuplicatesDialogOpen, setIsDuplicatesDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(
     null
   );
