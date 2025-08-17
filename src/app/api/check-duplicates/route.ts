@@ -21,8 +21,8 @@ interface Team {
 
 export async function GET() {
     if (!adminDb) {
-        console.error("Firebase Admin has not been initialized in API route.");
-        return NextResponse.json({ error: "Firebase Admin has not been initialized." }, { status: 500 });
+        console.error("Firebase Admin DB is not available in API route.");
+        return NextResponse.json({ error: "Server is not ready, please try again later." }, { status: 503 });
     }
 
     try {

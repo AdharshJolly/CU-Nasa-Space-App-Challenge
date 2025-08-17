@@ -3,11 +3,18 @@ import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { getAuth, Auth } from 'firebase-admin/auth';
 
-let adminApp: App;
-let adminDb: Firestore;
-let adminAuth: Auth;
+let adminApp: App | undefined;
+let adminDb: Firestore | undefined;
+let adminAuth: Auth | undefined;
+
+let initializationError: Error | null = null;
+let isInitialized = false;
 
 function initializeAdmin() {
+  if (isInitialized) {
+    return;
+  }
+  
   if (getApps().some(app => app.name === 'admin')) {
     const existingApp = getApps().find(app => app.name === 'admin');
     if (existingApp) {
@@ -26,18 +33,20 @@ function initializeAdmin() {
       }, 'admin');
     } catch (error: any) {
         console.error('Firebase Admin SDK initialization error:', error.message);
-        // Do not proceed if initialization fails
-        return;
+        initializationError = error;
+        adminApp = undefined; // Ensure app is undefined on error
     }
   }
   
   if (adminApp) {
     adminDb = getFirestore(adminApp);
     adminAuth = getAuth(adminApp);
+    isInitialized = true;
+    initializationError = null; // Clear error on success
   }
 }
 
 // Initialize on first import
 initializeAdmin();
 
-export { adminDb, adminAuth };
+export { adminDb, adminAuth, initializeAdmin, isInitialized };
