@@ -113,7 +113,10 @@ export default function AdminLogs() {
   const formatDate = (timestamp: Timestamp) => {
     if (!timestamp) return 'N/A';
     const date = timestamp.toDate();
-    return format(toZonedTime(date, 'UTC'), "PPP 'at' h:mm:ss a");
+    // Convert timestamp to IST (Asia/Kolkata)
+    const zonedDate = toZonedTime(date, 'Asia/Kolkata');
+    // Format the date in IST
+    return format(zonedDate, "PPP 'at' h:mm:ss a");
   };
 
   return (
@@ -176,7 +179,7 @@ export default function AdminLogs() {
                     <Table className="hidden md:table">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[25%]">Timestamp</TableHead>
+                                <TableHead className="w-[25%]">Timestamp (IST)</TableHead>
                                 <TableHead className="w-[15%]">User</TableHead>
                                 <TableHead className="w-[20%]">Action</TableHead>
                                 <TableHead>Details</TableHead>
