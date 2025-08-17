@@ -50,7 +50,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import { generateTeamName } from "@/ai/flows/generate-team-name-flow";
 import { logActivity } from "@/lib/logger";
 
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
@@ -172,7 +171,6 @@ const schools = [
 
 export function Registration() {
   const { toast } = useToast();
-  const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [isFormReady, setIsFormReady] = useState(false);
 
@@ -236,30 +234,6 @@ export function Registration() {
   });
 
   const { isSubmitting } = form.formState;
-
-  const handleGenerateTeamName = async () => {
-    setIsGeneratingName(true);
-    try {
-      const response = await generateTeamName({
-        nonce: Math.random().toString(36).substring(7),
-      });
-      if (response.teamName) {
-        form.setValue("teamName", response.teamName, { shouldValidate: true });
-        toast({
-          title: "Team Name Generated!",
-          description: `We've called your team "${response.teamName}". Feel free to change it!`,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Name Generation Failed",
-        description: "Could not generate a team name. Please try again or enter one manually.",
-      });
-    } finally {
-      setIsGeneratingName(false);
-    }
-  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -369,35 +343,16 @@ export function Registration() {
                     name="teamName"
                     render={({ field }) => (
                       <FormItem>
-                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                          <div className="flex-grow">
-                            <FormLabel className="text-lg font-headline">
-                              Team Name
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="The Star Gazers"
-                                {...field}
-                                disabled={isSubmitDisabled || isGeneratingName}
-                              />
-                            </FormControl>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={handleGenerateTeamName}
-                            disabled={isSubmitDisabled || isGeneratingName}
-                          >
-                            {isGeneratingName ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Generating...
-                              </>
-                            ) : (
-                              "Generate a Name"
-                            )}
-                          </Button>
-                        </div>
+                        <FormLabel className="text-lg font-headline">
+                          Team Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="The Star Gazers"
+                            {...field}
+                            disabled={isSubmitDisabled}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
