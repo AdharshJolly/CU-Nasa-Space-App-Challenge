@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { collection, onSnapshot, query, orderBy, Timestamp, doc } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, Timestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, BookText, Loader2, Search } from "lucide-react";
+import { ArrowLeft, BookText, Search } from "lucide-react";
 import Link from "next/link";
 import { DashboardSkeleton } from "@/components/admin/dashboard/DashboardSkeleton";
 
@@ -35,26 +35,13 @@ export default function AdminLogs() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        setUser(currentUser);
-      } else {
-        router.push("/admin");
-      }
-    });
+        const idTokenResult = await currentUser.getIdTokenResult();
+        const userRole = idTokenResult.claims.role;
 
-    return () => unsubscribeAuth();
-  }, [router]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const unsubscribeAdmins = onSnapshot(doc(db, "settings", "admins"), (doc) => {
-      if (doc.exists()) {
-        const adminEmails = doc.data().superAdminEmails || [];
-        const isAdmin = user.email ? adminEmails.includes(user.email) : false;
-        
-        if (isAdmin) {
+        if (userRole === 'superadmin') {
+          setUser(currentUser);
           setIsSuperAdmin(true);
         } else {
           toast({
@@ -62,13 +49,15 @@ export default function AdminLogs() {
             title: "Access Denied",
             description: "You do not have permission to view this page.",
           });
-          // router.push("/admin/dashboard");
+          router.push("/admin/dashboard");
         }
+      } else {
+        router.push("/admin");
       }
     });
 
-    return () => unsubscribeAdmins();
-  }, [user, router, toast]);
+    return () => unsubscribeAuth();
+  }, [router, toast]);
 
   useEffect(() => {
     if (!isSuperAdmin) {

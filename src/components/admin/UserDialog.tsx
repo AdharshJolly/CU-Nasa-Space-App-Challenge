@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import type { AppUser } from "@/app/admin/dashboard/page";
 
-export const USER_ROLES = ["admin", "faculty", "volunteer", "poc"] as const;
+export const USER_ROLES = ["superadmin", "admin", "faculty", "volunteer", "poc"] as const;
 export type UserRole = typeof USER_ROLES[number];
 
 const userSchema = z.object({

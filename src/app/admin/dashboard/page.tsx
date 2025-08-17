@@ -101,7 +101,6 @@ export default function AdminDashboard() {
   const [isClient, setIsClient] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [duplicates, setDuplicates] = useState<DuplicateInfo[]>([]);
-  const [superAdminEmails, setSuperAdminEmails] = useState<string[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
 
@@ -119,6 +118,7 @@ export default function AdminDashboard() {
 
             if (userRole === 'admin' || userRole === 'superadmin') {
                 setUser(currentUser);
+                setIsSuperAdmin(userRole === 'superadmin');
             } else {
                 toast({
                     variant: "destructive",
@@ -140,26 +140,19 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!user) return; // Don't run listeners if user is not logged in
 
-    // Check for super admin status
-    const unsubscribeAdmins = onSnapshot(doc(db, "settings", "admins"), (doc) => {
-        if (doc.exists()) {
-            const adminEmails = doc.data().superAdminEmails || [];
-            setSuperAdminEmails(adminEmails);
-            if (user.email) {
-              const superAdminStatus = adminEmails.includes(user.email);
-              setIsSuperAdmin(superAdminStatus);
-              // If the user becomes a super admin, start listening to the users collection
-              if (superAdminStatus) {
-                const unsubscribeUsers = onSnapshot(query(collection(db, "users")), (snapshot) => {
-                    const usersData = snapshot.docs.map(doc => ({ ...doc.data() })) as AppUser[];
-                    setUsers(usersData);
-                });
-                return () => unsubscribeUsers();
-              }
-            }
-        }
-    });
+    // If the user is a super admin, start listening to the users collection
+    if (isSuperAdmin) {
+      const unsubscribeUsers = onSnapshot(query(collection(db, "users")), (snapshot) => {
+          const usersData = snapshot.docs.map(doc => ({ ...doc.data() })) as AppUser[];
+          setUsers(usersData);
+      });
+      return () => unsubscribeUsers();
+    }
+  }, [user, isSuperAdmin]);
 
+
+  useEffect(() => {
+    if (!user) return; // Don't run listeners if user is not logged in
 
     const teamsQuery = query(collection(db, "registrations"));
     const unsubscribeTeams = onSnapshot(teamsQuery, (snapshot) => {
@@ -246,7 +239,6 @@ export default function AdminDashboard() {
     );
 
     return () => {
-      unsubscribeAdmins();
       unsubscribeTeams();
       unsubscribeProblems();
       unsubscribeSettings();
@@ -262,7 +254,7 @@ export default function AdminDashboard() {
       findDuplicates(false); // don't re-open the dialog
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teams]);
+  }, [teams, isDuplicatesDialogOpen]);
 
   const filteredTeams = useMemo(() => {
     if (!searchQuery) {
