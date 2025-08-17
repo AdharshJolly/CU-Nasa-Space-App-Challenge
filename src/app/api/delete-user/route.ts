@@ -1,38 +1,14 @@
 
 import { NextResponse } from 'next/server';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
 import { logActivity } from '@/lib/logger';
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
-// Function to initialize Firebase Admin SDK
-const initializeFirebaseAdmin = () => {
-    if (getApps().length > 0) {
-        return;
-    }
-    
-    if (!process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
-        throw new Error('The FIREBASE_ADMIN_PRIVATE_KEY environment variable is not set.');
-    }
-    
-    try {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_PRIVATE_KEY);
-        initializeApp({
-            credential: cert(serviceAccount)
-        });
-    } catch (error) {
-        if (error instanceof SyntaxError) {
-            throw new Error('Failed to parse FIREBASE_ADMIN_PRIVATE_KEY. Please ensure it is a valid JSON string.');
-        }
-        throw error;
-    }
-};
 
 export async function POST(req: Request) {
     try {
-        initializeFirebaseAdmin();
-        const auth = getAuth();
-        const db = getFirestore();
+        if (!adminAuth || !adminDb) {
+            throw new Error('Firebase Admin has not been initialized.');
+        }
 
         const { uid, deletedBy } = await req.json();
 
@@ -41,17 +17,19 @@ export async function POST(req: Request) {
         }
         
         // Fetch user to get email for logging before deletion
-        const userRecord = await auth.getUser(uid);
+        const userRecord = await adminAuth.getUser(uid);
         const userEmail = userRecord.email;
 
         // Delete from Firebase Authentication
-        await auth.deleteUser(uid);
+        await adminAuth.deleteUser(uid);
 
         // Delete from Firestore 'users' collection
-        await db.collection('users').doc(uid).delete();
+        await adminDb.collection('users').doc(uid).delete();
         
         // Log the action
-        await logActivity(deletedBy, 'User Deleted', { deletedUserUid: uid, deletedUserEmail: userEmail });
+        if (deletedBy && userEmail) {
+            await logActivity(deletedBy, 'User Deleted', { deletedUserUid: uid, deletedUserEmail: userEmail });
+        }
 
         return NextResponse.json({ message: 'User deleted successfully' });
 

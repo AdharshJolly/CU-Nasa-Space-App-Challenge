@@ -1,39 +1,12 @@
 
 import { NextResponse } from 'next/server';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-
-// Function to initialize Firebase Admin SDK
-const initializeFirebaseAdmin = () => {
-    if (getApps().length > 0) {
-        return;
-    }
-    
-    if (!process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
-        throw new Error('The FIREBASE_ADMIN_PRIVATE_KEY environment variable is not set.');
-    }
-    
-    try {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_PRIVATE_KEY);
-        initializeApp({
-            credential: cert(serviceAccount)
-        });
-    } catch (error) {
-        // Provide a more specific error for JSON parsing issues.
-        if (error instanceof SyntaxError) {
-            throw new Error('Failed to parse FIREBASE_ADMIN_PRIVATE_KEY. Please ensure it is a valid JSON string.');
-        }
-        throw error; // Re-throw other initialization errors.
-    }
-};
-
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
 export async function POST(req: Request) {
     try {
-        initializeFirebaseAdmin(); // Ensure Firebase Admin is initialized on each request
-        const auth = getAuth();
-        const db = getFirestore();
+        if (!adminAuth || !adminDb) {
+            throw new Error('Firebase Admin has not been initialized.');
+        }
 
         const { email, role, uid } = await req.json();
 
@@ -43,21 +16,21 @@ export async function POST(req: Request) {
 
         if (uid) { // This is an edit operation
             // Update custom claims
-            await auth.setCustomUserClaims(uid, { role });
+            await adminAuth.setCustomUserClaims(uid, { role });
 
             // Update role in Firestore
-            await db.collection('users').doc(uid).update({ role });
+            await adminDb.collection('users').doc(uid).update({ role });
             
             return NextResponse.json({ message: 'User updated successfully', uid, isNewUser: false });
 
         } else { // This is a create or "import" operation
             try {
                 // Check if user already exists
-                const existingUser = await auth.getUserByEmail(email);
+                const existingUser = await adminAuth.getUserByEmail(email);
 
                 // If user exists, update their role (import them)
-                await auth.setCustomUserClaims(existingUser.uid, { role });
-                await db.collection('users').doc(existingUser.uid).set({
+                await adminAuth.setCustomUserClaims(existingUser.uid, { role });
+                await adminDb.collection('users').doc(existingUser.uid).set({
                     uid: existingUser.uid,
                     email: existingUser.email,
                     role,
@@ -68,14 +41,14 @@ export async function POST(req: Request) {
             } catch (error: any) {
                  if (error.code === 'auth/user-not-found') {
                     // User does not exist, so create them without a password
-                    const newUserRecord = await auth.createUser({
+                    const newUserRecord = await adminAuth.createUser({
                         email,
                         emailVerified: false, // User will verify when setting password
                     });
             
-                    await auth.setCustomUserClaims(newUserRecord.uid, { role });
+                    await adminAuth.setCustomUserClaims(newUserRecord.uid, { role });
             
-                    await db.collection('users').doc(newUserRecord.uid).set({
+                    await adminDb.collection('users').doc(newUserRecord.uid).set({
                         uid: newUserRecord.uid,
                         email,
                         role,

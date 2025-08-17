@@ -1,29 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-
-const initializeFirebaseAdmin = () => {
-    if (getApps().length > 0) {
-        return;
-    }
-    
-    if (!process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
-        throw new Error('The FIREBASE_ADMIN_PRIVATE_KEY environment variable is not set.');
-    }
-    
-    try {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_PRIVATE_KEY);
-        initializeApp({
-            credential: cert(serviceAccount)
-        });
-    } catch (error) {
-        if (error instanceof SyntaxError) {
-            throw new Error('Failed to parse FIREBASE_ADMIN_PRIVATE_KEY. Please ensure it is a valid JSON string.');
-        }
-        throw error;
-    }
-};
+import { adminDb } from '@/lib/firebase-admin';
 
 interface TeamMember {
   name: string;
@@ -44,10 +21,11 @@ interface Team {
 
 export async function GET() {
     try {
-        initializeFirebaseAdmin();
-        const db = getFirestore();
+        if (!adminDb) {
+            throw new Error("Firebase Admin has not been initialized.");
+        }
 
-        const registrationsSnapshot = await db.collection('registrations').get();
+        const registrationsSnapshot = await adminDb.collection('registrations').get();
         
         const emails = new Set<string>();
         const registerNumbers = new Set<string>();
