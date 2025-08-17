@@ -4,10 +4,6 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
-import Manoj from "@/assets/co-ordinators/manoj.jpeg";
-import Adharsh from "@/assets/co-ordinators/adharsh.jpg";
-import Vishnu from "@/assets/co-ordinators/vishnu.jpg";
-import Annemarie from "@/assets/co-ordinators/annemarie.jpg";
 
 const facultyCoordinators = [
   {
@@ -71,28 +67,28 @@ const facultyCoordinators = [
 const studentCoordinators = [
   {
     name: "Manoj Reddy",
-    avatar: Manoj.src,
+    avatar: "/assets/co-ordinators/manoj.jpeg",
     hint: "student coordinator, Christ University, male portrait, event contact, phone, email",
     email: "m.manoj@btech.christuniversity.in",
     phone: "+918618627856",
   },
   {
     name: "Vishnu Nambiar",
-    avatar: Vishnu.src,
+    avatar: "/assets/co-ordinators/vishnu.jpg",
     hint: "student coordinator, Christ University, male portrait, event contact, phone, email",
     email: "vishnu.nambiar@btech.christuniversity.in",
     phone: "+918848799780",
   },
   {
     name: "Adharsh Jolly",
-    avatar: Adharsh.src,
+    avatar: "/assets/co-ordinators/adharsh.jpg",
     hint: "student coordinator, Christ University, male portrait, event contact, phone, email",
     email: "adharsh.jolly@btech.christuniversity.in",
     phone: "+919431703182",
   },
   {
     name: "Annmarie Vinish",
-    avatar: Annemarie.src,
+    avatar: "/assets/co-ordinators/annemarie.jpg",
     hint: "student coordinator, Christ University, female portrait, event contact, phone, email",
     email: "annmarie.vinish@btech.christuniversity.in",
     phone: "+918921323033",

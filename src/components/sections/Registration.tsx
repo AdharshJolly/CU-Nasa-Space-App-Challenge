@@ -1,4 +1,3 @@
-
 "use client";
 
 import { z } from "zod";
@@ -31,7 +30,14 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { collection, addDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  Timestamp,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useEffect, useState } from "react";
 import {
@@ -53,7 +59,6 @@ let existingEmails: string[] = [];
 let existingRegisterNumbers: string[] = [];
 let existingPhones: string[] = [];
 
-
 const memberSchema = z.object({
   name: z
     .string()
@@ -65,20 +70,25 @@ const memberSchema = z.object({
     .email({ message: "Please enter a valid email address." })
     .trim()
     .min(1, { message: "Email is required." })
-    .refine(val => !existingEmails.includes(val.toLowerCase()), {
-        message: "This email is already registered."
+    .refine((val) => !existingEmails.includes(val.toLowerCase()), {
+      message: "This email is already registered.",
     }),
-  phone: z.string().trim().min(1, { message: "Phone number is required." }).regex(indianPhoneNumberRegex, {
-    message: "Please enter a valid 10-digit Indian phone number.",
-  }).refine(val => !existingPhones.includes(val), {
-    message: "This phone number is already registered."
-  }),
+  phone: z
+    .string()
+    .trim()
+    .min(1, { message: "Phone number is required." })
+    .regex(indianPhoneNumberRegex, {
+      message: "Please enter a valid 10-digit Indian phone number.",
+    })
+    .refine((val) => !existingPhones.includes(val), {
+      message: "This phone number is already registered.",
+    }),
   registerNumber: z
     .string()
     .trim()
     .min(1, { message: "Register number is required." })
-    .refine(val => !existingRegisterNumbers.includes(val.toLowerCase()), {
-        message: "This register number is already registered."
+    .refine((val) => !existingRegisterNumbers.includes(val.toLowerCase()), {
+      message: "This register number is already registered.",
     }),
   className: z.string().trim().min(1, { message: "Class is required." }),
   department: z.string().trim().min(1, { message: "Department is required." }),
@@ -95,7 +105,10 @@ const formSchema = z
       .refine(
         async (teamName) => {
           if (!teamName) return true;
-          const q = query(collection(db, "registrations"), where("teamName", "==", teamName));
+          const q = query(
+            collection(db, "registrations"),
+            where("teamName", "==", teamName)
+          );
           const querySnapshot = await getDocs(q);
           return querySnapshot.empty;
         },
@@ -107,34 +120,41 @@ const formSchema = z
       .array(memberSchema)
       .min(2, "You must have at least two members.")
       .max(5, "You can have a maximum of 5 members."),
-  }).refine((data) => {
-    const emails = new Set<string>();
-    for (const member of data.members) {
-      const lowerEmail = member.email.toLowerCase();
-      if (emails.has(lowerEmail)) {
-        return false;
+  })
+  .refine(
+    (data) => {
+      const emails = new Set<string>();
+      for (const member of data.members) {
+        const lowerEmail = member.email.toLowerCase();
+        if (emails.has(lowerEmail)) {
+          return false;
+        }
+        emails.add(lowerEmail);
       }
-      emails.add(lowerEmail);
+      return true;
+    },
+    {
+      message: "Each team member must have a unique email address.",
+      path: ["members"],
     }
-    return true;
-  }, {
-    message: "Each team member must have a unique email address.",
-    path: ["members"],
-  }).refine((data) => {
-    const regNos = new Set<string>();
-    for (const member of data.members) {
+  )
+  .refine(
+    (data) => {
+      const regNos = new Set<string>();
+      for (const member of data.members) {
         const lowerRegNo = member.registerNumber.toLowerCase();
         if (regNos.has(lowerRegNo)) {
-            return false;
+          return false;
         }
         regNos.add(lowerRegNo);
+      }
+      return true;
+    },
+    {
+      message: "Each team member must have a unique register number.",
+      path: ["members"],
     }
-    return true;
-  }, {
-    message: "Each team member must have a unique register number.",
-    path: ["members"],
-  });
-
+  );
 
 const schools = [
   "School of Architecture",
@@ -157,29 +177,29 @@ export function Registration() {
 
   useEffect(() => {
     const fetchExistingData = async () => {
-        try {
-            const response = await fetch('/api/check-duplicates');
-            if (!response.ok) {
-                throw new Error('Failed to fetch existing registration data.');
-            }
-            const data = await response.json();
-            existingEmails = data.emails || [];
-            existingRegisterNumbers = data.registerNumbers || [];
-            existingPhones = data.phones || [];
-        } catch (error) {
-            console.error(error);
-            toast({
-                variant: 'destructive',
-                title: "Error",
-                description: "Could not load validation data. Please refresh the page.",
-            });
-        } finally {
-            setIsFormReady(true);
+      try {
+        const response = await fetch("/api/check-duplicates");
+        if (!response.ok) {
+          throw new Error("Failed to fetch existing registration data.");
         }
+        const data = await response.json();
+        existingEmails = data.emails || [];
+        existingRegisterNumbers = data.registerNumbers || [];
+        existingPhones = data.phones || [];
+      } catch (error) {
+        console.error(error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description:
+            "Could not load validation data. Please refresh the page.",
+        });
+      } finally {
+        setIsFormReady(true);
+      }
     };
     fetchExistingData();
   }, [toast]);
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -216,30 +236,29 @@ export function Registration() {
 
   const { isSubmitting } = form.formState;
 
-  const handleGenerateTeamName = async () => {
-    setIsGeneratingName(true);
-    try {
-      const response = await generateTeamName({
-        nonce: Math.random().toString(36).substring(7),
-      });
-      if (response.teamName) {
-        form.setValue("teamName", response.teamName, { shouldValidate: true });
-        toast({
-          title: "Team Name Generated!",
-          description: `We've called your team "${response.teamName}". Feel free to change it!`,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Name Generation Failed",
-        description: "Could not generate a team name. Please try again or enter one manually.",
-      });
-    } finally {
-      setIsGeneratingName(false);
-    }
-  };
-
+  // const handleGenerateTeamName = async () => {
+  //   setIsGeneratingName(true);
+  //   try {
+  //     const response = await generateTeamName({
+  //       nonce: Math.random().toString(36).substring(7),
+  //     });
+  //     if (response.teamName) {
+  //       form.setValue("teamName", response.teamName, { shouldValidate: true });
+  //       toast({
+  //         title: "Team Name Generated!",
+  //         description: `We've called your team "${response.teamName}". Feel free to change it!`,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Name Generation Failed",
+  //       description: "Could not generate a team name. Please try again or enter one manually.",
+  //     });
+  //   } finally {
+  //     setIsGeneratingName(false);
+  //   }
+  // };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -249,18 +268,21 @@ export function Registration() {
       });
 
       // Log the registration activity
-      await logActivity(null, 'Team Registered', { teamName: values.teamName, registrationId: docRef.id });
+      await logActivity(null, "Team Registered", {
+        teamName: values.teamName,
+        registrationId: docRef.id,
+      });
 
       // Sync to Google Sheet automatically (fire-and-forget)
-      fetch('/api/sync-to-sheet', {
-        method: 'POST',
+      fetch("/api/sync-to-sheet", {
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ teamData: values }),
-      }).catch(error => {
-          // Optional: log error to console or a logging service if the background sync fails
-          console.error("Background sync to sheet failed:", error);
+      }).catch((error) => {
+        // Optional: log error to console or a logging service if the background sync fails
+        console.error("Background sync to sheet failed:", error);
       });
 
       setIsSuccessDialogOpen(true);
@@ -324,17 +346,22 @@ export function Registration() {
               </div>
             </CardHeader>
             <CardContent className="p-6 md:p-8">
-                {!isFormReady && (
-                    <div className="flex flex-col items-center justify-center gap-4 text-center p-8">
-                        <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                        <h3 className="font-headline text-2xl">Preparing Launchpad...</h3>
-                        <p className="text-muted-foreground">Syncing with registration servers to prevent duplicate entries.</p>
-                    </div>
-                )}
+              {!isFormReady && (
+                <div className="flex flex-col items-center justify-center gap-4 text-center p-8">
+                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                  <h3 className="font-headline text-2xl">
+                    Preparing Launchpad...
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Syncing with registration servers to prevent duplicate
+                    entries.
+                  </p>
+                </div>
+              )}
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className={`space-y-8 ${!isFormReady ? 'hidden' : ''}`}
+                  className={`space-y-8 ${!isFormReady ? "hidden" : ""}`}
                 >
                   <FormField
                     control={form.control}
@@ -354,7 +381,7 @@ export function Registration() {
                               />
                             </FormControl>
                           </div>
-                           <Button
+                          {/* <Button
                             type="button"
                             variant="secondary"
                             onClick={handleGenerateTeamName}
@@ -368,7 +395,7 @@ export function Registration() {
                             ) : (
                               "Generate a Name"
                             )}
-                          </Button>
+                          </Button> */}
                         </div>
                         <FormMessage />
                       </FormItem>

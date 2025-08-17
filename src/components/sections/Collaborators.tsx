@@ -1,71 +1,59 @@
-
 import Image from "next/image";
-import NasaLogo from "@/assets/logos/nasa.png";
-import SumvnLogo from "@/assets/logos/sumvn.png";
-import TelenganaGovtLogo from "@/assets/logos/govt_telangana.png";
-import RichLogo from "@/assets/logos/rich.png";
-import MSFTLogo from "@/assets/logos/msft.png";
-import MSFTInnovatorsLogo from "@/assets/logos/msft_innovators.png";
-import WomenInnovatorLogo from "@/assets/logos/women_innovator.png";
-import DhruvaLogo from "@/assets/logos/dhruva.png";
-import OutshadeLogo from "@/assets/logos/outshade.png";
-import VishvaLogo from "@/assets/logos/vishva.png";
-import AICLogo from "@/assets/logos/aic_dsu.png";
 
 const collaborators = [
   {
     name: "NASA",
-    logo: NasaLogo,
+    logo: "/assets/logos/nasa.png",
     hint: "United States government agency for space exploration and aeronautics",
   },
   {
     name: "SUMVN",
-    logo: SumvnLogo,
+    logo: "/assets/logos/sumvn.png",
     hint: "Domain name and web services provider",
   },
   {
     name: "Telengana Government",
-    logo: TelenganaGovtLogo,
+    logo: "/assets/logos/govt_telangana.png",
     hint: "State government of Telangana, India",
   },
   {
     name: "RICH",
-    logo: RichLogo,
+    logo: "/assets/logos/rich.png",
     hint: "Research and Innovation Circle of Hyderabad, fostering innovation and entrepreneurship",
   },
   {
     name: "Microsoft",
-    logo: MSFTLogo,
+    logo: "/assets/logos/msft.png",
     hint: "Global technology company, software and cloud solutions",
   },
   {
     name: "Microsoft AI Innovators Hub",
-    logo: MSFTInnovatorsLogo,
+    logo: "/assets/logos/msft_innovators.png",
     hint: "Microsoft initiative supporting AI innovation and startups",
   },
   {
     name: "Women Innovators",
-    logo: WomenInnovatorLogo,
+    logo: "/assets/logos/women_innovator.png",
     hint: "Platform supporting women entrepreneurs and innovators",
   },
   {
     name: "Dhruva",
-    logo: DhruvaLogo,
+    logo: "/assets/logos/dhruva.png",
     hint: "Indian private space technology company, satellite and launch solutions",
   },
   {
     name: "Outshade",
-    logo: OutshadeLogo,
+    logo: "/assets/logos/outshade.png",
     hint: "Digital transformation and technology solutions company",
   },
   {
     name: "Vishva",
-    logo: VishvaLogo,
+    logo: "/assets/logos/vishva.png",
     hint: "Technology company",
   },
   {
     name: "AIC DSU",
-    logo: AICLogo,
+    logo: "/assets/logos/aic_dsu.png",
     hint: "Startup incubator at Dayananda Sagar University",
   },
 ];

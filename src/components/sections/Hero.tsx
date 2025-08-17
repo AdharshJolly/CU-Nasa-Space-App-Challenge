@@ -1,21 +1,19 @@
-
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Countdown } from "@/components/Countdown";
 import Link from "next/link";
 import Image from "next/image";
-import FloatingAstronaut from "@/assets/spaceElements/FloatingAstronaut.png";
-import AstronautPole from "@/assets/spaceElements/AstronautWithFlagPole.png";
-import NasaLogo from "@/assets/logos/nasa.png";
-import CULogo from "@/assets/logos/christ_university.png";
-import MSFTLogo from "@/assets/logos/msft.png";
 import { MapPin, Sparkles } from "lucide-react";
 
 const sponsors = [
-  { name: "CHRIST University", logo: CULogo, hint: "host organization" },
-  { name: "NASA", logo: NasaLogo, hint: "space agency" },
-  { name: "Microsoft", logo: MSFTLogo, hint: "tech company" },
+  {
+    name: "CHRIST University",
+    logo: "/assets/logos/christ_university.png",
+    hint: "host organization",
+  },
+  { name: "NASA", logo: "/assets/logos/nasa.png", hint: "space agency" },
+  { name: "Microsoft", logo: "/assets/logos/msft.png", hint: "tech company" },
 ];
 
 export function Hero() {
@@ -41,7 +39,7 @@ export function Hero() {
 
       <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
         <Image
-          src={FloatingAstronaut}
+          src={"/assets/spaceElements/FloatingAstronaut.png"}
           alt="Floating Astronaut"
           width={400}
           height={700}
@@ -49,7 +47,7 @@ export function Hero() {
           data-ai-hint="astronaut"
         />
         <Image
-          src={AstronautPole}
+          src={"/assets/spaceElements/AstronautWithFlagPole.png"}
           alt="Floating Satellite"
           width={300}
           height={300}

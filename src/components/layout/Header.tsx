@@ -11,8 +11,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import Image from "next/image";
-import SpaceAppLogo from "@/assets/logos/space_app_logo.png";
-import CULogo from "@/assets/logos/christ_university.png";
 import { Separator } from "../ui/separator";
 
 const navLinks = [
@@ -46,7 +44,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2 md:gap-4 min-w-0">
           <div className="relative h-12 w-28 md:h-14 md:w-36 flex-shrink-0">
             <Image
-              src={SpaceAppLogo}
+              src={"/assets/logos/space_app_logo.png"}
               alt="NASA Space Apps Challenge Logo"
               fill
               style={{ objectFit: "contain" }}
@@ -60,7 +58,7 @@ export function Header() {
           />
           <div className="relative h-14 w-36 md:h-16 md:w-44 flex-shrink-0">
             <Image
-              src={CULogo}
+              src={"/assets/logos/christ_university.png"}
               alt="CHRIST University Logo"
               fill
               style={{ objectFit: "contain" }}
