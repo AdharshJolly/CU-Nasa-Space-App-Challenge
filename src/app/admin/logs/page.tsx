@@ -49,7 +49,7 @@ export default function AdminLogs() {
             title: "Access Denied",
             description: "You do not have permission to view this page.",
           });
-          router.push("/admin/dashboard");
+          // router.push("/admin/dashboard");
         }
       } else {
         router.push("/admin");
@@ -96,7 +96,7 @@ export default function AdminLogs() {
     // This is a fallback, user should be redirected by the auth effect
     return (
         <div className="flex min-h-dvh flex-col items-center justify-center bg-background p-4">
-             <p>Redirecting...</p>
+             <p>You do not have permission to view this page. Redirecting to dashboard...</p>
         </div>
     );
   }
