@@ -41,13 +41,15 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
   });
   
   useEffect(() => {
-    if (user) {
-        form.reset({
-            email: user.email,
-            role: user.role,
-        });
-    } else {
-        form.reset({ email: "", role: "volunteer" });
+    if (isOpen) {
+        if (user) {
+            form.reset({
+                email: user.email,
+                role: user.role,
+            });
+        } else {
+            form.reset({ email: "", role: "volunteer" });
+        }
     }
   }, [user, form, isOpen])
 
@@ -55,6 +57,9 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
 
   const onSubmit = async (values: z.infer<typeof userSchema>) => {
     await onSave(values);
+    if (!form.formState.isSubmitSuccessful) {
+        return;
+    }
     form.reset();
   };
 

@@ -125,7 +125,6 @@ export default function AdminDashboard() {
                     title: "Permission Denied",
                     description: "You do not have access to the admin dashboard.",
                 });
-                await signOut(auth);
                 router.push("/admin");
             }
         } else {
@@ -142,9 +141,12 @@ export default function AdminDashboard() {
 
     // If the user is a super admin, start listening to the users collection
     if (isSuperAdmin) {
-      const unsubscribeUsers = onSnapshot(query(collection(db, "users")), (snapshot) => {
-          const usersData = snapshot.docs.map(doc => ({ ...doc.data() })) as AppUser[];
+      const usersQuery = query(collection(db, "users"));
+      const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
+          const usersData = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() })) as AppUser[];
           setUsers(usersData);
+      }, (error) => {
+          console.error("Firestore 'users' listener error:", error);
       });
       return () => unsubscribeUsers();
     }
@@ -208,15 +210,6 @@ export default function AdminDashboard() {
       },
       (error) => {
         console.error("Firestore 'domains' listener error:", error);
-        if ((error as any).code === "permission-denied") {
-          toast({
-            variant: "destructive",
-            title: "Firestore Permission Error",
-            description:
-              "Could not read 'domains'. Please update your Firestore security rules to allow reads for authenticated users on the 'domains' collection.",
-            duration: 10000,
-          });
-        }
       }
     );
 
@@ -246,7 +239,7 @@ export default function AdminDashboard() {
       unsubscribeBanner();
       unsubscribeDomains();
     };
-  }, [user, toast]);
+  }, [user]);
 
   useEffect(() => {
     // Re-calculate duplicates whenever the teams data changes and the dialog is open
@@ -554,6 +547,11 @@ export default function AdminDashboard() {
         }
 
         const result = await response.json();
+        
+        // Force refresh the user's token to get new claims
+        if (user?.email === data.email) {
+            await user?.getIdToken(true);
+        }
 
         // If a new user was created, send them a password reset email.
         if (result.isNewUser) {
@@ -733,7 +731,9 @@ export default function AdminDashboard() {
     setDuplicates(foundDuplicates);
     if (openDialog) {
         setIsDuplicatesDialogOpen(true);
-        logActivity(user?.email, 'Duplicate Scan Performed', { found: foundDuplicates.length });
+        if (user?.email) {
+            logActivity(user.email, 'Duplicate Scan Performed', { found: foundDuplicates.length });
+        }
     }
   };
 

@@ -61,7 +61,6 @@ export async function POST(req: Request) {
                     uid: existingUser.uid,
                     email: existingUser.email,
                     role,
-                    createdAt: existingUser.metadata.creationTime,
                 }, { merge: true });
 
                 return NextResponse.json({ message: `Existing user ${email} updated with new role.`, uid: existingUser.uid, isNewUser: false });
