@@ -33,7 +33,7 @@ import {
 } from "../ui/card";
 import { collection, addDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +48,12 @@ import { logActivity } from "@/lib/logger";
 
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
+// State to hold existing values fetched from the server
+let existingEmails: string[] = [];
+let existingRegisterNumbers: string[] = [];
+let existingPhones: string[] = [];
+
+
 const memberSchema = z.object({
   name: z
     .string()
@@ -58,14 +64,22 @@ const memberSchema = z.object({
     .string()
     .email({ message: "Please enter a valid email address." })
     .trim()
-    .min(1, { message: "Email is required." }),
+    .min(1, { message: "Email is required." })
+    .refine(val => !existingEmails.includes(val.toLowerCase()), {
+        message: "This email is already registered."
+    }),
   phone: z.string().trim().min(1, { message: "Phone number is required." }).regex(indianPhoneNumberRegex, {
     message: "Please enter a valid 10-digit Indian phone number.",
+  }).refine(val => !existingPhones.includes(val), {
+    message: "This phone number is already registered."
   }),
   registerNumber: z
     .string()
     .trim()
-    .min(1, { message: "Register number is required." }),
+    .min(1, { message: "Register number is required." })
+    .refine(val => !existingRegisterNumbers.includes(val.toLowerCase()), {
+        message: "This register number is already registered."
+    }),
   className: z.string().trim().min(1, { message: "Class is required." }),
   department: z.string().trim().min(1, { message: "Department is required." }),
   school: z.string().min(1, { message: "Please select a school." }),
@@ -77,27 +91,50 @@ const formSchema = z
       .string()
       .trim()
       .min(3, { message: "Team name must be at least 3 characters." })
-      .max(25, { message: "Team name cannot be more than 25 characters." }),
+      .max(25, { message: "Team name cannot be more than 25 characters." })
+      .refine(
+        async (teamName) => {
+          if (!teamName) return true;
+          const q = query(collection(db, "registrations"), where("teamName", "==", teamName));
+          const querySnapshot = await getDocs(q);
+          return querySnapshot.empty;
+        },
+        {
+          message: "This team name is already taken. Please choose another.",
+        }
+      ),
     members: z
       .array(memberSchema)
       .min(2, "You must have at least two members.")
       .max(5, "You can have a maximum of 5 members."),
-  })
-  .refine(
-    async (data) => {
-      if (!data.teamName) return true; // Don't run validation if field is empty
-      const q = query(
-        collection(db, "registrations"),
-        where("teamName", "==", data.teamName)
-      );
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.empty;
-    },
-    {
-      message: "This team name is already taken. Please choose another.",
-      path: ["teamName"],
+  }).refine((data) => {
+    const emails = new Set<string>();
+    for (const member of data.members) {
+      const lowerEmail = member.email.toLowerCase();
+      if (emails.has(lowerEmail)) {
+        return false;
+      }
+      emails.add(lowerEmail);
     }
-  );
+    return true;
+  }, {
+    message: "Each team member must have a unique email address.",
+    path: ["members"],
+  }).refine((data) => {
+    const regNos = new Set<string>();
+    for (const member of data.members) {
+        const lowerRegNo = member.registerNumber.toLowerCase();
+        if (regNos.has(lowerRegNo)) {
+            return false;
+        }
+        regNos.add(lowerRegNo);
+    }
+    return true;
+  }, {
+    message: "Each team member must have a unique register number.",
+    path: ["members"],
+  });
+
 
 const schools = [
   "School of Architecture",
@@ -116,9 +153,37 @@ export function Registration() {
   const { toast } = useToast();
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [isFormReady, setIsFormReady] = useState(false);
+
+  useEffect(() => {
+    const fetchExistingData = async () => {
+        try {
+            const response = await fetch('/api/check-duplicates');
+            if (!response.ok) {
+                throw new Error('Failed to fetch existing registration data.');
+            }
+            const data = await response.json();
+            existingEmails = data.emails || [];
+            existingRegisterNumbers = data.registerNumbers || [];
+            existingPhones = data.phones || [];
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: 'destructive',
+                title: "Error",
+                description: "Could not load validation data. Please refresh the page.",
+            });
+        } finally {
+            setIsFormReady(true);
+        }
+    };
+    fetchExistingData();
+  }, [toast]);
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onTouched", // Validate on blur
+    mode: "onTouched",
     defaultValues: {
       teamName: "",
       members: [
@@ -211,6 +276,8 @@ export function Registration() {
     }
   }
 
+  const isSubmitDisabled = isSubmitting || !isFormReady;
+
   return (
     <>
       <section
@@ -257,10 +324,17 @@ export function Registration() {
               </div>
             </CardHeader>
             <CardContent className="p-6 md:p-8">
+                {!isFormReady && (
+                    <div className="flex flex-col items-center justify-center gap-4 text-center p-8">
+                        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                        <h3 className="font-headline text-2xl">Preparing Launchpad...</h3>
+                        <p className="text-muted-foreground">Syncing with registration servers to prevent duplicate entries.</p>
+                    </div>
+                )}
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
+                  className={`space-y-8 ${!isFormReady ? 'hidden' : ''}`}
                 >
                   <FormField
                     control={form.control}
@@ -276,7 +350,7 @@ export function Registration() {
                               <Input
                                 placeholder="The Star Gazers"
                                 {...field}
-                                disabled={isSubmitting || isGeneratingName}
+                                disabled={isSubmitDisabled || isGeneratingName}
                               />
                             </FormControl>
                           </div>
@@ -284,7 +358,7 @@ export function Registration() {
                             type="button"
                             variant="secondary"
                             onClick={handleGenerateTeamName}
-                            disabled={isSubmitting || isGeneratingName}
+                            disabled={isSubmitDisabled || isGeneratingName}
                           >
                             {isGeneratingName ? (
                               <>
@@ -322,7 +396,7 @@ export function Registration() {
                               size="icon"
                               className="h-7 w-7"
                               onClick={() => remove(index)}
-                              disabled={isSubmitting}
+                              disabled={isSubmitDisabled}
                             >
                               <Trash className="h-4 w-4" />
                               <span className="sr-only">Remove member</span>
@@ -340,7 +414,7 @@ export function Registration() {
                                   <Input
                                     placeholder="Galileo Galilei"
                                     {...field}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitDisabled}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -358,7 +432,7 @@ export function Registration() {
                                     type="email"
                                     placeholder="galileo.g@example.com"
                                     {...field}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitDisabled}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -376,7 +450,7 @@ export function Registration() {
                                     type="tel"
                                     placeholder="+91 98765 43210"
                                     {...field}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitDisabled}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -395,7 +469,7 @@ export function Registration() {
                                   <Input
                                     placeholder="222XXXX"
                                     {...field}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitDisabled}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -412,7 +486,7 @@ export function Registration() {
                                   <Input
                                     placeholder="e.g. 3BTECH-CS"
                                     {...field}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitDisabled}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -429,7 +503,7 @@ export function Registration() {
                                   <Input
                                     placeholder="e.g. Computer Science"
                                     {...field}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitDisabled}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -445,7 +519,7 @@ export function Registration() {
                                 <Select
                                   onValueChange={field.onChange}
                                   defaultValue={field.value}
-                                  disabled={isSubmitting}
+                                  disabled={isSubmitDisabled}
                                 >
                                   <FormControl>
                                     <SelectTrigger>
@@ -485,7 +559,7 @@ export function Registration() {
                             school: "",
                           })
                         }
-                        disabled={isSubmitting}
+                        disabled={isSubmitDisabled}
                       >
                         <UserPlus className="mr-2 h-4 w-4" /> Add Team Member
                       </Button>
@@ -501,7 +575,7 @@ export function Registration() {
                       type="submit"
                       className="w-full"
                       size="lg"
-                      disabled={isSubmitting}
+                      disabled={isSubmitDisabled}
                     >
                       {isSubmitting ? (
                         <>
