@@ -236,7 +236,7 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     const userEmail = user?.email || 'unknown_user';
     await signOut(auth);
-    await logActivity('Admin Logout', { user: userEmail });
+    await logActivity(userEmail, 'Admin Logout');
     router.push("/");
   };
 
@@ -254,7 +254,7 @@ export default function AdminDashboard() {
           checked ? "live" : "hidden"
         }.`,
       });
-      await logActivity('Toggled Problem Statement Release', { released: checked });
+      await logActivity(user?.email, 'Toggled Problem Statement Release', { released: checked });
     } catch (error) {
       console.error("Error updating settings: ", error);
       toast({
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
         title: "Success!",
         description: "Live banner has been updated.",
       });
-      await logActivity('Live Banner Updated', { from: oldText, to: liveBannerText });
+      await logActivity(user?.email, 'Live Banner Updated', { from: oldText, to: liveBannerText });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
       const domainToDelete = domains.find(d => d.id === domainId);
       await deleteDoc(doc(db, "domains", domainId));
       toast({ title: "Success", description: "Domain deleted." });
-      await logActivity('Domain Deleted', { domainId, title: domainToDelete?.title });
+      await logActivity(user?.email, 'Domain Deleted', { domainId, title: domainToDelete?.title });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -318,11 +318,11 @@ export default function AdminDashboard() {
       if (editingDomain) {
         await updateDoc(doc(db, "domains", editingDomain.id), domainData);
         toast({ title: "Success", description: "Domain updated." });
-        await logActivity('Domain Updated', { domainId: editingDomain.id, ...domainData });
+        await logActivity(user?.email, 'Domain Updated', { domainId: editingDomain.id, ...domainData });
       } else {
         const newDoc = await addDoc(collection(db, "domains"), domainData);
         toast({ title: "Success", description: "Domain added." });
-        await logActivity('Domain Added', { domainId: newDoc.id, ...domainData });
+        await logActivity(user?.email, 'Domain Added', { domainId: newDoc.id, ...domainData });
       }
       setIsDomainDialogOpen(false);
     } catch (error) {
@@ -350,7 +350,7 @@ export default function AdminDashboard() {
       const problemToDelete = problems.find(p => p.id === problemId);
       await deleteDoc(doc(db, "problems", problemId));
       toast({ title: "Success", description: "Problem statement deleted." });
-      await logActivity('Problem Deleted', { problemId, title: problemToDelete?.title });
+      await logActivity(user?.email, 'Problem Deleted', { problemId, title: problemToDelete?.title });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -367,12 +367,12 @@ export default function AdminDashboard() {
       if (editingProblem) {
         await updateDoc(doc(db, "problems", editingProblem.id), problemData);
         toast({ title: "Success", description: "Problem statement updated." });
-        await logActivity('Problem Updated', { problemId: editingProblem.id, ...problemData });
+        await logActivity(user?.email, 'Problem Updated', { problemId: editingProblem.id, ...problemData });
 
       } else {
         const newDoc = await addDoc(collection(db, "problems"), problemData);
         toast({ title: "Success", description: "Problem statement added." });
-        await logActivity('Problem Added', { problemId: newDoc.id, ...problemData });
+        await logActivity(user?.email, 'Problem Added', { problemId: newDoc.id, ...problemData });
       }
       setIsProblemDialogOpen(false);
     } catch (error) {
@@ -400,7 +400,7 @@ export default function AdminDashboard() {
       const eventToDelete = timelineEvents.find(e => e.id === eventId);
       await deleteDoc(doc(db, "timeline", eventId));
       toast({ title: "Success", description: "Timeline event deleted." });
-      await logActivity('Timeline Event Deleted', { eventId, title: eventToDelete?.title });
+      await logActivity(user?.email, 'Timeline Event Deleted', { eventId, title: eventToDelete?.title });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -420,11 +420,11 @@ export default function AdminDashboard() {
           eventData
         );
         toast({ title: "Success", description: "Timeline event updated." });
-        await logActivity('Timeline Event Updated', { eventId: editingTimelineEvent.id, ...eventData });
+        await logActivity(user?.email, 'Timeline Event Updated', { eventId: editingTimelineEvent.id, ...eventData });
       } else {
         const newDoc = await addDoc(collection(db, "timeline"), eventData);
         toast({ title: "Success", description: "Timeline event added." });
-        await logActivity('Timeline Event Added', { eventId: newDoc.id, ...eventData });
+        await logActivity(user?.email, 'Timeline Event Added', { eventId: newDoc.id, ...eventData });
       }
       setIsTimelineDialogOpen(false);
     } catch (error) {
@@ -464,7 +464,7 @@ export default function AdminDashboard() {
         title: "Sync Successful",
         description: `Successfully synced ${teams.length} teams to the Google Sheet.`,
       });
-      await logActivity('Manual Bulk Sync to Google Sheet', { teamCount: teams.length });
+      await logActivity(user?.email, 'Manual Bulk Sync to Google Sheet', { teamCount: teams.length });
     } catch (error) {
       console.error("Failed to sync to sheet:", error);
       toast({
@@ -518,7 +518,7 @@ export default function AdminDashboard() {
         title: "Export Successful",
         description: "The team data has been downloaded as an Excel file.",
       });
-      await logActivity('Exported Registrations to Excel', { teamCount: teams.length });
+      await logActivity(user?.email, 'Exported Registrations to Excel', { teamCount: teams.length });
     } catch (error) {
       console.error("Failed to export to Excel:", error);
       toast({
@@ -587,7 +587,7 @@ export default function AdminDashboard() {
     setDuplicates(foundDuplicates);
     if (openDialog) {
         setIsDuplicatesDialogOpen(true);
-        logActivity('Duplicate Scan Performed', { found: foundDuplicates.length });
+        logActivity(user?.email, 'Duplicate Scan Performed', { found: foundDuplicates.length });
     }
   };
 
@@ -599,7 +599,7 @@ export default function AdminDashboard() {
         title: "Success",
         description: "Team registration has been deleted.",
       });
-      await logActivity('Team Deleted', { teamId, teamName: teamToDelete?.teamName });
+      await logActivity(user?.email, 'Team Deleted', { teamId, teamName: teamToDelete?.teamName });
       // The onSnapshot listener for teams will automatically update the UI.
       // The useEffect for duplicates will re-calculate the list.
     } catch (error) {

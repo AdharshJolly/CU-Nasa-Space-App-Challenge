@@ -184,7 +184,7 @@ export function Registration() {
       });
 
       // Log the registration activity
-      await logActivity('Team Registered', { teamName: values.teamName, registrationId: docRef.id });
+      await logActivity(null, 'Team Registered', { teamName: values.teamName, registrationId: docRef.id });
 
       // Sync to Google Sheet automatically (fire-and-forget)
       fetch('/api/sync-to-sheet', {
