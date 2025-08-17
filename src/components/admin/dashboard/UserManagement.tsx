@@ -57,15 +57,15 @@ export function UserManagement({ users, onAddNew, onEdit, onDelete }: UserManage
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogTitle>Are you sure you want to delete {user.email}?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                This will permanently delete this user.
+                                                This will permanently delete this user from Authentication and Firestore. This action cannot be undone.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                                             <AlertDialogAction onClick={() => onDelete(user.uid)} className="bg-destructive hover:bg-destructive/90">
-                                                Delete
+                                                Delete User
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -101,13 +101,13 @@ export function UserManagement({ users, onAddNew, onEdit, onDelete }: UserManage
                                         </AlertDialogTrigger>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the user.</AlertDialogDescription>
+                                                <AlertDialogTitle>Are you absolutely sure you want to delete {user.email}?</AlertDialogTitle>
+                                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the user from Firebase Authentication and remove their role from the system.</AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                                 <AlertDialogAction onClick={() => onDelete(user.uid)} className="bg-destructive hover:bg-destructive/90">
-                                                    Yes, delete it
+                                                    Yes, delete this user
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>

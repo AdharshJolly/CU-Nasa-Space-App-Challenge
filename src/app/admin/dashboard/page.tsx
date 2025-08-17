@@ -490,9 +490,42 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteUser = async (uid: string) => {
-      // This would also need a backend function
-      toast({ title: "Note", description: "User deletion needs to be implemented via a backend function."});
-      console.log("Delete user:", uid);
+    const userToDelete = users.find(u => u.uid === uid);
+    if (!userToDelete) return;
+
+    if (userToDelete.email === user?.email) {
+      toast({
+        variant: "destructive",
+        title: "Cannot Delete Self",
+        description: "Super admins cannot delete their own account.",
+      });
+      return;
+    }
+
+    try {
+        const response = await fetch('/api/delete-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid, deletedBy: user?.email }) // Pass deleting admin's email for logging
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to delete user.');
+        }
+
+        toast({
+            title: "Success!",
+            description: `User ${userToDelete.email} has been permanently deleted.`
+        });
+        // The onSnapshot listener will automatically update the user list.
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Deletion Failed",
+            description: (error as Error).message,
+        });
+    }
   };
 
   const handleSaveUser = async (data: { email: string, password?: string, role: UserRole }) => {
@@ -516,7 +549,7 @@ export default function AdminDashboard() {
 
         toast({
             title: "Success!",
-            description: editingUser ? `User ${data.email} updated.` : `User ${data.email} created.`
+            description: editingUser ? `User ${data.email} updated.` : `User ${data.email} created/imported.`
         });
         await logActivity(user?.email, editingUser ? 'User Updated' : 'User Created', { targetUser: data.email, role: data.role });
         
@@ -811,4 +844,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
