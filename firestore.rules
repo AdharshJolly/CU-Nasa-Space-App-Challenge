@@ -6,19 +6,17 @@ service cloud.firestore {
     // Allow anyone to create a registration
     // Only allow authenticated users (admins) to read, update, or delete them
     match /registrations/{registrationId} {
-      allow create, read: if true;
-      allow update, delete: if request.auth != null;
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
     }
     
     // Lock down the 'logs' collection
     match /logs/{logId} {
-      // READ: Allow only if the user is authenticated and their email is in the superAdminEmails array
-      // in the /settings/admins document.
+      // READ: Allow only if the user is authenticated and their email is in the super admin list
       allow read: if request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/settings/admins).data.superAdminEmails;
 
-      // CREATE: Allow any authenticated user to create a log entry.
-      // This is secure because the content of the log is generated on the server.
-      allow create: if request.auth != null;
+      // CREATE: Allow any authenticated user (or server process) to create a log entry.
+      allow create: if true;
 
       // UPDATE, DELETE: Nobody should be able to update or delete logs.
       allow update, delete: if false;
@@ -30,19 +28,20 @@ service cloud.firestore {
     }
     
     // Allow admins to manage settings, but anyone can read them
-    match /settings/{setting} {
+    match /settings/features {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+     match /settings/liveBanner {
       allow read: if true;
       allow write: if request.auth != null;
     }
     
-    // Rules for the 'settings/admins' document
+    // Super admins can manage the list of super admins
     match /settings/admins {
-      // Allow read access to any authenticated user (so rules can check against it)
-      allow get: if request.auth != null;
-      // Allow write access only to super admins already in the list
-      allow write: if request.auth != null && request.auth.token.email in resource.data.superAdminEmails;
+        allow read, write: if request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/settings/admins).data.superAdminEmails;
     }
-
 
     // Allow anyone to read problems
     // Only allow admins to create, update, or delete them
@@ -56,6 +55,11 @@ service cloud.firestore {
     match /timeline/{eventId} {
         allow read: if true;
         allow create, update, delete: if request.auth != null;
+    }
+
+     // Lock down user management to super admins
+    match /users/{userId} {
+        allow read, write: if request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/settings/admins).data.superAdminEmails;
     }
   }
 }

@@ -40,6 +40,8 @@ import { TimelineControl } from "@/components/admin/dashboard/TimelineControl";
 import { ProblemsControl } from "@/components/admin/dashboard/ProblemsControl";
 import { TeamsTable } from "@/components/admin/dashboard/TeamsTable";
 import { logActivity } from "@/lib/logger";
+import { UserManagement } from "@/components/admin/dashboard/UserManagement";
+import { UserDialog, type UserRole } from "@/components/admin/UserDialog";
 
 interface TeamMember {
   name: string;
@@ -58,6 +60,12 @@ interface Team {
   createdAt?: Timestamp;
 }
 
+export type AppUser = {
+    uid: string;
+    email: string;
+    role: UserRole;
+}
+
 export type DuplicateInfo = {
   type: "Email" | "Phone" | "Register Number";
   value: string;
@@ -70,18 +78,21 @@ export default function AdminDashboard() {
   const [problems, setProblems] = useState<ProblemStatement[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
+  const [users, setUsers] = useState<AppUser[]>([]);
   const [problemsReleased, setProblemsReleased] = useState(false);
   const [liveBannerText, setLiveBannerText] = useState("");
   const [isSavingBanner, setIsSavingBanner] = useState(false);
   const [isProblemDialogOpen, setIsProblemDialogOpen] = useState(false);
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const [isDomainDialogOpen, setIsDomainDialogOpen] = useState(false);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(
     null
   );
   const [editingTimelineEvent, setEditingTimelineEvent] =
     useState<TimelineEvent | null>(null);
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
+  const [editingUser, setEditingUser] = useState<AppUser | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const router = useRouter();
@@ -122,7 +133,16 @@ export default function AdminDashboard() {
             const adminEmails = doc.data().superAdminEmails || [];
             setSuperAdminEmails(adminEmails);
             if (user.email) {
-              setIsSuperAdmin(adminEmails.includes(user.email));
+              const superAdminStatus = adminEmails.includes(user.email);
+              setIsSuperAdmin(superAdminStatus);
+              // If the user becomes a super admin, start listening to the users collection
+              if (superAdminStatus) {
+                const unsubscribeUsers = onSnapshot(query(collection(db, "users")), (snapshot) => {
+                    const usersData = snapshot.docs.map(doc => ({ ...doc.data() })) as AppUser[];
+                    setUsers(usersData);
+                });
+                return () => unsubscribeUsers();
+              }
             }
         }
     });
@@ -458,6 +478,59 @@ export default function AdminDashboard() {
     }
   };
 
+  // User Handlers
+  const handleAddNewUser = () => {
+      setEditingUser(null);
+      setIsUserDialogOpen(true);
+  };
+
+  const handleEditUser = (user: AppUser) => {
+      setEditingUser(user);
+      setIsUserDialogOpen(true);
+  };
+
+  const handleDeleteUser = async (uid: string) => {
+      // This would also need a backend function
+      toast({ title: "Note", description: "User deletion needs to be implemented via a backend function."});
+      console.log("Delete user:", uid);
+  };
+
+  const handleSaveUser = async (data: { email: string, password?: string, role: UserRole }) => {
+    try {
+        const response = await fetch('/api/create-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: data.email,
+                password: data.password,
+                role: data.role,
+                // Pass editing user's uid if it exists
+                uid: editingUser ? editingUser.uid : undefined 
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to save user.');
+        }
+
+        toast({
+            title: "Success!",
+            description: editingUser ? `User ${data.email} updated.` : `User ${data.email} created.`
+        });
+        await logActivity(user?.email, editingUser ? 'User Updated' : 'User Created', { targetUser: data.email, role: data.role });
+        
+        setIsUserDialogOpen(false);
+        setEditingUser(null);
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Save Failed",
+            description: (error as Error).message,
+        });
+    }
+  };
+
   const handleSyncToSheet = async () => {
     if (teams.length === 0) {
       toast({
@@ -648,6 +721,15 @@ export default function AdminDashboard() {
             teamsCount={teams.length}
             participantsCount={totalParticipants}
           />
+        
+          {isSuperAdmin && (
+              <UserManagement
+                  users={users}
+                  onAddNew={handleAddNewUser}
+                  onEdit={handleEditUser}
+                  onDelete={handleDeleteUser}
+              />
+          )}
 
           <SiteControls
             problemsReleased={problemsReleased}
@@ -720,6 +802,13 @@ export default function AdminDashboard() {
         duplicates={duplicates}
         onDeleteTeam={handleDeleteTeam}
       />
+       <UserDialog
+        isOpen={isUserDialogOpen}
+        onClose={() => setIsUserDialogOpen(false)}
+        onSave={handleSaveUser}
+        user={editingUser}
+      />
     </div>
   );
 }
+
