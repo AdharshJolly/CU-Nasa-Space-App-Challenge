@@ -1,3 +1,4 @@
+
 "use client";
 
 import { z } from "zod";
@@ -236,29 +237,29 @@ export function Registration() {
 
   const { isSubmitting } = form.formState;
 
-  // const handleGenerateTeamName = async () => {
-  //   setIsGeneratingName(true);
-  //   try {
-  //     const response = await generateTeamName({
-  //       nonce: Math.random().toString(36).substring(7),
-  //     });
-  //     if (response.teamName) {
-  //       form.setValue("teamName", response.teamName, { shouldValidate: true });
-  //       toast({
-  //         title: "Team Name Generated!",
-  //         description: `We've called your team "${response.teamName}". Feel free to change it!`,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Name Generation Failed",
-  //       description: "Could not generate a team name. Please try again or enter one manually.",
-  //     });
-  //   } finally {
-  //     setIsGeneratingName(false);
-  //   }
-  // };
+  const handleGenerateTeamName = async () => {
+    setIsGeneratingName(true);
+    try {
+      const response = await generateTeamName({
+        nonce: Math.random().toString(36).substring(7),
+      });
+      if (response.teamName) {
+        form.setValue("teamName", response.teamName, { shouldValidate: true });
+        toast({
+          title: "Team Name Generated!",
+          description: `We've called your team "${response.teamName}". Feel free to change it!`,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Name Generation Failed",
+        description: "Could not generate a team name. Please try again or enter one manually.",
+      });
+    } finally {
+      setIsGeneratingName(false);
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -381,7 +382,7 @@ export function Registration() {
                               />
                             </FormControl>
                           </div>
-                          {/* <Button
+                          <Button
                             type="button"
                             variant="secondary"
                             onClick={handleGenerateTeamName}
@@ -395,7 +396,7 @@ export function Registration() {
                             ) : (
                               "Generate a Name"
                             )}
-                          </Button> */}
+                          </Button>
                         </div>
                         <FormMessage />
                       </FormItem>
