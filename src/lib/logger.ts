@@ -9,13 +9,13 @@ type LogDetails = {
 };
 
 export async function logActivity(userEmail: string | null, action: string, details: LogDetails = {}) {
-  try {
-    // Ensure the admin instance is ready before proceeding
-    if (!adminDb) {
-        console.error("Firebase Admin has not been initialized. Log will not be written.");
-        return;
-    }
+  // Ensure the admin instance is ready before proceeding.
+  if (!adminDb) {
+      console.error("Firebase Admin DB has not been initialized. Log will not be written for action:", action);
+      return;
+  }
 
+  try {
     const emailToLog = userEmail || 'system@anonymous';
     
     await addDoc(collection(adminDb, 'logs'), {
@@ -31,7 +31,6 @@ export async function logActivity(userEmail: string | null, action: string, deta
       userEmail,
       error,
     });
-    // Re-throwing the error or handling it might be necessary depending on requirements
     // For now, we just log it to the server console.
   }
 }

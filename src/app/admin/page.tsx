@@ -132,24 +132,7 @@ export default function AdminDashboard() {
 
 
   useEffect(() => {
-    if (!user) return; // Don't run listeners if user is not logged in
-
-    // If the user is a super admin, start listening to the users collection
-    if (isSuperAdmin) {
-      const usersQuery = query(collection(db, "users"));
-      const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
-          const usersData = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() })) as AppUser[];
-          setUsers(usersData);
-      }, (error) => {
-          console.error("Firestore 'users' listener error:", error);
-      });
-      return () => unsubscribeUsers();
-    }
-  }, [user, isSuperAdmin]);
-
-
-  useEffect(() => {
-    if (!user) return; // Don't run listeners if user is not logged in
+    if (!user) return; 
 
     const teamsQuery = query(collection(db, "registrations"));
     const unsubscribeTeams = onSnapshot(teamsQuery, (snapshot) => {
@@ -226,6 +209,18 @@ export default function AdminDashboard() {
       }
     );
 
+    // Only listen to users if superadmin
+    let unsubscribeUsers = () => {};
+    if (isSuperAdmin) {
+      const usersQuery = query(collection(db, "users"));
+      unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
+          const usersData = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() })) as AppUser[];
+          setUsers(usersData);
+      }, (error) => {
+          console.error("Firestore 'users' listener error:", error);
+      });
+    }
+
     return () => {
       unsubscribeTeams();
       unsubscribeProblems();
@@ -233,8 +228,9 @@ export default function AdminDashboard() {
       unsubscribeTimeline();
       unsubscribeBanner();
       unsubscribeDomains();
+      unsubscribeUsers();
     };
-  }, [user]);
+  }, [user, isSuperAdmin]);
 
   useEffect(() => {
     // Re-calculate duplicates whenever the teams data changes and the dialog is open

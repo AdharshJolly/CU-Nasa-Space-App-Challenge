@@ -20,11 +20,12 @@ interface Team {
 
 
 export async function GET() {
-    try {
-        if (!adminDb) {
-            throw new Error("Firebase Admin has not been initialized.");
-        }
+    if (!adminDb) {
+        console.error("Firebase Admin has not been initialized in API route.");
+        return NextResponse.json({ error: "Firebase Admin has not been initialized." }, { status: 500 });
+    }
 
+    try {
         const registrationsSnapshot = await adminDb.collection('registrations').get();
         
         const emails = new Set<string>();
