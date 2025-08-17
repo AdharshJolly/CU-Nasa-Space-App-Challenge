@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { collection, onSnapshot, query, orderBy, Timestamp, doc } from "firebase/firestore";
@@ -12,7 +12,8 @@ import { toZonedTime } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, BookText, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, BookText, Loader2, Search } from "lucide-react";
 import Link from "next/link";
 import { DashboardSkeleton } from "@/components/admin/dashboard/DashboardSkeleton";
 
@@ -27,6 +28,7 @@ interface Log {
 export default function AdminLogs() {
   const [user, setUser] = useState<User | null>(null);
   const [logs, setLogs] = useState<Log[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -95,6 +97,18 @@ export default function AdminLogs() {
     return () => unsubscribeLogs();
   }, [isSuperAdmin, toast]);
 
+  const filteredLogs = useMemo(() => {
+    if (!searchQuery) {
+      return logs;
+    }
+    const query = searchQuery.toLowerCase();
+    return logs.filter((log) => 
+        log.userEmail.toLowerCase().includes(query) ||
+        log.action.toLowerCase().includes(query) ||
+        JSON.stringify(log.details).toLowerCase().includes(query)
+    );
+  }, [logs, searchQuery]);
+
 
   if (isLoading || !user) {
     return <DashboardSkeleton />;
@@ -136,15 +150,26 @@ export default function AdminLogs() {
       <main className="flex-1 p-4 md:p-8">
         <div className="container mx-auto px-0.5">
             <Card>
-                <CardHeader>
-                    <CardTitle>Audit Trail</CardTitle>
-                    <CardDescription>A chronological record of all actions performed on the site.</CardDescription>
+                <CardHeader className="space-y-4">
+                    <div>
+                        <CardTitle>Audit Trail</CardTitle>
+                        <CardDescription>A chronological record of all actions performed on the site.</CardDescription>
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search by user, action, or details..."
+                            className="pl-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                 </CardHeader>
                 <CardContent>
                     {/* Mobile View */}
                     <div className="md:hidden space-y-4">
-                        {logs.length > 0 ? (
-                            logs.map(log => (
+                        {filteredLogs.length > 0 ? (
+                            filteredLogs.map(log => (
                                 <Card key={log.id} className="p-4">
                                     <div className="space-y-2">
                                         <p className="font-semibold text-foreground">{log.action}</p>
@@ -156,7 +181,7 @@ export default function AdminLogs() {
                             ))
                         ) : (
                              <div className="text-center py-8 text-muted-foreground">
-                                No log entries found.
+                                {searchQuery ? "No logs found matching your search." : "No log entries found."}
                             </div>
                         )}
                     </div>
@@ -171,8 +196,8 @@ export default function AdminLogs() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {logs.length > 0 ? (
-                                logs.map(log => (
+                            {filteredLogs.length > 0 ? (
+                                filteredLogs.map(log => (
                                     <TableRow key={log.id}>
                                         <TableCell className="font-medium">{formatDate(log.timestamp)}</TableCell>
                                         <TableCell className="font-mono text-xs">{log.userEmail}</TableCell>
@@ -183,7 +208,7 @@ export default function AdminLogs() {
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={4} className="text-center h-24">
-                                        No log entries found.
+                                        {searchQuery ? "No logs found matching your search." : "No log entries found."}
                                     </TableCell>
                                 </TableRow>
                             )}
