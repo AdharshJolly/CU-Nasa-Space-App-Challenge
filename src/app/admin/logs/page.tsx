@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { collection, onSnapshot, query, orderBy, Timestamp } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, Timestamp, doc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -36,10 +36,21 @@ export default function AdminLogs() {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        const superAdminEmails = (process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS || "")
-          .split(',')
-          .map(email => email.trim());
-        const isAdmin = currentUser.email ? superAdminEmails.includes(currentUser.email) : false;
+      } else {
+        router.push("/admin");
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, [router]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribeAdmins = onSnapshot(doc(db, "settings", "admins"), (doc) => {
+      if (doc.exists()) {
+        const adminEmails = doc.data().superAdminEmails || [];
+        const isAdmin = user.email ? adminEmails.includes(user.email) : false;
         
         if (isAdmin) {
           setIsSuperAdmin(true);
@@ -51,14 +62,11 @@ export default function AdminLogs() {
           });
           // router.push("/admin/dashboard");
         }
-      } else {
-        router.push("/admin");
       }
     });
 
-    return () => unsubscribeAuth();
-  }, [router, toast]);
-
+    return () => unsubscribeAdmins();
+  }, [user, router, toast]);
 
   useEffect(() => {
     if (!isSuperAdmin) {

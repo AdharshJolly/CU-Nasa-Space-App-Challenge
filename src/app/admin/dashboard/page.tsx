@@ -90,6 +90,9 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [duplicates, setDuplicates] = useState<DuplicateInfo[]>([]);
   const [isDuplicatesDialogOpen, setIsDuplicatesDialogOpen] = useState(false);
+  const [superAdminEmails, setSuperAdminEmails] = useState<string[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -98,15 +101,32 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!isClient) return;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
       } else {
         router.push("/admin");
       }
     });
 
-    if (!user) return () => unsubscribeAuth();
+    return () => unsubscribeAuth();
+  }, [isClient, router]);
+
+
+  useEffect(() => {
+    if (!user) return; // Don't run listeners if user is not logged in
+
+    // Check for super admin status
+    const unsubscribeAdmins = onSnapshot(doc(db, "settings", "admins"), (doc) => {
+        if (doc.exists()) {
+            const adminEmails = doc.data().superAdminEmails || [];
+            setSuperAdminEmails(adminEmails);
+            if (user.email) {
+              setIsSuperAdmin(adminEmails.includes(user.email));
+            }
+        }
+    });
+
 
     const teamsQuery = query(collection(db, "registrations"));
     const unsubscribeTeams = onSnapshot(teamsQuery, (snapshot) => {
@@ -193,7 +213,7 @@ export default function AdminDashboard() {
     );
 
     return () => {
-      unsubscribeAuth();
+      unsubscribeAdmins();
       unsubscribeTeams();
       unsubscribeProblems();
       unsubscribeSettings();
@@ -201,7 +221,7 @@ export default function AdminDashboard() {
       unsubscribeBanner();
       unsubscribeDomains();
     };
-  }, [isClient, user, router, toast]);
+  }, [user, toast]);
 
   useEffect(() => {
     // Re-calculate duplicates whenever the teams data changes and the dialog is open
@@ -234,9 +254,11 @@ export default function AdminDashboard() {
   );
 
   const handleLogout = async () => {
-    const userEmail = user?.email || 'unknown_user';
+    const userEmail = user?.email;
     await signOut(auth);
-    await logActivity(userEmail, 'Admin Logout');
+    if (userEmail) {
+        await logActivity(userEmail, 'Admin Logout');
+    }
     router.push("/");
   };
 
@@ -615,12 +637,6 @@ export default function AdminDashboard() {
   if (!isClient || !user) {
     return <DashboardSkeleton />;
   }
-
-  const superAdminEmails = (process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS || '')
-    .split(',')
-    .map(email => email.trim());
-
-  const isSuperAdmin = user.email ? superAdminEmails.includes(user.email) : false;
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
