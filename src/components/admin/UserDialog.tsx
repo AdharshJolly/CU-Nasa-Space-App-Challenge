@@ -18,19 +18,12 @@ export type UserRole = typeof USER_ROLES[number];
 
 const userSchema = z.object({
     email: z.string().email("Please enter a valid email."),
-    password: z.string().optional(),
+    // Password is optional. It is only required if the user doesn't already exist.
+    // The backend will handle this logic.
+    password: z.string().min(6, "Password must be at least 6 characters.").optional().or(z.literal('')),
     role: z.enum(USER_ROLES, {
         required_error: "Please select a role for the user.",
     }),
-}).refine(data => {
-    // If there's no user (we're creating), password is required
-    if (!data.email.includes('@') && data.password && data.password.length < 6) {
-        return false;
-    }
-    return true;
-}, {
-    message: "Password must be at least 6 characters long.",
-    path: ["password"],
 });
 
 
@@ -74,9 +67,9 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
     <Dialog open={isOpen} onOpenChange={(open) => { if (!isSubmitting) onClose() }}>
         <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-                <DialogTitle>{user ? "Edit User" : "Add New User"}</DialogTitle>
+                <DialogTitle>{user ? "Edit User" : "Add or Import User"}</DialogTitle>
                 <DialogDescription>
-                    {user ? "Update the user's role." : "Create a new user with a specific role."}
+                    {user ? "Update the user's role." : "Create a new user or assign a role to an existing user."}
                 </DialogDescription>
             </DialogHeader>
              <Form {...form}>
@@ -105,6 +98,9 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
                                         <Input type="password" placeholder="••••••••" {...field} disabled={isSubmitting}/>
                                     </FormControl>
                                     <FormMessage />
+                                    <p className="text-xs text-muted-foreground pt-1">
+                                        Only required if creating a brand new user. Leave blank if the user already exists.
+                                    </p>
                                 </FormItem>
                             )}
                         />
