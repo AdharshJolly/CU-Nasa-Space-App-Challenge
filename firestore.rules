@@ -3,63 +3,57 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow anyone to create a registration
-    // Only allow authenticated users (admins) to read, update, or delete them
+    
+    function isAdmin() {
+      return request.auth.token.role == 'admin' || request.auth.token.role == 'superadmin';
+    }
+
+    function isSuperAdmin() {
+      return request.auth.token.role == 'superadmin';
+    }
+
+    // Allow anyone to create a registration, but only admins to manage them.
     match /registrations/{registrationId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read, update, delete: if isAdmin();
     }
     
-    // Lock down the 'logs' collection
+    // Only super admins can read logs.
+    // Any authenticated user can create a log (via server-side actions).
     match /logs/{logId} {
-      // READ: Allow only if the user is authenticated and their email is in the super admin list
-      allow read: if request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/settings/admins).data.superAdminEmails;
+      allow read: if isSuperAdmin();
+      allow create: if request.auth != null;
+      allow update, delete: if false; // Logs are immutable
+    }
 
-      // CREATE: Allow any authenticated user (or server process) to create a log entry.
-      allow create: if true;
-
-      // UPDATE, DELETE: Nobody should be able to update or delete logs.
-      allow update, delete: if false;
+    // Admins can manage users, but only super admins can see all users.
+    match /users/{userId} {
+      allow read, write: if isSuperAdmin();
     }
     
+    // Anyone can read domains, but only admins can write them.
     match /domains/{domainId} {
     	allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
     
-    // Allow admins to manage settings, but anyone can read them
-    match /settings/features {
+    // Anyone can read settings, but only admins can write them.
+    // Super admins are defined in the 'admins' document within settings.
+    match /settings/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
-     match /settings/liveBanner {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    
-    // Super admins can manage the list of super admins
-    match /settings/admins {
-        allow read, write: if request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/settings/admins).data.superAdminEmails;
-    }
-
-    // Allow anyone to read problems
-    // Only allow admins to create, update, or delete them
+    // Anyone can read problems, but only admins can write them.
     match /problems/{problemId} {
         allow read: if true;
-        allow create, update, delete: if request.auth != null;
+        allow write: if isAdmin();
     }
 
-    // Allow anyone to read timeline events
-    // Only allow admins to create, update, or delete them
+    // Anyone can read the timeline, but only admins can write to it.
     match /timeline/{eventId} {
         allow read: if true;
-        allow create, update, delete: if request.auth != null;
-    }
-
-     // Lock down user management to super admins
-    match /users/{userId} {
-        allow read, write: if request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/settings/admins).data.superAdminEmails;
+        allow write: if isAdmin();
     }
   }
 }

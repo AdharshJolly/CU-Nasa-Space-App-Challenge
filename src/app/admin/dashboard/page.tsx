@@ -112,16 +112,29 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!isClient) return;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        router.push("/admin");
-      }
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+        if (currentUser) {
+            const idTokenResult = await currentUser.getIdTokenResult();
+            const userRole = idTokenResult.claims.role;
+
+            if (userRole === 'admin' || userRole === 'superadmin') {
+                setUser(currentUser);
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: "Permission Denied",
+                    description: "You do not have access to the admin dashboard.",
+                });
+                await signOut(auth);
+                router.push("/admin");
+            }
+        } else {
+            router.push("/admin");
+        }
     });
 
     return () => unsubscribeAuth();
-  }, [isClient, router]);
+}, [isClient, router, toast]);
 
 
   useEffect(() => {
@@ -249,7 +262,7 @@ export default function AdminDashboard() {
       findDuplicates(false); // don't re-open the dialog
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teams, isDuplicatesDialogOpen]);
+  }, [teams]);
 
   const filteredTeams = useMemo(() => {
     if (!searchQuery) {
