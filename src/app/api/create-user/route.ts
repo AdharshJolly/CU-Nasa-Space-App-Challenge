@@ -4,20 +4,37 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
-// Initialize Firebase Admin SDK
-const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_PRIVATE_KEY as string);
+// Function to initialize Firebase Admin SDK
+const initializeFirebaseAdmin = () => {
+    if (getApps().length > 0) {
+        return;
+    }
+    
+    if (!process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
+        throw new Error('The FIREBASE_ADMIN_PRIVATE_KEY environment variable is not set.');
+    }
+    
+    try {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_PRIVATE_KEY);
+        initializeApp({
+            credential: cert(serviceAccount)
+        });
+    } catch (error) {
+        // Provide a more specific error for JSON parsing issues.
+        if (error instanceof SyntaxError) {
+            throw new Error('Failed to parse FIREBASE_ADMIN_PRIVATE_KEY. Please ensure it is a valid JSON string.');
+        }
+        throw error; // Re-throw other initialization errors.
+    }
+};
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(serviceAccount)
-  });
-}
-
-const auth = getAuth();
-const db = getFirestore();
 
 export async function POST(req: Request) {
     try {
+        initializeFirebaseAdmin(); // Ensure Firebase Admin is initialized on each request
+        const auth = getAuth();
+        const db = getFirestore();
+
         const { email, password, role, uid } = await req.json();
 
         if (!email || !role) {
