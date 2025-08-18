@@ -5,10 +5,6 @@ import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
 
 export async function POST(req: Request) {
-    if (!adminAuth || !adminDb) {
-        return NextResponse.json({ error: 'Firebase Admin has not been initialized.' }, { status: 500 });
-    }
-
     try {
         const { uid, deletedBy } = await req.json();
 

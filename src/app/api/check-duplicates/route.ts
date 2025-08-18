@@ -20,10 +20,6 @@ interface Team {
 
 
 export async function GET() {
-    if (!adminDb) {
-        return NextResponse.json({ error: "Firebase Admin has not been initialized." }, { status: 500 });
-    }
-
     try {
         const registrationsSnapshot = await adminDb.collection('registrations').get();
         
