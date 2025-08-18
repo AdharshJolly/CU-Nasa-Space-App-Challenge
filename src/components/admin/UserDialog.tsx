@@ -11,16 +11,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import type { AppUser } from "@/app/admin/dashboard/page";
+import type { AppUser } from "@/app/admin/page";
 
 export const USER_ROLES = ["superadmin", "admin", "faculty", "volunteer", "poc"] as const;
 export type UserRole = typeof USER_ROLES[number];
+
+const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 const userSchema = z.object({
     email: z.string().email("Please enter a valid email."),
     role: z.enum(USER_ROLES, {
         required_error: "Please select a role for the user.",
     }),
+    phone: z.string().optional(),
+}).refine(data => {
+    if ((data.role === 'volunteer' || data.role === 'poc') && (!data.phone || !indianPhoneNumberRegex.test(data.phone))) {
+        return false;
+    }
+    return true;
+}, {
+    message: "A valid Indian phone number is required for Volunteers and POCs.",
+    path: ["phone"],
 });
 
 
@@ -37,6 +48,7 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
     defaultValues: {
         email: "",
         role: "volunteer",
+        phone: ""
     }
   });
   
@@ -46,14 +58,16 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
             form.reset({
                 email: user.email,
                 role: user.role,
+                phone: (user as any).phone || ""
             });
         } else {
-            form.reset({ email: "", role: "volunteer" });
+            form.reset({ email: "", role: "volunteer", phone: "" });
         }
     }
   }, [user, form, isOpen])
 
   const { isSubmitting } = form.formState;
+  const watchedRole = form.watch("role");
 
   const onSubmit = async (values: z.infer<typeof userSchema>) => {
     await onSave(values);
@@ -111,6 +125,21 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
                             </FormItem>
                         )}
                     />
+                    {(watchedRole === 'volunteer' || watchedRole === 'poc') && (
+                        <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Phone Number</FormLabel>
+                                    <FormControl>
+                                        <Input type="tel" placeholder="+91 98765 43210" {...field} disabled={isSubmitting} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
                     <DialogFooter>
                         <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
                         <Button type="submit" disabled={isSubmitting}>

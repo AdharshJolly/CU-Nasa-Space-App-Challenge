@@ -1,6 +1,9 @@
 
 import { NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import type { UserRole } from '@/components/admin/UserDialog';
+
+const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 export async function POST(req: Request) {
     if (!adminAuth || !adminDb) {
@@ -9,15 +12,23 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { email, role, uid } = await req.json();
+        const { email, role, uid, phone } = (await req.json()) as {email: string, role: UserRole, uid?: string, phone?: string};
 
         if (!email || !role) {
             return NextResponse.json({ error: 'Email and role are required' }, { status: 400 });
         }
 
+        const claims: { [key: string]: any } = { role };
+        if ((role === 'volunteer' || role === 'poc') && phone) {
+            if (!indianPhoneNumberRegex.test(phone)) {
+                 return NextResponse.json({ error: 'Invalid phone number format for volunteer/poc.' }, { status: 400 });
+            }
+            claims.phone = phone;
+        }
+
         if (uid) { // This is an edit operation
             // Update custom claims
-            await adminAuth.setCustomUserClaims(uid, { role });
+            await adminAuth.setCustomUserClaims(uid, claims);
 
             // Update role in Firestore
             await adminDb.collection('users').doc(uid).update({ role });
@@ -30,7 +41,7 @@ export async function POST(req: Request) {
                 const existingUser = await adminAuth.getUserByEmail(email);
 
                 // If user exists, update their role (import them)
-                await adminAuth.setCustomUserClaims(existingUser.uid, { role });
+                await adminAuth.setCustomUserClaims(existingUser.uid, claims);
                 await adminDb.collection('users').doc(existingUser.uid).set({
                     uid: existingUser.uid,
                     email: existingUser.email,
@@ -47,7 +58,7 @@ export async function POST(req: Request) {
                         emailVerified: false, // User will verify when setting password
                     });
             
-                    await adminAuth.setCustomUserClaims(newUserRecord.uid, { role });
+                    await adminAuth.setCustomUserClaims(newUserRecord.uid, claims);
             
                     await adminDb.collection('users').doc(newUserRecord.uid).set({
                         uid: newUserRecord.uid,
