@@ -42,6 +42,7 @@ import { TeamsTable } from "@/components/admin/dashboard/TeamsTable";
 import { logActivity } from "@/lib/logger";
 import { UserManagement } from "@/components/admin/dashboard/UserManagement";
 import { UserDialog, type UserRole, type UserVertical } from "@/components/admin/UserDialog";
+import { TeamDialog } from "@/components/admin/TeamDialog";
 
 interface TeamMember {
   name: string;
@@ -94,6 +95,7 @@ export default function AdminDashboard() {
   const [isDomainDialogOpen, setIsDomainDialogOpen] = useState(false);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [isDuplicatesDialogOpen, setIsDuplicatesDialogOpen] = useState(false);
+  const [isTeamDialogOpen, setIsTeamDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<ProblemStatement | null>(
     null
   );
@@ -101,6 +103,7 @@ export default function AdminDashboard() {
     useState<TimelineEvent | null>(null);
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const router = useRouter();
@@ -647,6 +650,44 @@ export default function AdminDashboard() {
     }
   };
 
+  // Team Handlers
+  const handleEditTeam = (team: Team) => {
+    setEditingTeam(team);
+    setIsTeamDialogOpen(true);
+  };
+  
+  const handleSaveTeam = async (teamData: Omit<Team, "id">) => {
+    if (!editingTeam) return;
+
+    try {
+        const response = await fetch('/api/update-team', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ teamId: editingTeam.id, teamData, updatedBy: user?.email })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update team.');
+        }
+
+        toast({
+            title: "Success!",
+            description: `Team "${teamData.teamName}" has been updated.`
+        });
+        
+        setIsTeamDialogOpen(false);
+        setEditingTeam(null);
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: (error as Error).message,
+        });
+    }
+  };
+
+
   const handleSyncToSheet = async () => {
     if (teams.length === 0) {
       toast({
@@ -895,6 +936,8 @@ export default function AdminDashboard() {
             isExporting={isExporting}
             onFindDuplicates={() => findDuplicates(true)}
             isSuperAdmin={isSuperAdmin}
+            onEditTeam={handleEditTeam}
+            onDeleteTeam={handleDeleteTeam}
           />
         </div>
       </main>
@@ -928,6 +971,13 @@ export default function AdminDashboard() {
         onClose={() => setIsUserDialogOpen(false)}
         onSave={handleSaveUser}
         user={editingUser}
+      />
+      <TeamDialog
+        isOpen={isTeamDialogOpen}
+        onClose={() => setIsTeamDialogOpen(false)}
+        onSave={handleSaveTeam}
+        team={editingTeam}
+        allTeams={teams}
       />
     </div>
   );

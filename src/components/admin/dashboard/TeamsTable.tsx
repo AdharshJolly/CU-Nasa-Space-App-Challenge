@@ -4,9 +4,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, Loader2, RefreshCw, Search, Users, ScanSearch } from "lucide-react";
+import { Download, Loader2, RefreshCw, Search, Users, ScanSearch, Pencil, Trash2 } from "lucide-react";
 import type { Timestamp } from "firebase/firestore";
 import { Input } from "@/components/ui/input";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
 
 interface TeamMember {
     name: string;
@@ -35,9 +37,11 @@ interface TeamsTableProps {
     isExporting: boolean;
     onFindDuplicates: () => void;
     isSuperAdmin: boolean;
+    onEditTeam: (team: Team) => void;
+    onDeleteTeam: (teamId: string) => void;
 }
 
-export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, isSyncing, onExportToExcel, isExporting, onFindDuplicates, isSuperAdmin }: TeamsTableProps) {
+export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, isSyncing, onExportToExcel, isExporting, onFindDuplicates, isSuperAdmin, onEditTeam, onDeleteTeam }: TeamsTableProps) {
     return (
         <Card>
             <CardHeader className="flex flex-col gap-4">
@@ -112,10 +116,36 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
               <div className="md:hidden space-y-4">
                 {teams.map((team) => (
                   <Card key={team.id} className="p-4">
-                    <CardHeader className="p-2">
+                    <CardHeader className="p-2 flex flex-row justify-between items-start">
                       <CardTitle className="text-base">
                         {team.teamName}
                       </CardTitle>
+                       {isSuperAdmin && (
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEditTeam(team)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                  </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                          This will permanently delete the registration for team <b>{team.teamName}</b>.
+                                      </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => onDeleteTeam(team.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                              </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      )}
                     </CardHeader>
                     <CardContent className="p-2 text-sm">
                       <ul className="space-y-3">
@@ -140,6 +170,7 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
                   <TableRow>
                     <TableHead>Team Name</TableHead>
                     <TableHead>Members</TableHead>
+                    {isSuperAdmin && <TableHead className="text-right">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -163,6 +194,32 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
                           ))}
                         </ul>
                       </TableCell>
+                      {isSuperAdmin && (
+                        <TableCell className="text-right">
+                           <Button variant="ghost" size="icon" onClick={() => onEditTeam(team)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                           <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will permanently delete the registration for team <b>{team.teamName}</b>.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => onDeleteTeam(team.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -176,3 +233,5 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
           </Card>
     );
 }
+
+    
