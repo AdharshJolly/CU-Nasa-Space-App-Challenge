@@ -40,6 +40,7 @@ import {
   Timestamp,
   doc,
   onSnapshot,
+  setDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useEffect, useState } from "react";
@@ -187,7 +188,8 @@ export function Registration() {
           const newStatus = data.scheduledState;
           setRegistrationsOpen(newStatus);
           // Update Firestore to reflect the change has occurred
-          setDoc(doc.ref, { enabled: newStatus, isScheduled: false, scheduledChange: null, scheduledState: false }, { merge: true });
+          const registrationDocRef = doc(db, "settings", "registration");
+          setDoc(registrationDocRef, { enabled: newStatus, isScheduled: false, scheduledChange: null, scheduledState: false }, { merge: true });
         } else {
           setRegistrationsOpen(data.enabled);
         }
@@ -305,26 +307,47 @@ export function Registration() {
   const isSubmitDisabled = isSubmitting || registrationsOpen !== true;
 
   const renderClosedState = () => (
-    <div className="flex flex-col items-center justify-center gap-4 text-center p-8">
-      <XCircle className="h-12 w-12 text-destructive" />
-      <h3 className="font-headline text-2xl">Registrations Are Currently Closed</h3>
-      <p className="text-muted-foreground">
-        We are not accepting new registrations at this time. Please check back later or contact the organizers for more information.
-      </p>
-    </div>
+     <section
+      id="register"
+      className="py-12 md:py-24 bg-background/80 backdrop-blur-sm"
+    >
+        <div className="container mx-auto px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center gap-4 text-center p-8 max-w-2xl mx-auto rounded-lg bg-card border">
+                <XCircle className="h-12 w-12 text-destructive" />
+                <h3 className="font-headline text-2xl">Registrations Are Currently Closed</h3>
+                <p className="text-muted-foreground">
+                    We are not accepting new registrations at this time. If you believe this is a mistake, please <a href="#contact" className="text-primary underline">contact the coordinators</a>.
+                </p>
+            </div>
+        </div>
+     </section>
   );
 
   const renderLoadingState = () => (
-     <div className="flex flex-col items-center justify-center gap-4 text-center p-8">
-      <Loader2 className="h-10 w-10 text-primary animate-spin" />
-      <h3 className="font-headline text-2xl">
-        Preparing Launchpad...
-      </h3>
-      <p className="text-muted-foreground">
-        Checking registration status and syncing with servers.
-      </p>
-    </div>
+     <section
+        id="register"
+        className="py-12 md:py-24 bg-background/80 backdrop-blur-sm"
+    >
+        <div className="container mx-auto px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center gap-4 text-center p-8 max-w-2xl mx-auto rounded-lg bg-card border">
+                <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                <h3 className="font-headline text-2xl">
+                    Preparing Launchpad...
+                </h3>
+                <p className="text-muted-foreground">
+                    Checking registration status and syncing with servers.
+                </p>
+            </div>
+        </div>
+    </section>
   );
+
+  if (registrationsOpen === null) {
+      return renderLoadingState();
+  }
+  if (registrationsOpen === false) {
+      return renderClosedState();
+  }
 
   return (
     <>
@@ -372,9 +395,6 @@ export function Registration() {
               </div>
             </CardHeader>
             <CardContent className="p-6 md:p-8">
-              {registrationsOpen === null && renderLoadingState()}
-              {registrationsOpen === false && renderClosedState()}
-              {registrationsOpen === true && (
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -614,7 +634,6 @@ export function Registration() {
                     </div>
                   </form>
                 </Form>
-              )}
             </CardContent>
           </Card>
         </div>

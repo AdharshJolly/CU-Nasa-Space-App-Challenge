@@ -33,7 +33,7 @@ import { DuplicatesDialog } from "@/components/admin/DuplicatesDialog";
 import { DashboardSkeleton } from "@/components/admin/dashboard/DashboardSkeleton";
 import { DashboardHeader } from "@/components/admin/dashboard/DashboardHeader";
 import { EventSnapshot } from "@/components/admin/dashboard/EventSnapshot";
-import { SiteControls } from "@/components/admin/dashboard/SiteControls";
+import { SiteControls, type RegistrationSettings } from "@/components/admin/dashboard/SiteControls";
 import { LiveBanner } from "@/components/admin/dashboard/LiveBanner";
 import { PreviousDomains } from "@/components/admin/dashboard/PreviousDomains";
 import { TimelineControl } from "@/components/admin/dashboard/TimelineControl";
@@ -42,7 +42,6 @@ import { TeamsTable } from "@/components/admin/dashboard/TeamsTable";
 import { logActivity } from "@/lib/logger";
 import { UserManagement } from "@/components/admin/dashboard/UserManagement";
 import { UserDialog, type UserRole, type UserVertical } from "@/components/admin/UserDialog";
-import { RegistrationControl, type RegistrationSettings } from "@/components/admin/dashboard/RegistrationControl";
 
 interface TeamMember {
   name: string;
@@ -853,14 +852,10 @@ export default function AdminDashboard() {
           <SiteControls
             problemsReleased={problemsReleased}
             onReleaseToggle={handleReleaseToggle}
+            settings={registrationSettings}
+            onSettingsChange={handleRegistrationSettingsChange}
+            isSuperAdmin={isSuperAdmin}
           />
-          
-          {isSuperAdmin && (
-              <RegistrationControl
-                  settings={registrationSettings}
-                  onSettingsChange={handleRegistrationSettingsChange}
-              />
-          )}
 
           <LiveBanner
             liveBannerText={liveBannerText}
@@ -937,3 +932,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+    

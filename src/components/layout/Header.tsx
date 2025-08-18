@@ -1,6 +1,7 @@
+
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Rocket, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import { Separator } from "../ui/separator";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const navLinks = [
   { href: "#about", label: "About" },
@@ -23,13 +26,26 @@ const navLinks = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [registrationsOpen, setRegistrationsOpen] = useState<boolean | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    const unsubscribe = onSnapshot(doc(db, "settings", "registration"), (doc) => {
+      if (doc.exists()) {
+        setRegistrationsOpen(doc.data().enabled);
+      } else {
+        setRegistrationsOpen(false);
+      }
+    });
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      unsubscribe();
+    }
   }, []);
 
   return (
@@ -77,9 +93,11 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <Button asChild>
-            <Link href="#register">Register Now</Link>
-          </Button>
+          {registrationsOpen && (
+            <Button asChild>
+              <Link href="#register">Register Now</Link>
+            </Button>
+          )}
         </nav>
         <div className="md:hidden">
           <Sheet>
@@ -109,11 +127,13 @@ export function Header() {
                     </Link>
                   </SheetClose>
                 ))}
-                <Button asChild className="mt-4">
-                  <SheetClose asChild>
-                    <Link href="#register">Register Now</Link>
-                  </SheetClose>
-                </Button>
+                 {registrationsOpen && (
+                  <Button asChild className="mt-4">
+                    <SheetClose asChild>
+                      <Link href="#register">Register Now</Link>
+                    </SheetClose>
+                  </Button>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
