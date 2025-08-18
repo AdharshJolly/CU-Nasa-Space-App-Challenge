@@ -1,6 +1,7 @@
 
 import { google } from 'googleapis';
 import {NextResponse} from 'next/server';
+import { logAPI, logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic'; // Force Node.js runtime
 
@@ -86,6 +87,16 @@ function transformTeamToRow(team: Team) {
 export async function POST(req: Request) {
     try {
         const { teamData, teamsData } = (await req.json()) as { teamData?: Team, teamsData?: Team[] };
+        
+        // Log API access
+        await logAPI(null, '/api/sync-to-sheet', 'POST', {
+            hasTeamData: !!teamData,
+            hasTeamsData: !!teamsData,
+            teamsCount: teamsData?.length || 0,
+            userAgent: req.headers.get('user-agent'),
+            timestamp: new Date().toISOString()
+        });
+
         const { GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY, GOOGLE_SHEET_ID } = process.env;
         
         if (!GOOGLE_SHEETS_CLIENT_EMAIL || !GOOGLE_SHEETS_PRIVATE_KEY || !GOOGLE_SHEET_ID) {
@@ -119,6 +130,15 @@ export async function POST(req: Request) {
                     values: [row],
                 },
             });
+
+            // Log successful single team sync
+            await logAPI(null, '/api/sync-to-sheet', 'POST', {
+                type: 'single_team_sync',
+                teamName: teamData.teamName,
+                memberCount: teamData.members.length,
+                status: 'success'
+            });
+
             return NextResponse.json({ message: 'Sync successful!' });
         }
         
@@ -141,6 +161,15 @@ export async function POST(req: Request) {
                     },
                 });
             }
+
+            // Log successful bulk sync
+            await logAPI(null, '/api/sync-to-sheet', 'POST', {
+                type: 'bulk_sync',
+                teamsCount: teamsData.length,
+                totalMembers: teamsData.reduce((total, team) => total + team.members.length, 0),
+                status: 'success'
+            });
+
             return NextResponse.json({ message: 'Bulk sync successful!' });
         }
 
@@ -148,6 +177,13 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error('Error syncing to Google Sheet:', error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        
+        // Log sync error
+        await logError(null, 'Google Sheets Sync Failed', error instanceof Error ? error : new Error(errorMessage), {
+            endpoint: '/api/sync-to-sheet',
+            timestamp: new Date().toISOString()
+        });
+
         return NextResponse.json({ error: `Server Error: ${errorMessage}` }, { status: 500 });
     }
 }

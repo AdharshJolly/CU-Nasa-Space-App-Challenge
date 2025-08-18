@@ -1,9 +1,13 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged, signOut, type User, sendPasswordResetEmail } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signOut,
+  type User,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import {
   collection,
   onSnapshot,
@@ -39,9 +43,13 @@ import { PreviousDomains } from "@/components/admin/dashboard/PreviousDomains";
 import { TimelineControl } from "@/components/admin/dashboard/TimelineControl";
 import { ProblemsControl } from "@/components/admin/dashboard/ProblemsControl";
 import { TeamsTable } from "@/components/admin/dashboard/TeamsTable";
-import { logActivity } from "@/lib/logger";
+import { logActivity, logAuth } from "@/lib/logger";
 import { UserManagement } from "@/components/admin/dashboard/UserManagement";
-import { UserDialog, type UserRole, type UserVertical } from "@/components/admin/UserDialog";
+import {
+  UserDialog,
+  type UserRole,
+  type UserVertical,
+} from "@/components/admin/UserDialog";
 
 interface TeamMember {
   name: string;
@@ -61,12 +69,12 @@ interface Team {
 }
 
 export type AppUser = {
-    uid: string;
-    email: string;
-    role: UserRole;
-    phone?: string;
-    vertical?: UserVertical;
-}
+  uid: string;
+  email: string;
+  role: UserRole;
+  phone?: string;
+  vertical?: UserVertical;
+};
 
 export type DuplicateInfo = {
   type: "Email" | "Phone" | "Register Number";
@@ -105,36 +113,34 @@ export default function AdminDashboard() {
   const [duplicates, setDuplicates] = useState<DuplicateInfo[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
-
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
-        if (currentUser) {
-            const idTokenResult = await currentUser.getIdTokenResult();
-            const userRole = idTokenResult.claims.role;
+      if (currentUser) {
+        const idTokenResult = await currentUser.getIdTokenResult();
+        const userRole = idTokenResult.claims.role;
 
-            if (userRole === 'admin' || userRole === 'superadmin') {
-                setUser(currentUser);
-                setIsSuperAdmin(userRole === 'superadmin');
-            } else {
-                toast({
-                    variant: "destructive",
-                    title: "Permission Denied",
-                    description: "You do not have access to the admin dashboard.",
-                });
-                router.push("/login");
-            }
+        if (userRole === "admin" || userRole === "superadmin") {
+          setUser(currentUser);
+          setIsSuperAdmin(userRole === "superadmin");
         } else {
-            router.push("/login");
+          toast({
+            variant: "destructive",
+            title: "Permission Denied",
+            description: "You do not have access to the admin dashboard.",
+          });
+          router.push("/login");
         }
-        setIsLoading(false);
+      } else {
+        router.push("/login");
+      }
+      setIsLoading(false);
     });
 
     return () => unsubscribeAuth();
-}, [router, toast]);
-
+  }, [router, toast]);
 
   useEffect(() => {
-    if (!user) return; 
+    if (!user) return;
 
     const teamsQuery = query(collection(db, "registrations"));
     const unsubscribeTeams = onSnapshot(teamsQuery, (snapshot) => {
@@ -215,12 +221,19 @@ export default function AdminDashboard() {
     let unsubscribeUsers = () => {};
     if (isSuperAdmin) {
       const usersQuery = query(collection(db, "users"));
-      unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
-          const usersData = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() })) as AppUser[];
+      unsubscribeUsers = onSnapshot(
+        usersQuery,
+        (snapshot) => {
+          const usersData = snapshot.docs.map((doc) => ({
+            uid: doc.id,
+            ...doc.data(),
+          })) as AppUser[];
           setUsers(usersData);
-      }, (error) => {
+        },
+        (error) => {
           console.error("Firestore 'users' listener error:", error);
-      });
+        }
+      );
     }
 
     return () => {
@@ -239,7 +252,7 @@ export default function AdminDashboard() {
     if (isDuplicatesDialogOpen) {
       findDuplicates(false); // don't re-open the dialog
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teams, isDuplicatesDialogOpen]);
 
   const filteredTeams = useMemo(() => {
@@ -268,7 +281,7 @@ export default function AdminDashboard() {
     const userEmail = user?.email;
     await signOut(auth);
     if (userEmail) {
-        await logActivity(userEmail, 'Admin Logout');
+      await logAuth(userEmail, "logout");
     }
     router.push("/");
   };
@@ -287,7 +300,9 @@ export default function AdminDashboard() {
           checked ? "live" : "hidden"
         }.`,
       });
-      await logActivity(user?.email, 'Toggled Problem Statement Release', { released: checked });
+      await logActivity(user?.email, "Toggled Problem Statement Release", {
+        released: checked,
+      });
     } catch (error) {
       console.error("Error updating settings: ", error);
       toast({
@@ -308,7 +323,10 @@ export default function AdminDashboard() {
         title: "Success!",
         description: "Live banner has been updated.",
       });
-      await logActivity(user?.email, 'Live Banner Updated', { from: oldText, to: liveBannerText });
+      await logActivity(user?.email, "Live Banner Updated", {
+        from: oldText,
+        to: liveBannerText,
+      });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -333,11 +351,14 @@ export default function AdminDashboard() {
 
   const handleDeleteDomain = async (domainId: string) => {
     try {
-      const domainToDelete = domains.find(d => d.id === domainId);
+      const domainToDelete = domains.find((d) => d.id === domainId);
       await deleteDoc(doc(db, "domains", domainId));
       toast({ title: "Success", description: "Domain deleted." });
-      if(user?.email && domainToDelete) {
-        await logActivity(user.email, 'Domain Deleted', { domainId, title: domainToDelete.title });
+      if (user?.email && domainToDelete) {
+        await logActivity(user.email, "Domain Deleted", {
+          domainId,
+          title: domainToDelete.title,
+        });
       }
     } catch (error) {
       toast({
@@ -353,14 +374,20 @@ export default function AdminDashboard() {
       if (editingDomain) {
         await updateDoc(doc(db, "domains", editingDomain.id), domainData);
         toast({ title: "Success", description: "Domain updated." });
-        if(user?.email) {
-            await logActivity(user.email, 'Domain Updated', { domainId: editingDomain.id, ...domainData });
+        if (user?.email) {
+          await logActivity(user.email, "Domain Updated", {
+            domainId: editingDomain.id,
+            ...domainData,
+          });
         }
       } else {
         const newDoc = await addDoc(collection(db, "domains"), domainData);
         toast({ title: "Success", description: "Domain added." });
-        if(user?.email) {
-            await logActivity(user.email, 'Domain Added', { domainId: newDoc.id, ...domainData });
+        if (user?.email) {
+          await logActivity(user.email, "Domain Added", {
+            domainId: newDoc.id,
+            ...domainData,
+          });
         }
       }
       setIsDomainDialogOpen(false);
@@ -386,11 +413,14 @@ export default function AdminDashboard() {
 
   const handleDeleteProblem = async (problemId: string) => {
     try {
-      const problemToDelete = problems.find(p => p.id === problemId);
+      const problemToDelete = problems.find((p) => p.id === problemId);
       await deleteDoc(doc(db, "problems", problemId));
       toast({ title: "Success", description: "Problem statement deleted." });
-      if(user?.email && problemToDelete) {
-        await logActivity(user.email, 'Problem Deleted', { problemId, title: problemToDelete.title });
+      if (user?.email && problemToDelete) {
+        await logActivity(user.email, "Problem Deleted", {
+          problemId,
+          title: problemToDelete.title,
+        });
       }
     } catch (error) {
       toast({
@@ -408,14 +438,20 @@ export default function AdminDashboard() {
       if (editingProblem) {
         await updateDoc(doc(db, "problems", editingProblem.id), problemData);
         toast({ title: "Success", description: "Problem statement updated." });
-        if(user?.email) {
-            await logActivity(user.email, 'Problem Updated', { problemId: editingProblem.id, ...problemData });
+        if (user?.email) {
+          await logActivity(user.email, "Problem Updated", {
+            problemId: editingProblem.id,
+            ...problemData,
+          });
         }
       } else {
         const newDoc = await addDoc(collection(db, "problems"), problemData);
         toast({ title: "Success", description: "Problem statement added." });
-        if(user?.email) {
-            await logActivity(user.email, 'Problem Added', { problemId: newDoc.id, ...problemData });
+        if (user?.email) {
+          await logActivity(user.email, "Problem Added", {
+            problemId: newDoc.id,
+            ...problemData,
+          });
         }
       }
       setIsProblemDialogOpen(false);
@@ -441,11 +477,14 @@ export default function AdminDashboard() {
 
   const handleDeleteTimelineEvent = async (eventId: string) => {
     try {
-      const eventToDelete = timelineEvents.find(e => e.id === eventId);
+      const eventToDelete = timelineEvents.find((e) => e.id === eventId);
       await deleteDoc(doc(db, "timeline", eventId));
       toast({ title: "Success", description: "Timeline event deleted." });
-      if(user?.email && eventToDelete) {
-        await logActivity(user.email, 'Timeline Event Deleted', { eventId, title: eventToDelete.title });
+      if (user?.email && eventToDelete) {
+        await logActivity(user.email, "Timeline Event Deleted", {
+          eventId,
+          title: eventToDelete.title,
+        });
       }
     } catch (error) {
       toast({
@@ -466,14 +505,20 @@ export default function AdminDashboard() {
           eventData
         );
         toast({ title: "Success", description: "Timeline event updated." });
-        if(user?.email) {
-            await logActivity(user.email, 'Timeline Event Updated', { eventId: editingTimelineEvent.id, ...eventData });
+        if (user?.email) {
+          await logActivity(user.email, "Timeline Event Updated", {
+            eventId: editingTimelineEvent.id,
+            ...eventData,
+          });
         }
       } else {
         const newDoc = await addDoc(collection(db, "timeline"), eventData);
         toast({ title: "Success", description: "Timeline event added." });
-        if(user?.email) {
-            await logActivity(user.email, 'Timeline Event Added', { eventId: newDoc.id, ...eventData });
+        if (user?.email) {
+          await logActivity(user.email, "Timeline Event Added", {
+            eventId: newDoc.id,
+            ...eventData,
+          });
         }
       }
       setIsTimelineDialogOpen(false);
@@ -488,17 +533,17 @@ export default function AdminDashboard() {
 
   // User Handlers
   const handleAddNewUser = () => {
-      setEditingUser(null);
-      setIsUserDialogOpen(true);
+    setEditingUser(null);
+    setIsUserDialogOpen(true);
   };
 
   const handleEditUser = (user: AppUser) => {
-      setEditingUser(user);
-      setIsUserDialogOpen(true);
+    setEditingUser(user);
+    setIsUserDialogOpen(true);
   };
 
   const handleDeleteUser = async (uid: string) => {
-    const userToDelete = users.find(u => u.uid === uid);
+    const userToDelete = users.find((u) => u.uid === uid);
     if (!userToDelete) return;
 
     if (userToDelete.email === user?.email) {
@@ -511,86 +556,97 @@ export default function AdminDashboard() {
     }
 
     try {
-        const response = await fetch('/api/delete-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid, deletedBy: user?.email }) // Pass deleting admin's email for logging
-        });
+      const response = await fetch("/api/delete-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid, deletedBy: user?.email }), // Pass deleting admin's email for logging
+      });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to delete user.');
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete user.");
+      }
 
-        toast({
-            title: "Success!",
-            description: `User ${userToDelete.email} has been permanently deleted.`
-        });
-        // The onSnapshot listener will automatically update the user list.
+      toast({
+        title: "Success!",
+        description: `User ${userToDelete.email} has been permanently deleted.`,
+      });
+      // The onSnapshot listener will automatically update the user list.
     } catch (error) {
-        toast({
-            variant: "destructive",
-            title: "Deletion Failed",
-            description: (error as Error).message,
-        });
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: (error as Error).message,
+      });
     }
   };
 
-  const handleSaveUser = async (data: { email: string; role: UserRole; phone?: string; vertical?: UserVertical; }) => {
+  const handleSaveUser = async (data: {
+    email: string;
+    role: UserRole;
+    phone?: string;
+    vertical?: UserVertical;
+  }) => {
     const isEditing = !!editingUser;
 
     try {
-        const response = await fetch('/api/create-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: data.email,
-                role: data.role,
-                phone: data.phone,
-                vertical: data.vertical,
-                // Pass editing user's uid if it exists
-                uid: editingUser ? editingUser.uid : undefined 
-            })
-        });
+      const response = await fetch("/api/create-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.email,
+          role: data.role,
+          phone: data.phone,
+          vertical: data.vertical,
+          // Pass editing user's uid if it exists
+          uid: editingUser ? editingUser.uid : undefined,
+        }),
+      });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to save user.');
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save user.");
+      }
 
-        const result = await response.json();
-        
-        // Force refresh the user's token to get new claims
-        if (user?.email === data.email) {
-            await user?.getIdToken(true);
-        }
+      const result = await response.json();
 
-        // If a new user was created, send them a password reset email.
-        if (result.isNewUser) {
-            await sendPasswordResetEmail(auth, data.email);
-            toast({
-                title: "User Created!",
-                description: `${data.email} has been created. A password setup email has been sent to them.`
-            });
-        } else {
-             toast({
-                title: "Success!",
-                description: isEditing ? `User ${data.email} updated.` : `Existing user ${data.email} updated with new role.`
-            });
-        }
+      // Force refresh the user's token to get new claims
+      if (user?.email === data.email) {
+        await user?.getIdToken(true);
+      }
 
-        if(user?.email) {
-            await logActivity(user.email, isEditing ? 'User Updated' : 'User Created/Imported', { targetUser: data.email, role: data.role, vertical: data.vertical });
-        }
-        
-        setIsUserDialogOpen(false);
-        setEditingUser(null);
-    } catch (error) {
+      // If a new user was created, send them a password reset email.
+      if (result.isNewUser) {
+        await sendPasswordResetEmail(auth, data.email);
         toast({
-            variant: "destructive",
-            title: "Save Failed",
-            description: (error as Error).message,
+          title: "User Created!",
+          description: `${data.email} has been created. A password setup email has been sent to them.`,
         });
+      } else {
+        toast({
+          title: "Success!",
+          description: isEditing
+            ? `User ${data.email} updated.`
+            : `Existing user ${data.email} updated with new role.`,
+        });
+      }
+
+      if (user?.email) {
+        await logActivity(
+          user.email,
+          isEditing ? "User Updated" : "User Created/Imported",
+          { targetUser: data.email, role: data.role, vertical: data.vertical }
+        );
+      }
+
+      setIsUserDialogOpen(false);
+      setEditingUser(null);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: (error as Error).message,
+      });
     }
   };
 
@@ -622,8 +678,10 @@ export default function AdminDashboard() {
         title: "Sync Successful",
         description: `Successfully synced ${teams.length} teams to the Google Sheet.`,
       });
-      if(user?.email) {
-        await logActivity(user.email, 'Manual Bulk Sync to Google Sheet', { teamCount: teams.length });
+      if (user?.email) {
+        await logActivity(user.email, "Manual Bulk Sync to Google Sheet", {
+          teamCount: teams.length,
+        });
       }
     } catch (error) {
       console.error("Failed to sync to sheet:", error);
@@ -678,8 +736,10 @@ export default function AdminDashboard() {
         title: "Export Successful",
         description: "The team data has been downloaded as an Excel file.",
       });
-      if(user?.email) {
-        await logActivity(user.email, 'Exported Registrations to Excel', { teamCount: teams.length });
+      if (user?.email) {
+        await logActivity(user.email, "Exported Registrations to Excel", {
+          teamCount: teams.length,
+        });
       }
     } catch (error) {
       console.error("Failed to export to Excel:", error);
@@ -748,23 +808,28 @@ export default function AdminDashboard() {
 
     setDuplicates(foundDuplicates);
     if (openDialog) {
-        setIsDuplicatesDialogOpen(true);
-        if (user?.email) {
-            logActivity(user.email, 'Duplicate Scan Performed', { found: foundDuplicates.length });
-        }
+      setIsDuplicatesDialogOpen(true);
+      if (user?.email) {
+        logActivity(user.email, "Duplicate Scan Performed", {
+          found: foundDuplicates.length,
+        });
+      }
     }
   };
 
   const handleDeleteTeam = async (teamId: string) => {
     try {
-      const teamToDelete = teams.find(t => t.id === teamId);
+      const teamToDelete = teams.find((t) => t.id === teamId);
       await deleteDoc(doc(db, "registrations", teamId));
       toast({
         title: "Success",
         description: "Team registration has been deleted.",
       });
-      if(user?.email && teamToDelete) {
-        await logActivity(user.email, 'Team Deleted', { teamId, teamName: teamToDelete.teamName });
+      if (user?.email && teamToDelete) {
+        await logActivity(user.email, "Team Deleted", {
+          teamId,
+          teamName: teamToDelete.teamName,
+        });
       }
       // The onSnapshot listener for teams will automatically update the UI.
       // The useEffect for duplicates will re-calculate the list.
@@ -792,14 +857,14 @@ export default function AdminDashboard() {
             teamsCount={teams.length}
             participantsCount={totalParticipants}
           />
-        
+
           {isSuperAdmin && (
-              <UserManagement
-                  users={users}
-                  onAddNew={handleAddNewUser}
-                  onEdit={handleEditUser}
-                  onDelete={handleDeleteUser}
-              />
+            <UserManagement
+              users={users}
+              onAddNew={handleAddNewUser}
+              onEdit={handleEditUser}
+              onDelete={handleDeleteUser}
+            />
           )}
 
           <SiteControls
@@ -873,7 +938,7 @@ export default function AdminDashboard() {
         duplicates={duplicates}
         onDeleteTeam={handleDeleteTeam}
       />
-       <UserDialog
+      <UserDialog
         isOpen={isUserDialogOpen}
         onClose={() => setIsUserDialogOpen(false)}
         onSave={handleSaveUser}

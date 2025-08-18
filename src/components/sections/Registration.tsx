@@ -53,7 +53,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import { logActivity } from "@/lib/logger";
+import { logActivity, logError } from "@/lib/logger";
 
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
@@ -286,8 +286,13 @@ export function Registration() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ teamData: values }),
-      }).catch((error) => {
-        // Optional: log error to console or a logging service if the background sync fails
+      }).catch(async (error) => {
+        // Log sync error to Firestore
+        await logError(null, "Google Sheets Background Sync Failed", error, {
+          teamName: values.teamName,
+          memberCount: values.members.length,
+          timestamp: new Date().toISOString()
+        });
         console.error("Background sync to sheet failed:", error);
       });
 
@@ -295,6 +300,14 @@ export function Registration() {
       form.reset();
     } catch (e) {
       console.error("Error adding document: ", e);
+      
+      // Log registration error
+      await logError(null, "Team Registration Failed", e instanceof Error ? e : new Error(String(e)), {
+        teamName: values?.teamName || 'Unknown',
+        memberCount: values?.members?.length || 0,
+        timestamp: new Date().toISOString()
+      });
+
       toast({
         variant: "destructive",
         title: "Registration Failed",

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { logAuth, logPageAccess } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,21 +27,32 @@ export default function LoginPage() {
       const idTokenResult = await userCredential.user.getIdTokenResult();
       const userRole = idTokenResult.claims.role || 'viewer'; // Default role if none is set
 
+      // Log successful login
+      await logAuth(userCredential.user.email, 'login_success', { 
+        role: userRole,
+        loginTime: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      });
+
       // Role-based redirection
       switch (userRole) {
         case 'superadmin':
         case 'admin':
+          await logPageAccess(userCredential.user.email, '/admin/dashboard', userRole);
           router.push("/admin/dashboard");
           break;
         case 'faculty':
+          await logPageAccess(userCredential.user.email, '/faculties', userRole);
           router.push("/faculties");
           break;
         case 'volunteer':
         case 'poc':
+          await logPageAccess(userCredential.user.email, '/volunteers', userRole);
           router.push("/volunteers");
           break;
         default:
           // For any other roles or if no role, redirect to the homepage
+          await logPageAccess(userCredential.user.email, '/', userRole);
           toast({
             title: "Login Successful",
             description: "Welcome! Redirecting to homepage.",
@@ -50,6 +62,13 @@ export default function LoginPage() {
       }
       
     } catch (error: any) {
+      // Log failed login attempt
+      await logAuth(email, 'login_failed', { 
+        error: error.code || error.message,
+        attemptTime: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      });
+
       toast({
         variant: "destructive",
         title: "Login Failed",

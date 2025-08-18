@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { initializeAdminApp } from '@/lib/firebase-admin';
+import { logAPI } from '@/lib/logger';
 
 interface TeamMember {
   name: string;
@@ -19,8 +20,14 @@ interface Team {
 }
 
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        // Log API access
+        await logAPI(null, '/api/check-duplicates', 'GET', {
+            userAgent: request.headers.get('user-agent'),
+            timestamp: new Date().toISOString()
+        });
+
         const { adminDb } = initializeAdminApp();
         const registrationsSnapshot = await adminDb.collection('registrations').get();
         
@@ -37,14 +44,34 @@ export async function GET() {
             });
         });
 
-        return NextResponse.json({
+        const result = {
             emails: Array.from(emails),
             registerNumbers: Array.from(registerNumbers),
             phones: Array.from(phones),
+        };
+
+        // Log successful response
+        await logAPI(null, '/api/check-duplicates', 'GET', {
+            ...result,
+            status: 'success',
+            recordCount: {
+                emails: result.emails.length,
+                registerNumbers: result.registerNumbers.length,
+                phones: result.phones.length
+            }
         });
+
+        return NextResponse.json(result);
 
     } catch (error: any) {
         console.error('Error fetching duplicates:', error);
+        
+        // Log error
+        await logAPI(null, '/api/check-duplicates', 'GET', {
+            error: error.message,
+            status: 'error'
+        });
+
         return NextResponse.json({ error: error.message || 'An unknown error occurred' }, { status: 500 });
     }
 }

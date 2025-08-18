@@ -6,18 +6,23 @@ type LogDetails = {
   [key: string]: any;
 };
 
+type LogLevel = "info" | "warn" | "error" | "success";
+
 export async function logActivity(
   userEmail: string | null,
   action: string,
-  details: LogDetails = {}
+  details: LogDetails = {},
+  level: LogLevel = "info"
 ) {
   try {
-    const { adminDb } = initializeAdminApp(); // Ensure adminDb is initialized
+    const { adminDb } = initializeAdminApp();
     const logItem = {
       action,
       details,
       userEmail: userEmail || "system@anonymous",
-      timestamp: new Date(), // Use native Date object for Admin SDK
+      timestamp: new Date(),
+      level,
+      source: "web-app", // Identify the source of the log
     };
 
     await adminDb.collection("logs").add(logItem);
@@ -25,4 +30,58 @@ export async function logActivity(
     // Log to server console if Firestore logging fails
     console.error("Failed to log activity to Firestore:", error);
   }
+}
+
+// Specialized logging functions for different types of activities
+export async function logAuth(
+  userEmail: string | null,
+  action: "login_success" | "login_failed" | "logout",
+  details: LogDetails = {}
+) {
+  await logActivity(
+    userEmail,
+    `Auth: ${action}`,
+    details,
+    action === "login_failed" ? "warn" : "success"
+  );
+}
+
+export async function logAPI(
+  userEmail: string | null,
+  endpoint: string,
+  method: string,
+  details: LogDetails = {}
+) {
+  await logActivity(userEmail, `API: ${method} ${endpoint}`, details, "info");
+}
+
+export async function logError(
+  userEmail: string | null,
+  action: string,
+  error: Error | string,
+  details: LogDetails = {}
+) {
+  const errorDetails = {
+    ...details,
+    error: typeof error === "string" ? error : error.message,
+    stack: typeof error === "object" ? error.stack : undefined,
+  };
+  await logActivity(userEmail, `Error: ${action}`, errorDetails, "error");
+}
+
+export async function logPageAccess(
+  userEmail: string | null,
+  page: string,
+  userRole?: string
+) {
+  await logActivity(
+    userEmail,
+    `Page Access: ${page}`,
+    {
+      page,
+      userRole,
+      timestamp: new Date().toISOString(),
+    },
+    "info"
+  );
 }
