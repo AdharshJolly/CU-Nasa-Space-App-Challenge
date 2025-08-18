@@ -21,23 +21,26 @@ export function LiveBanner({ liveBannerText, setLiveBannerText, onSave, isSaving
     return (
         <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
             <Card>
-                <CollapsibleTrigger asChild>
-                    <div className="flex justify-between items-center cursor-pointer p-6">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <Megaphone className="h-6 w-6" />
-                                <CardTitle>Live Banner</CardTitle>
-                            </div>
-                            <CardDescription>
-                                Update the announcement banner at the top of the site. Leave
-                                empty to hide it.
-                            </CardDescription>
+                <div className="flex items-center justify-between p-6">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <Megaphone className="h-6 w-6" />
+                            <CardTitle>Live Banner</CardTitle>
                         </div>
-                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
+                        <CardDescription className="mt-1.5">
+                            Update the announcement banner at the top of the site. Leave
+                            empty to hide it.
+                        </CardDescription>
                     </div>
-                </CollapsibleTrigger>
+                     <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <ChevronsUpDown className="h-4 w-4" />
+                            <span className="sr-only">Toggle</span>
+                        </Button>
+                    </CollapsibleTrigger>
+                </div>
                 <CollapsibleContent>
-                    <CardContent className="space-y-4">
+                    <CardContent className="pt-0 space-y-4">
                         <Textarea
                             placeholder="Enter banner text here..."
                             value={liveBannerText}

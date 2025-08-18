@@ -23,25 +23,30 @@ export function PreviousDomains({ domains, onAddNew, onEdit, onDelete }: Previou
     return (
       <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
         <Card>
-            <CardHeader className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                <CollapsibleTrigger asChild>
-                    <div className="flex-1 cursor-pointer">
-                        <div className="flex items-center gap-2">
-                            <Lightbulb className="h-6 w-6" />
-                            <CardTitle>Previous Year Domains</CardTitle>
-                            <ChevronsUpDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
-                        </div>
-                        <CardDescription>
-                        Manage the example domains shown on the homepage.
-                        </CardDescription>
+            <div className="flex items-start justify-between p-6">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <Lightbulb className="h-6 w-6" />
+                        <CardTitle>Previous Year Domains</CardTitle>
                     </div>
-                </CollapsibleTrigger>
-                <Button onClick={onAddNew} className="flex-shrink-0">
-                    <PlusCircle className="mr-2" /> Add New Domain
-                </Button>
-            </CardHeader>
+                    <CardDescription className="mt-1.5">
+                    Manage the example domains shown on the homepage.
+                    </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button onClick={onAddNew} size="sm" className="ml-auto flex-shrink-0">
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add New Domain
+                    </Button>
+                    <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                             <ChevronsUpDown className="h-4 w-4" />
+                             <span className="sr-only">Toggle</span>
+                        </Button>
+                    </CollapsibleTrigger>
+                </div>
+            </div>
             <CollapsibleContent>
-                <CardContent>
+                <CardContent className="pt-0">
                     <div className="md:hidden space-y-4">
                         {domains.map((domain) => (
                         <Card key={domain.id} className="p-4">

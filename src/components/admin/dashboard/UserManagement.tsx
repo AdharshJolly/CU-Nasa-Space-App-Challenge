@@ -24,25 +24,30 @@ export function UserManagement({ users, onAddNew, onEdit, onDelete }: UserManage
     return (
         <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
             <Card>
-                <CardHeader className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <CollapsibleTrigger asChild>
-                        <div className="flex-1 cursor-pointer">
-                            <div className="flex items-center gap-2">
-                                <Users className="h-6 w-6" />
-                                <CardTitle>User Management</CardTitle>
-                                <ChevronsUpDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
-                            </div>
-                            <CardDescription>
-                                Create, edit, and manage users and their roles.
-                            </CardDescription>
+                <div className="flex items-start justify-between p-6">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <Users className="h-6 w-6" />
+                            <CardTitle>User Management</CardTitle>
                         </div>
-                    </CollapsibleTrigger>
-                    <Button onClick={onAddNew} className="flex-shrink-0">
-                        <PlusCircle className="mr-2" /> Add New User
-                    </Button>
-                </CardHeader>
+                        <CardDescription className="mt-1.5">
+                            Create, edit, and manage users and their roles.
+                        </CardDescription>
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <Button onClick={onAddNew} size="sm" className="ml-auto flex-shrink-0">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add New User
+                        </Button>
+                        <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <ChevronsUpDown className="h-4 w-4" />
+                                <span className="sr-only">Toggle</span>
+                            </Button>
+                        </CollapsibleTrigger>
+                    </div>
+                </div>
                 <CollapsibleContent>
-                    <CardContent>
+                    <CardContent className="pt-0">
                         <div className="md:hidden space-y-4">
                             {users.map((user) => (
                                 <Card key={user.uid} className="p-4">

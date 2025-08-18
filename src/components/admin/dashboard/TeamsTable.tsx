@@ -49,27 +49,34 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
     return (
         <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
             <Card>
-                <CardHeader className="flex flex-col gap-4">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <CollapsibleTrigger asChild>
-                        <div className="flex-1 cursor-pointer">
+                <div className="flex flex-col gap-4 p-6">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div>
                             <div className="flex items-center gap-2">
                                 <Users className="h-6 w-6" />
                                 <CardTitle>Registered Teams</CardTitle>
-                                <ChevronsUpDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
                             </div>
-                            <CardDescription>
+                            <CardDescription className="mt-1.5">
                                 A list of all teams registered for the Space Apps Challenge.
                                 Sync is automatic, with manual override options.
                             </CardDescription>
                         </div>
-                    </CollapsibleTrigger>
+                        <div className="flex items-center gap-2">
+                            <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <ChevronsUpDown className="h-4 w-4" />
+                                    <span className="sr-only">Toggle</span>
+                                </Button>
+                            </CollapsibleTrigger>
+                        </div>
+                    </div>
                     <div className="flex flex-col sm:flex-row gap-2 flex-wrap justify-end flex-shrink-0">
                     {isSuperAdmin && (
                         <Button
                         variant="outline"
                         onClick={onFindDuplicates}
                         disabled={teams.length === 0}
+                        size="sm"
                         >
                         <ScanSearch className="mr-2" />
                         Find Duplicates
@@ -79,6 +86,7 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
                         variant="secondary"
                         onClick={onSyncToSheet}
                         disabled={teams.length === 0 || isSyncing}
+                        size="sm"
                     >
                         {isSyncing ? (
                         <>
@@ -95,6 +103,7 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
                     <Button
                         onClick={onExportToExcel}
                         disabled={teams.length === 0 || isExporting}
+                        size="sm"
                     >
                         {isExporting ? (
                         <>
@@ -109,19 +118,18 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
                         )}
                     </Button>
                     </div>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search by team, name, email, or reg no..."
+                            className="pl-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                 </div>
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input 
-                        placeholder="Search by team, name, email, or reg no..."
-                        className="pl-10"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                </CardHeader>
                 <CollapsibleContent>
-                    <CardContent>
+                    <CardContent className="pt-0">
                     <div className="md:hidden space-y-4">
                         {teams.map((team) => (
                         <Card key={team.id} className="p-4">
@@ -244,5 +252,3 @@ export function TeamsTable({ teams, searchQuery, setSearchQuery, onSyncToSheet, 
         </Collapsible>
     );
 }
-
-    

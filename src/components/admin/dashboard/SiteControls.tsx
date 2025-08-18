@@ -76,24 +76,27 @@ export function SiteControls({
     };
 
     return (
-      <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} asChild>
         <Card>
-            <CollapsibleTrigger asChild>
-                <div className="flex justify-between items-center cursor-pointer p-6">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <Settings className="h-6 w-6" />
-                            <CardTitle>Site Controls</CardTitle>
-                        </div>
-                        <CardDescription>
-                            Control feature visibility and registration status on the main website.
-                        </CardDescription>
+            <div className="flex items-center justify-between p-6">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <Settings className="h-6 w-6" />
+                        <CardTitle>Site Controls</CardTitle>
                     </div>
-                     <ChevronsUpDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
+                    <CardDescription className="mt-1.5">
+                        Control feature visibility and registration status on the main website.
+                    </CardDescription>
                 </div>
-            </CollapsibleTrigger>
+                <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                         <ChevronsUpDown className="h-4 w-4" />
+                         <span className="sr-only">Toggle</span>
+                    </Button>
+                </CollapsibleTrigger>
+            </div>
             <CollapsibleContent>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-0">
                 <div className="flex items-center space-x-4 rounded-md border p-4">
                     <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium leading-none">
