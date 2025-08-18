@@ -14,22 +14,25 @@ export async function logActivity(
   details: LogDetails = {},
   level: LogLevel = "info"
 ) {
-  try {
-    const { adminDb } = initializeAdminApp();
-    const logItem = {
-      action,
-      details,
-      userEmail: userEmail || "system@anonymous",
-      timestamp: new Date(),
-      level,
-      source: "web-app", // Identify the source of the log
-    };
+  // Fire and forget - don't wait for logging to complete
+  setImmediate(async () => {
+    try {
+      const { adminDb } = initializeAdminApp();
+      const logItem = {
+        action,
+        details,
+        userEmail: userEmail || "system@anonymous",
+        timestamp: new Date(),
+        level,
+        source: "web-app", // Identify the source of the log
+      };
 
-    await adminDb.collection("logs").add(logItem);
-  } catch (error) {
-    // Log to server console if Firestore logging fails
-    console.error("Failed to log activity to Firestore:", error);
-  }
+      await adminDb.collection("logs").add(logItem);
+    } catch (error) {
+      // Log to server console if Firestore logging fails
+      console.error("Failed to log activity to Firestore:", error);
+    }
+  });
 }
 
 // Specialized logging functions for different types of activities

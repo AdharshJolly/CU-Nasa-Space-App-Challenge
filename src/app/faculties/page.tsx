@@ -8,45 +8,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { logAuth, logPageAccess } from "@/lib/logger";
+import { logAuth } from "@/lib/logger";
+import { useAuth } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { usePerformanceMonitor } from "@/hooks/use-performance-monitor";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Loader2, LogOut, UserCheck } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { LogOut, UserCheck } from "lucide-react";
 
-export default function FacultiesPage() {
+function FacultiesContent() {
+  const { user } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const idTokenResult = await currentUser.getIdTokenResult();
-        const userRole = idTokenResult.claims.role;
-
-        if (userRole === "faculty") {
-          setUser(currentUser);
-          await logPageAccess(currentUser.email, "/faculties", userRole);
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Permission Denied",
-            description: "You do not have access to this page.",
-          });
-          router.push("/login");
-        }
-      } else {
-        router.push("/login");
-      }
-      setIsLoading(false);
-    });
-
-    return () => unsubscribeAuth();
-  }, [router, toast]);
+  usePerformanceMonitor("Faculties Page");
 
   const handleLogout = async () => {
     const userEmail = user?.email;
@@ -56,14 +31,6 @@ export default function FacultiesPage() {
     }
     router.push("/login");
   };
-
-  if (isLoading || !user) {
-    return (
-      <div className="flex min-h-dvh flex-col items-center justify-center bg-background bg-grid-pattern p-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-background bg-grid-pattern p-4">
@@ -75,7 +42,7 @@ export default function FacultiesPage() {
           <CardTitle className="font-headline text-3xl">
             Faculty Portal
           </CardTitle>
-          <CardDescription>Welcome, {user.email}</CardDescription>
+          <CardDescription>Welcome, {user?.email}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <p>This is the placeholder page for the Faculty Dashboard.</p>
@@ -89,5 +56,13 @@ export default function FacultiesPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function FacultiesPage() {
+  return (
+    <ProtectedRoute allowedRoles={["faculty"]} pagePath="/faculties">
+      <FacultiesContent />
+    </ProtectedRoute>
   );
 }
