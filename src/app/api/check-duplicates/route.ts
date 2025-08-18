@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase-admin';
+import { initializeAdminApp } from '@/lib/firebase-admin';
 
 interface TeamMember {
   name: string;
@@ -21,6 +21,7 @@ interface Team {
 
 export async function GET() {
     try {
+        const { adminDb } = initializeAdminApp();
         const registrationsSnapshot = await adminDb.collection('registrations').get();
         
         const emails = new Set<string>();

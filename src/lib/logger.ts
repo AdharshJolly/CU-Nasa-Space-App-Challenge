@@ -2,7 +2,7 @@
 'use server';
 
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { adminDb } from './firebase-admin'; // Directly import the initialized instance
+import { initializeAdminApp } from './firebase-admin';
 
 type LogDetails = {
   [key: string]: any;
@@ -10,6 +10,7 @@ type LogDetails = {
 
 export async function logActivity(userEmail: string | null, action: string, details: LogDetails = {}) {
     try {
+        const { adminDb } = initializeAdminApp(); // Ensure adminDb is initialized
         const logItem = {
             action,
             details,
@@ -19,6 +20,7 @@ export async function logActivity(userEmail: string | null, action: string, deta
 
         await addDoc(collection(adminDb, 'logs'), logItem);
     } catch (error) {
+        // Log to server console if Firestore logging fails
         console.error('Failed to log activity to Firestore:', error);
     }
 }

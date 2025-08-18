@@ -1,11 +1,12 @@
 
 import { NextResponse } from 'next/server';
 import { logActivity } from '@/lib/logger';
-import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { initializeAdminApp } from '@/lib/firebase-admin';
 
 
 export async function POST(req: Request) {
     try {
+        const { adminAuth, adminDb } = initializeAdminApp();
         const { uid, deletedBy } = await req.json();
 
         if (!uid) {

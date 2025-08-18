@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { initializeAdminApp } from '@/lib/firebase-admin';
 import type { UserRole, UserVertical } from '@/components/admin/UserDialog';
 import { logActivity } from '@/lib/logger';
 
@@ -8,6 +8,7 @@ const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 export async function POST(req: Request) {
     try {
+        const { adminAuth, adminDb } = initializeAdminApp();
         const { email, role, uid, phone, vertical, createdBy } = (await req.json()) as {email: string, role: UserRole, uid?: string, phone?: string, vertical?: UserVertical, createdBy?: string};
 
         if (!email || !role) {
