@@ -73,7 +73,9 @@ function transformTeamToRow(team: Team) {
     for (let i = 0; i < MAX_MEMBERS; i++) {
         const member = team.members[i];
         if (member) {
-            row.push(member.name, member.email, member.phone, member.registerNumber, member.className, member.department, member.school);
+            // Prepend phone number with an apostrophe to ensure it's treated as a string by Google Sheets
+            const phone = member.phone ? `'${member.phone}` : null;
+            row.push(member.name, member.email, phone, member.registerNumber, member.className, member.department, member.school);
         } else {
             row.push(null, null, null, null, null, null, null);
         }
