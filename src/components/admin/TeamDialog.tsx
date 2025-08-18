@@ -44,43 +44,35 @@ const schools = [
   "School of Social Sciences",
 ];
 
-let existingEmails: string[] = [];
-let existingRegisterNumbers: string[] = [];
-let existingPhones: string[] = [];
-
 // Helper function to create the validation schema dynamically
 const createTeamSchema = (allTeams: Team[], editingTeamId: string | null) => {
-    // When editing, filter out the current team's data from the uniqueness check
+    // When editing, we create lists of existing values from *other* teams.
     const otherTeams = allTeams.filter(t => t.id !== editingTeamId);
-    existingEmails = otherTeams.flatMap(t => t.members.map(m => m.email.toLowerCase()));
-    existingRegisterNumbers = otherTeams.flatMap(t => t.members.map(m => m.registerNumber.toLowerCase()));
-    existingPhones = otherTeams.flatMap(t => t.members.map(m => m.phone));
+    const existingEmails = otherTeams.flatMap(t => t.members.map(m => m.email.toLowerCase()));
+    const existingRegisterNumbers = otherTeams.flatMap(t => t.members.map(m => m.registerNumber.toLowerCase()));
+    const existingPhones = otherTeams.flatMap(t => t.members.map(m => m.phone));
 
     const memberSchema = z.object({
         name: z.string().trim().min(2, "Name must be at least 2 characters."),
-        email: z.string().email().trim().refine((val, ctx) => {
-            // Team lead (index 0) email can exist, others cannot.
-            // This is a simplification; validation happens against a static list.
-            // A more robust solution would pass the member's original email.
-            // For now, we allow the lead's email by skipping validation.
-            if (ctx.path.includes(0)) return true;
-            return !existingEmails.includes(val.toLowerCase());
-        }, "This email is already registered in another team."),
-        phone: z.string().trim().regex(indianPhoneNumberRegex, "Please enter a valid Indian phone number.").refine((val, ctx) => {
-             if (ctx.path.includes(0)) return true;
-            return !existingPhones.includes(val);
-        }, "This phone number is already registered in another team."),
-        registerNumber: z.string().trim().min(1).refine((val, ctx) => {
-             if (ctx.path.includes(0)) return true;
-            return !existingRegisterNumbers.includes(val.toLowerCase())
-        }, "This register number is already registered in another team."),
+        email: z.string().email("Invalid email format.").trim().refine(val => 
+            !existingEmails.includes(val.toLowerCase()), 
+            "This email is already registered in another team."
+        ),
+        phone: z.string().trim().regex(indianPhoneNumberRegex, "Please enter a valid Indian phone number.").refine(val => 
+            !existingPhones.includes(val),
+            "This phone number is already registered in another team."
+        ),
+        registerNumber: z.string().trim().min(1, "Register number is required.").refine(val => 
+            !existingRegisterNumbers.includes(val.toLowerCase()),
+            "This register number is already registered in another team."
+        ),
         className: z.string().trim().min(1, "Class is required."),
         department: z.string().trim().min(1, "Department is required."),
         school: z.string().min(1, "Please select a school."),
     });
     
     return z.object({
-        teamName: z.string().trim().min(3, "Team name must be at least 3 characters.").refine(async (teamName) => {
+        teamName: z.string().trim().min(3, "Team name must be at least 3 characters.").refine((teamName) => {
             const teamNameExists = allTeams.some(t => t.teamName.toLowerCase() === teamName.toLowerCase() && t.id !== editingTeamId);
             return !teamNameExists;
         }, "This team name is already taken."),
@@ -131,14 +123,14 @@ export function TeamDialog({ isOpen, onClose, onSave, team, allTeams }: TeamDial
   
   useEffect(() => {
     // Update the schema when the dialog opens or the team being edited changes
-    setTeamSchema(() => createTeamSchema(allTeams, team?.id || null));
+    if (isOpen) {
+        setTeamSchema(() => createTeamSchema(allTeams, team?.id || null));
+    }
   }, [allTeams, team, isOpen]);
   
   useEffect(() => {
-    if (team) {
-        form.reset(team);
-    } else {
-        form.reset({ teamName: "", members: [] });
+    if (isOpen && team) {
+        form.reset(JSON.parse(JSON.stringify(team))); // Deep copy to avoid reference issues
     }
   }, [team, form, isOpen]);
 
@@ -146,7 +138,9 @@ export function TeamDialog({ isOpen, onClose, onSave, team, allTeams }: TeamDial
 
   const onSubmit = async (values: z.infer<typeof teamSchema>) => {
     await onSave(values);
-    form.reset();
+    if (form.formState.isSubmitSuccessful) {
+        onClose();
+    }
   };
 
   return (
@@ -188,7 +182,7 @@ export function TeamDialog({ isOpen, onClose, onSave, team, allTeams }: TeamDial
                                         {index === 0 ? "Team Lead" : `Member #${index + 1}`}
                                         </h4>
                                         {fields.length > 2 && index > 0 && (
-                                        <Button type="button" variant="destructive" size="icon" className="h-7 w-7" onClick={() => remove(index)} disabled={isSubmitting}>
+                                        <Button type="button" variant="destructive" size="icon" className="h-7 w-7" onClick={() => remove(index)} disabled={isSubmitting || index === 0}>
                                             <Trash className="h-4 w-4" />
                                         </Button>
                                         )}
@@ -205,8 +199,8 @@ export function TeamDialog({ isOpen, onClose, onSave, team, allTeams }: TeamDial
                                     </div>
                                 ))}
                              </div>
-                             {form.formState.errors.members && !form.formState.errors.members.root && (
-                                <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.members.message}</p>
+                             {form.formState.errors.members && (
+                                <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.members.message || form.formState.errors.members.root?.message}</p>
                             )}
                         </div>
 
@@ -219,7 +213,7 @@ export function TeamDialog({ isOpen, onClose, onSave, team, allTeams }: TeamDial
                     </ScrollArea>
                     <DialogFooter>
                         <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Save Changes
                         </Button>
@@ -230,5 +224,3 @@ export function TeamDialog({ isOpen, onClose, onSave, team, allTeams }: TeamDial
     </Dialog>
   )
 }
-
-    
