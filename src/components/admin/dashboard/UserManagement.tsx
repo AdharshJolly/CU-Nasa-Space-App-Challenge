@@ -37,12 +37,13 @@ export function UserManagement({ users, onAddNew, onEdit, onDelete }: UserManage
                 <div className="md:hidden space-y-4">
                     {users.map((user) => (
                         <Card key={user.uid} className="p-4">
-                            <CardHeader className="p-2">
+                            <CardHeader className="p-2 space-y-1">
                                 <CardTitle className="text-base truncate">
                                     {user.email}
                                 </CardTitle>
-                                <CardDescription>
-                                    <Badge variant="secondary">{user.role}</Badge>
+                                <CardDescription className="flex flex-wrap gap-2">
+                                    <Badge variant="secondary" className="capitalize">{user.role}</Badge>
+                                    {user.vertical && <Badge variant="outline">{user.vertical}</Badge>}
                                 </CardDescription>
                             </CardHeader>
                             <CardFooter className="p-2 flex justify-end gap-2">
@@ -77,8 +78,9 @@ export function UserManagement({ users, onAddNew, onEdit, onDelete }: UserManage
                 <Table className="hidden md:table">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Email</TableHead>
+                            <TableHead className="w-[40%]">Email</TableHead>
                             <TableHead>Role</TableHead>
+                            <TableHead>Vertical</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -87,7 +89,10 @@ export function UserManagement({ users, onAddNew, onEdit, onDelete }: UserManage
                             <TableRow key={user.uid}>
                                 <TableCell className="font-medium">{user.email}</TableCell>
                                 <TableCell>
-                                    <Badge variant="secondary">{user.role}</Badge>
+                                    <Badge variant="secondary" className="capitalize">{user.role}</Badge>
+                                </TableCell>
+                                <TableCell>
+                                    {user.vertical ? <Badge variant="outline">{user.vertical}</Badge> : 'N/A'}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Button variant="ghost" size="icon" onClick={() => onEdit(user)}>

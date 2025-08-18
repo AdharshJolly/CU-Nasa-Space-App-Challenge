@@ -16,6 +16,17 @@ import type { AppUser } from "@/app/admin/page";
 export const USER_ROLES = ["superadmin", "admin", "faculty", "volunteer", "poc"] as const;
 export type UserRole = typeof USER_ROLES[number];
 
+export const USER_VERTICALS = [
+    "Inauguration & Valedictory",
+    "Registration",
+    "Guest/Jury Shadow",
+    "Hackathon - On Ground",
+    "Logistics",
+    "Media",
+    "Documentation & IT",
+] as const;
+export type UserVertical = typeof USER_VERTICALS[number];
+
 const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 const userSchema = z.object({
@@ -24,19 +35,32 @@ const userSchema = z.object({
         required_error: "Please select a role for the user.",
     }),
     phone: z.string().optional(),
+    vertical: z.string().optional(),
 }).refine(data => {
-    // Mandatory for volunteer and poc
-    if ((data.role === 'volunteer' || data.role === 'poc') && (!data.phone || !indianPhoneNumberRegex.test(data.phone))) {
+    // Phone validation
+    const needsPhone = data.role === 'volunteer' || data.role === 'poc' || data.role === 'admin' || data.role === 'superadmin';
+    const isPhoneMandatory = data.role === 'volunteer' || data.role === 'poc';
+
+    if (isPhoneMandatory && (!data.phone || !indianPhoneNumberRegex.test(data.phone))) {
         return false;
     }
-    // Optional for others, but if provided, must be valid
-    if (data.phone && data.phone.length > 0 && !indianPhoneNumberRegex.test(data.phone)) {
+    if (data.phone && needsPhone && !indianPhoneNumberRegex.test(data.phone)) {
         return false;
     }
     return true;
 }, {
     message: "A valid Indian phone number is required for Volunteers and POCs. For other roles, it must be valid if provided.",
     path: ["phone"],
+}).refine(data => {
+    // Vertical validation
+    const needsVertical = data.role === 'volunteer' || data.role === 'poc';
+    if (needsVertical && !data.vertical) {
+        return false;
+    }
+    return true;
+}, {
+    message: "A vertical is required for Volunteers and POCs.",
+    path: ["vertical"],
 });
 
 
@@ -53,7 +77,8 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
     defaultValues: {
         email: "",
         role: "volunteer",
-        phone: ""
+        phone: "",
+        vertical: "",
     }
   });
   
@@ -63,10 +88,11 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
             form.reset({
                 email: user.email,
                 role: user.role,
-                phone: user.phone || ""
+                phone: user.phone || "",
+                vertical: user.vertical || "",
             });
         } else {
-            form.reset({ email: "", role: "volunteer", phone: "" });
+            form.reset({ email: "", role: "volunteer", phone: "", vertical: "" });
         }
     }
   }, [user, form, isOpen])
@@ -75,12 +101,13 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
   const watchedRole = form.watch("role");
 
   const onSubmit = async (values: z.infer<typeof userSchema>) => {
-    // Only pass the phone if the role needs it.
+    // Only pass the phone/vertical if the role needs it.
     const dataToSave = {
         ...values,
-        phone: (watchedRole !== 'faculty' && values.phone) ? values.phone : undefined
+        phone: (watchedRole !== 'faculty' && values.phone) ? values.phone : undefined,
+        vertical: (watchedRole === 'volunteer' || watchedRole === 'poc') ? values.vertical : undefined,
     };
-    await onSave(dataToSave);
+    await onSave(dataToSave as any);
     if (!form.formState.isSubmitSuccessful) {
         return;
     }
@@ -94,6 +121,10 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
     return "Phone Number (Optional)";
   }
 
+  const showPhoneField = watchedRole === 'volunteer' || watchedRole === 'poc' || watchedRole === 'admin' || watchedRole === 'superadmin';
+  const showVerticalField = watchedRole === 'volunteer' || watchedRole === 'poc';
+
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!isSubmitting) onClose() }}>
         <DialogContent className="sm:max-w-[425px]">
@@ -101,7 +132,7 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
                 <DialogTitle>{user ? "Edit User" : "Add or Import User"}</DialogTitle>
                 <DialogDescription>
                     {user 
-                        ? "Update the user's role." 
+                        ? "Update the user's role and details." 
                         : "Create a new user or assign a role to an existing user. New users will receive an email to set their password."}
                 </DialogDescription>
             </DialogHeader>
@@ -142,7 +173,7 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
                             </FormItem>
                         )}
                     />
-                    {watchedRole !== 'faculty' && (
+                    {showPhoneField && (
                         <FormField
                             control={form.control}
                             name="phone"
@@ -152,6 +183,30 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
                                     <FormControl>
                                         <Input type="tel" placeholder="+91 98765 43210" {...field} disabled={isSubmitting} />
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+                    {showVerticalField && (
+                        <FormField
+                            control={form.control}
+                            name="vertical"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Vertical (Mandatory)</FormLabel>
+                                     <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a vertical" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {USER_VERTICALS.map(v => (
+                                                <SelectItem key={v} value={v}>{v}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

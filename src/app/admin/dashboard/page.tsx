@@ -41,7 +41,7 @@ import { ProblemsControl } from "@/components/admin/dashboard/ProblemsControl";
 import { TeamsTable } from "@/components/admin/dashboard/TeamsTable";
 import { logActivity } from "@/lib/logger";
 import { UserManagement } from "@/components/admin/dashboard/UserManagement";
-import { UserDialog, type UserRole } from "@/components/admin/UserDialog";
+import { UserDialog, type UserRole, type UserVertical } from "@/components/admin/UserDialog";
 
 interface TeamMember {
   name: string;
@@ -64,6 +64,7 @@ export type AppUser = {
     uid: string;
     email: string;
     role: UserRole;
+    vertical?: UserVertical;
 }
 
 export type DuplicateInfo = {
@@ -521,7 +522,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveUser = async (data: { email: string, role: UserRole }) => {
+  const handleSaveUser = async (data: { email: string; role: UserRole; phone?: string; vertical?: UserVertical; }) => {
     const isEditing = !!editingUser;
 
     try {
@@ -531,6 +532,8 @@ export default function AdminDashboard() {
             body: JSON.stringify({
                 email: data.email,
                 role: data.role,
+                phone: data.phone,
+                vertical: data.vertical,
                 // Pass editing user's uid if it exists
                 uid: editingUser ? editingUser.uid : undefined 
             })
