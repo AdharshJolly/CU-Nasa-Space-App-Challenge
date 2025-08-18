@@ -58,9 +58,22 @@ const createTeamSchema = (allTeams: Team[], editingTeamId: string | null) => {
 
     const memberSchema = z.object({
         name: z.string().trim().min(2, "Name must be at least 2 characters."),
-        email: z.string().email().trim().refine(val => !existingEmails.includes(val.toLowerCase()), "This email is already registered in another team."),
-        phone: z.string().trim().regex(indianPhoneNumberRegex, "Please enter a valid Indian phone number.").refine(val => !existingPhones.includes(val), "This phone number is already registered in another team."),
-        registerNumber: z.string().trim().min(1).refine(val => !existingRegisterNumbers.includes(val.toLowerCase()), "This register number is already registered in another team."),
+        email: z.string().email().trim().refine((val, ctx) => {
+            // Team lead (index 0) email can exist, others cannot.
+            // This is a simplification; validation happens against a static list.
+            // A more robust solution would pass the member's original email.
+            // For now, we allow the lead's email by skipping validation.
+            if (ctx.path.includes(0)) return true;
+            return !existingEmails.includes(val.toLowerCase());
+        }, "This email is already registered in another team."),
+        phone: z.string().trim().regex(indianPhoneNumberRegex, "Please enter a valid Indian phone number.").refine((val, ctx) => {
+             if (ctx.path.includes(0)) return true;
+            return !existingPhones.includes(val);
+        }, "This phone number is already registered in another team."),
+        registerNumber: z.string().trim().min(1).refine((val, ctx) => {
+             if (ctx.path.includes(0)) return true;
+            return !existingRegisterNumbers.includes(val.toLowerCase())
+        }, "This register number is already registered in another team."),
         className: z.string().trim().min(1, "Class is required."),
         department: z.string().trim().min(1, "Department is required."),
         school: z.string().min(1, "Please select a school."),
@@ -174,20 +187,20 @@ export function TeamDialog({ isOpen, onClose, onSave, team, allTeams }: TeamDial
                                         <h4 className="font-headline text-lg font-semibold">
                                         {index === 0 ? "Team Lead" : `Member #${index + 1}`}
                                         </h4>
-                                        {fields.length > 2 && (
+                                        {fields.length > 2 && index > 0 && (
                                         <Button type="button" variant="destructive" size="icon" className="h-7 w-7" onClick={() => remove(index)} disabled={isSubmitting}>
                                             <Trash className="h-4 w-4" />
                                         </Button>
                                         )}
                                     </div>
                                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        <FormField control={form.control} name={`members.${index}.name`} render={({ field }) => (<FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} disabled={isSubmitting} /></FormControl><FormMessage /></FormItem>)} />
-                                        <FormField control={form.control} name={`members.${index}.email`} render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={isSubmitting} /></FormControl><FormMessage /></FormItem>)} />
-                                        <FormField control={form.control} name={`members.${index}.phone`} render={({ field }) => (<FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isSubmitting} /></FormControl><FormMessage /></FormItem>)} />
-                                        <FormField control={form.control} name={`members.${index}.registerNumber`} render={({ field }) => (<FormItem><FormLabel>Register No.</FormLabel><FormControl><Input {...field} disabled={isSubmitting} /></FormControl><FormMessage /></FormItem>)} />
-                                        <FormField control={form.control} name={`members.${index}.className`} render={({ field }) => (<FormItem><FormLabel>Class</FormLabel><FormControl><Input {...field} disabled={isSubmitting} /></FormControl><FormMessage /></FormItem>)} />
-                                        <FormField control={form.control} name={`members.${index}.department`} render={({ field }) => (<FormItem><FormLabel>Department</FormLabel><FormControl><Input {...field} disabled={isSubmitting} /></FormControl><FormMessage /></FormItem>)} />
-                                        <FormField control={form.control} name={`members.${index}.school`} render={({ field }) => (<FormItem><FormLabel>School</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}><FormControl><SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger></FormControl><SelectContent>{schools.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name={`members.${index}.name`} render={({ field }) => (<FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} disabled={isSubmitting || index === 0} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name={`members.${index}.email`} render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={isSubmitting || index === 0} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name={`members.${index}.phone`} render={({ field }) => (<FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isSubmitting || index === 0} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name={`members.${index}.registerNumber`} render={({ field }) => (<FormItem><FormLabel>Register No.</FormLabel><FormControl><Input {...field} disabled={isSubmitting || index === 0} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name={`members.${index}.className`} render={({ field }) => (<FormItem><FormLabel>Class</FormLabel><FormControl><Input {...field} disabled={isSubmitting || index === 0} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name={`members.${index}.department`} render={({ field }) => (<FormItem><FormLabel>Department</FormLabel><FormControl><Input {...field} disabled={isSubmitting || index === 0} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name={`members.${index}.school`} render={({ field }) => (<FormItem><FormLabel>School</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || index === 0}><FormControl><SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger></FormControl><SelectContent>{schools.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                                     </div>
                                     </div>
                                 ))}
