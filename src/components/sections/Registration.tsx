@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Rocket, Trash, UserPlus } from "lucide-react";
+import { Loader2, Rocket, Trash, UserPlus, XCircle } from "lucide-react";
 import { Separator } from "../ui/separator";
 import {
   Card,
@@ -38,6 +38,8 @@ import {
   query,
   where,
   Timestamp,
+  doc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useEffect, useState } from "react";
@@ -172,9 +174,34 @@ const schools = [
 export function Registration() {
   const { toast } = useToast();
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
-  const [isFormReady, setIsFormReady] = useState(false);
+  const [registrationsOpen, setRegistrationsOpen] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // Listen to registration settings
+    const unsubscribe = onSnapshot(doc(db, "settings", "registration"), (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        // Check if a scheduled change is past due
+        if (data.isScheduled && data.scheduledChange && data.scheduledChange.toDate() < new Date()) {
+          // Update the status and disable the schedule
+          const newStatus = data.scheduledState;
+          setRegistrationsOpen(newStatus);
+          // Update Firestore to reflect the change has occurred
+          setDoc(doc.ref, { enabled: newStatus, isScheduled: false, scheduledChange: null, scheduledState: false }, { merge: true });
+        } else {
+          setRegistrationsOpen(data.enabled);
+        }
+      } else {
+        setRegistrationsOpen(false); // Default to closed if not set
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Don't fetch validation data if registrations are closed
+    if (registrationsOpen === false) return;
+
     const fetchExistingData = async () => {
       try {
         const response = await fetch("/api/check-duplicates");
@@ -193,12 +220,14 @@ export function Registration() {
           description:
             "Could not load validation data. Please refresh the page.",
         });
-      } finally {
-        setIsFormReady(true);
       }
     };
-    fetchExistingData();
-  }, [toast]);
+    
+    // Only fetch when registrations are known to be open
+    if(registrationsOpen) {
+        fetchExistingData();
+    }
+  }, [toast, registrationsOpen]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -273,7 +302,29 @@ export function Registration() {
     }
   }
 
-  const isSubmitDisabled = isSubmitting || !isFormReady;
+  const isSubmitDisabled = isSubmitting || registrationsOpen !== true;
+
+  const renderClosedState = () => (
+    <div className="flex flex-col items-center justify-center gap-4 text-center p-8">
+      <XCircle className="h-12 w-12 text-destructive" />
+      <h3 className="font-headline text-2xl">Registrations Are Currently Closed</h3>
+      <p className="text-muted-foreground">
+        We are not accepting new registrations at this time. Please check back later or contact the organizers for more information.
+      </p>
+    </div>
+  );
+
+  const renderLoadingState = () => (
+     <div className="flex flex-col items-center justify-center gap-4 text-center p-8">
+      <Loader2 className="h-10 w-10 text-primary animate-spin" />
+      <h3 className="font-headline text-2xl">
+        Preparing Launchpad...
+      </h3>
+      <p className="text-muted-foreground">
+        Checking registration status and syncing with servers.
+      </p>
+    </div>
+  );
 
   return (
     <>
@@ -321,257 +372,249 @@ export function Registration() {
               </div>
             </CardHeader>
             <CardContent className="p-6 md:p-8">
-              {!isFormReady && (
-                <div className="flex flex-col items-center justify-center gap-4 text-center p-8">
-                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                  <h3 className="font-headline text-2xl">
-                    Preparing Launchpad...
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Syncing with registration servers to prevent duplicate
-                    entries.
-                  </p>
-                </div>
-              )}
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className={`space-y-8 ${!isFormReady ? "hidden" : ""}`}
-                >
-                  <FormField
-                    control={form.control}
-                    name="teamName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-lg font-headline">
-                          Team Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="The Star Gazers"
-                            {...field}
-                            disabled={isSubmitDisabled}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Separator />
-
-                  <div className="space-y-6">
-                    {fields.map((field, index) => (
-                      <div
-                        key={field.id}
-                        className="space-y-4 p-4 border rounded-lg relative bg-card/50"
-                      >
-                        <div className="flex justify-between items-center">
-                          <h4 className="font-headline text-lg font-semibold">
-                            {index === 0
-                              ? "Team Lead"
-                              : `Team Member #${index + 1}`}
-                          </h4>
-                          {index > 1 && (
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => remove(index)}
+              {registrationsOpen === null && renderLoadingState()}
+              {registrationsOpen === false && renderClosedState()}
+              {registrationsOpen === true && (
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="teamName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-lg font-headline">
+                            Team Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="The Star Gazers"
+                              {...field}
                               disabled={isSubmitDisabled}
-                            >
-                              <Trash className="h-4 w-4" />
-                              <span className="sr-only">Remove member</span>
-                            </Button>
-                          )}
-                        </div>
-                        <div className="grid md:grid-cols-3 gap-4">
-                          <FormField
-                            control={form.control}
-                            name={`members.${index}.name`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Full Name</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Galileo Galilei"
-                                    {...field}
-                                    disabled={isSubmitDisabled}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`members.${index}.email`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Email Address</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="email"
-                                    placeholder="galileo.g@example.com"
-                                    {...field}
-                                    disabled={isSubmitDisabled}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`members.${index}.phone`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Phone Number</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="tel"
-                                    placeholder="+91 98765 43210"
-                                    {...field}
-                                    disabled={isSubmitDisabled}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                          <FormField
-                            control={form.control}
-                            name={`members.${index}.registerNumber`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Register Number</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="222XXXX"
-                                    {...field}
-                                    disabled={isSubmitDisabled}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`members.${index}.className`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Class</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. 3BTECH-CS"
-                                    {...field}
-                                    disabled={isSubmitDisabled}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`members.${index}.department`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Department</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. Computer Science"
-                                    {...field}
-                                    disabled={isSubmitDisabled}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`members.${index}.school`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>School</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  disabled={isSubmitDisabled}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select a school" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {schools.map((school) => (
-                                      <SelectItem key={school} value={school}>
-                                        {school}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <div className="flex flex-col gap-4">
-                    {fields.length < 5 && (
+                    <Separator />
+
+                    <div className="space-y-6">
+                      {fields.map((field, index) => (
+                        <div
+                          key={field.id}
+                          className="space-y-4 p-4 border rounded-lg relative bg-card/50"
+                        >
+                          <div className="flex justify-between items-center">
+                            <h4 className="font-headline text-lg font-semibold">
+                              {index === 0
+                                ? "Team Lead"
+                                : `Team Member #${index + 1}`}
+                            </h4>
+                            {index > 1 && (
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => remove(index)}
+                                disabled={isSubmitDisabled}
+                              >
+                                <Trash className="h-4 w-4" />
+                                <span className="sr-only">Remove member</span>
+                              </Button>
+                            )}
+                          </div>
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`members.${index}.name`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Full Name</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Galileo Galilei"
+                                      {...field}
+                                      disabled={isSubmitDisabled}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`members.${index}.email`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Email Address</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="email"
+                                      placeholder="galileo.g@example.com"
+                                      {...field}
+                                      disabled={isSubmitDisabled}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`members.${index}.phone`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Phone Number</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="tel"
+                                      placeholder="+91 98765 43210"
+                                      {...field}
+                                      disabled={isSubmitDisabled}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`members.${index}.registerNumber`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Register Number</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="222XXXX"
+                                      {...field}
+                                      disabled={isSubmitDisabled}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`members.${index}.className`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Class</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="e.g. 3BTECH-CS"
+                                      {...field}
+                                      disabled={isSubmitDisabled}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`members.${index}.department`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Department</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="e.g. Computer Science"
+                                      {...field}
+                                      disabled={isSubmitDisabled}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`members.${index}.school`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>School</FormLabel>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    disabled={isSubmitDisabled}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select a school" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {schools.map((school) => (
+                                        <SelectItem key={school} value={school}>
+                                          {school}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                      {fields.length < 5 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() =>
+                            append({
+                              name: "",
+                              email: "",
+                              phone: "",
+                              registerNumber: "",
+                              className: "",
+                              department: "",
+                              school: "",
+                            })
+                          }
+                          disabled={isSubmitDisabled}
+                        >
+                          <UserPlus className="mr-2 h-4 w-4" /> Add Team Member
+                        </Button>
+                      )}
+                      {form.formState.errors.members && (
+                        <p className="text-sm font-medium text-destructive text-center">
+                          {form.formState.errors.members.message ||
+                            form.formState.errors.members.root?.message}
+                        </p>
+                      )}
+
                       <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() =>
-                          append({
-                            name: "",
-                            email: "",
-                            phone: "",
-                            registerNumber: "",
-                            className: "",
-                            department: "",
-                            school: "",
-                          })
-                        }
+                        type="submit"
+                        className="w-full"
+                        size="lg"
                         disabled={isSubmitDisabled}
                       >
-                        <UserPlus className="mr-2 h-4 w-4" /> Add Team Member
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          "Confirm Registration"
+                        )}
                       </Button>
-                    )}
-                    {form.formState.errors.members && (
-                      <p className="text-sm font-medium text-destructive text-center">
-                        {form.formState.errors.members.message ||
-                          form.formState.errors.members.root?.message}
-                      </p>
-                    )}
-
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      size="lg"
-                      disabled={isSubmitDisabled}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Confirm Registration"
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+                    </div>
+                  </form>
+                </Form>
+              )}
             </CardContent>
           </Card>
         </div>

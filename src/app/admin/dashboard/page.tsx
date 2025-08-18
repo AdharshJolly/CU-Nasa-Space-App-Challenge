@@ -42,6 +42,7 @@ import { TeamsTable } from "@/components/admin/dashboard/TeamsTable";
 import { logActivity } from "@/lib/logger";
 import { UserManagement } from "@/components/admin/dashboard/UserManagement";
 import { UserDialog, type UserRole, type UserVertical } from "@/components/admin/UserDialog";
+import { RegistrationControl, type RegistrationSettings } from "@/components/admin/dashboard/RegistrationControl";
 
 interface TeamMember {
   name: string;
@@ -81,6 +82,12 @@ export default function AdminDashboard() {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [problemsReleased, setProblemsReleased] = useState(false);
+  const [registrationSettings, setRegistrationSettings] = useState<RegistrationSettings>({
+    enabled: false,
+    isScheduled: false,
+    scheduledChange: null,
+    scheduledState: false,
+  });
   const [liveBannerText, setLiveBannerText] = useState("");
   const [isSavingBanner, setIsSavingBanner] = useState(false);
   const [isProblemDialogOpen, setIsProblemDialogOpen] = useState(false);
@@ -218,6 +225,37 @@ export default function AdminDashboard() {
       }
     );
 
+     const unsubscribeRegistrationSettings = onSnapshot(
+      doc(db, "settings", "registration"), (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        // Check for scheduled changes
+        if (data.isScheduled && data.scheduledChange && data.scheduledChange.toDate() < new Date()) {
+          const updatedSettings = {
+            enabled: data.scheduledState,
+            isScheduled: false,
+            scheduledChange: null,
+            scheduledState: false,
+          };
+          // Use setDoc to overwrite the old settings
+          setDoc(doc.ref, updatedSettings);
+          setRegistrationSettings(updatedSettings);
+          logActivity(user?.email, 'Scheduled Registration Change Executed', { newState: data.scheduledState });
+
+        } else {
+          setRegistrationSettings({
+            enabled: data.enabled,
+            isScheduled: data.isScheduled,
+            scheduledChange: data.scheduledChange ? data.scheduledChange.toDate() : null,
+            scheduledState: data.scheduledState,
+          });
+        }
+      } else {
+        // If doc doesn't exist, create it with default 'closed' state
+        setDoc(doc.ref, { enabled: false, isScheduled: false, scheduledChange: null, scheduledState: false });
+      }
+    });
+
     const unsubscribeBanner = onSnapshot(
       doc(db, "settings", "liveBanner"),
       (doc) => {
@@ -234,6 +272,7 @@ export default function AdminDashboard() {
       unsubscribeTimeline();
       unsubscribeBanner();
       unsubscribeDomains();
+      unsubscribeRegistrationSettings();
     };
   }, [user]);
 
@@ -322,6 +361,37 @@ export default function AdminDashboard() {
       setIsSavingBanner(false);
     }
   };
+
+  const handleRegistrationSettingsChange = async (newSettings: RegistrationSettings) => {
+    try {
+      const settingsToSave: any = {
+        ...newSettings,
+        scheduledChange: newSettings.scheduledChange ? Timestamp.fromDate(newSettings.scheduledChange) : null,
+      };
+      await setDoc(doc(db, "settings", "registration"), settingsToSave);
+      
+      let toastDescription = `Registrations are now ${newSettings.enabled ? 'OPEN' : 'CLOSED'}.`;
+      if (newSettings.isScheduled && newSettings.scheduledChange) {
+        toastDescription = `Registration status change scheduled for ${newSettings.scheduledChange.toLocaleString()}.`;
+      } else if (!newSettings.isScheduled && registrationSettings.isScheduled) {
+        toastDescription = 'Scheduled registration change has been cancelled.';
+      }
+      
+      toast({
+        title: "Success!",
+        description: toastDescription,
+      });
+
+      await logActivity(user?.email, 'Registration Settings Updated', newSettings);
+    } catch (error) {
+       toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not update registration settings. Please try again.",
+      });
+    }
+  }
+
 
   // Domain Handlers
   const handleAddNewDomain = () => {
@@ -784,6 +854,13 @@ export default function AdminDashboard() {
             problemsReleased={problemsReleased}
             onReleaseToggle={handleReleaseToggle}
           />
+          
+          {isSuperAdmin && (
+              <RegistrationControl
+                  settings={registrationSettings}
+                  onSettingsChange={handleRegistrationSettingsChange}
+              />
+          )}
 
           <LiveBanner
             liveBannerText={liveBannerText}
