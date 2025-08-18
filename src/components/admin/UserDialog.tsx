@@ -39,7 +39,7 @@ interface UserDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (data: z.infer<typeof userSchema>) => Promise<void>;
-    user: AppUser | null;
+    user: (AppUser & { phone?: string }) | null;
 }
 
 export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
@@ -58,7 +58,7 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
             form.reset({
                 email: user.email,
                 role: user.role,
-                phone: (user as any).phone || ""
+                phone: user.phone || ""
             });
         } else {
             form.reset({ email: "", role: "volunteer", phone: "" });

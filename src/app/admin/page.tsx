@@ -64,6 +64,7 @@ export type AppUser = {
     uid: string;
     email: string;
     role: UserRole;
+    phone?: string;
 }
 
 export type DuplicateInfo = {
@@ -534,7 +535,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveUser = async (data: { email: string, role: UserRole }) => {
+  const handleSaveUser = async (data: { email: string, role: UserRole, phone?: string }) => {
     const isEditing = !!editingUser;
 
     try {
@@ -544,6 +545,7 @@ export default function AdminDashboard() {
             body: JSON.stringify({
                 email: data.email,
                 role: data.role,
+                phone: data.phone,
                 // Pass editing user's uid if it exists
                 uid: editingUser ? editingUser.uid : undefined 
             })

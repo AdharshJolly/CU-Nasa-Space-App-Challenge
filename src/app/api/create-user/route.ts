@@ -18,24 +18,36 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Email and role are required' }, { status: 400 });
         }
 
-        const claims: { [key: string]: any } = { role };
-        if ((role === 'volunteer' || role === 'poc') && phone) {
-            if (!indianPhoneNumberRegex.test(phone)) {
-                 return NextResponse.json({ error: 'Invalid phone number format for volunteer/poc.' }, { status: 400 });
-            }
-            claims.phone = phone;
+        const isNewRolePhoneRequired = role === 'volunteer' || role === 'poc';
+
+        if (isNewRolePhoneRequired && (!phone || !indianPhoneNumberRegex.test(phone))) {
+             return NextResponse.json({ error: 'A valid Indian phone number is required for Volunteers and POCs.' }, { status: 400 });
         }
 
         if (uid) { // This is an edit operation
-            // Update custom claims
-            await adminAuth.setCustomUserClaims(uid, claims);
+            const userRecord = await adminAuth.getUser(uid);
+            const existingClaims = userRecord.customClaims || {};
+            const newClaims = { ...existingClaims, role };
 
-            // Update role in Firestore
+            // If the new role requires a phone, add it.
+            if (isNewRolePhoneRequired) {
+                newClaims.phone = phone;
+            } else {
+                // If the new role does not require a phone, remove it if it exists.
+                delete newClaims.phone;
+            }
+
+            await adminAuth.setCustomUserClaims(uid, newClaims);
             await adminDb.collection('users').doc(uid).update({ role });
             
             return NextResponse.json({ message: 'User updated successfully', uid, isNewUser: false });
 
         } else { // This is a create or "import" operation
+            const claims: { [key: string]: any } = { role };
+            if (isNewRolePhoneRequired) {
+                claims.phone = phone;
+            }
+            
             try {
                 // Check if user already exists
                 const existingUser = await adminAuth.getUserByEmail(email);
