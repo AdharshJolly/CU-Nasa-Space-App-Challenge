@@ -3,8 +3,7 @@ import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { getAuth, Auth } from 'firebase-admin/auth';
 
-let adminDb: Firestore;
-let adminAuth: Auth;
+let app: App;
 
 if (!getApps().length) {
   try {
@@ -13,7 +12,7 @@ if (!getApps().length) {
     }
     const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_PRIVATE_KEY);
     
-    initializeApp({
+    app = initializeApp({
       credential: cert(serviceAccount)
     });
     
@@ -21,10 +20,14 @@ if (!getApps().length) {
 
   } catch (error: any) {
     console.error("Firebase Admin SDK initialization error:", error.message);
+    // If initialization fails, we should not proceed to get Firestore or Auth.
+    // Instead, we let the app object be undefined, and functions using it should handle this case.
   }
+} else {
+    app = getApps()[0];
 }
 
-adminDb = getFirestore();
-adminAuth = getAuth();
+const adminDb: Firestore = getFirestore(app);
+const adminAuth: Auth = getAuth(app);
 
 export { adminDb, adminAuth };

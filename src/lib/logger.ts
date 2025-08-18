@@ -9,6 +9,13 @@ type LogDetails = {
 };
 
 export async function logActivity(userEmail: string | null, action: string, details: LogDetails = {}) {
+    if (!adminDb) {
+        console.error("Admin DB not initialized. Cannot log activity.");
+        // Depending on requirements, you might want to queue this or simply fail.
+        // For now, we'll log an error and return.
+        return;
+    }
+
     const logItem = {
         action,
         details,
@@ -17,10 +24,6 @@ export async function logActivity(userEmail: string | null, action: string, deta
     };
 
     try {
-        if (!adminDb) {
-            console.error("Admin DB not initialized. Cannot log activity.");
-            return;
-        }
         await addDoc(collection(adminDb, 'logs'), logItem);
     } catch (error) {
         console.error('Failed to log activity to Firestore:', error);

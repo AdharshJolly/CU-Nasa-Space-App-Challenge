@@ -7,7 +7,6 @@ const indianPhoneNumberRegex = /^(?:\+91)?[6-9]\d{9}$/;
 
 export async function POST(req: Request) {
     if (!adminAuth || !adminDb) {
-        console.error("Firebase Admin has not been initialized in API route.");
         return NextResponse.json({ error: 'Firebase Admin has not been initialized.' }, { status: 500 });
     }
 
