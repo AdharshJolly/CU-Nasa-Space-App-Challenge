@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Pencil, PlusCircle, Trash2, Users } from "lucide-react";
+import { ChevronsUpDown, Pencil, PlusCircle, Trash2, Users } from "lucide-react";
 import type { AppUser } from "@/app/admin/dashboard/page";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from "react";
 
 interface UserManagementProps {
     users: AppUser[];
@@ -17,112 +19,121 @@ interface UserManagementProps {
 }
 
 export function UserManagement({ users, onAddNew, onEdit, onDelete }: UserManagementProps) {
+    const [isOpen, setIsOpen] = useState(true);
+
     return (
-        <Card>
-            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <Users className="h-6 w-6" />
-                        <CardTitle>User Management</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Create, edit, and manage users and their roles.
-                    </CardDescription>
-                </div>
-                <Button onClick={onAddNew}>
-                    <PlusCircle className="mr-2" /> Add New User
-                </Button>
-            </CardHeader>
-            <CardContent>
-                <div className="md:hidden space-y-4">
-                    {users.map((user) => (
-                        <Card key={user.uid} className="p-4">
-                            <CardHeader className="p-2 space-y-1">
-                                <CardTitle className="text-base truncate">
-                                    {user.email}
-                                </CardTitle>
-                                <CardDescription className="flex flex-wrap gap-2">
-                                    <Badge variant="secondary" className="capitalize">{user.role}</Badge>
-                                    {user.vertical && <Badge variant="outline">{user.vertical}</Badge>}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardFooter className="p-2 flex justify-end gap-2">
-                                <Button variant="ghost" size="icon" onClick={() => onEdit(user)}>
-                                    <Pencil className="h-4 w-4" />
-                                </Button>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                            <Trash2 className="h-4 w-4" />
+        <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
+            <Card>
+                <CardHeader className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <CollapsibleTrigger asChild>
+                        <div className="flex-1 cursor-pointer">
+                            <div className="flex items-center gap-2">
+                                <Users className="h-6 w-6" />
+                                <CardTitle>User Management</CardTitle>
+                                <ChevronsUpDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
+                            </div>
+                            <CardDescription>
+                                Create, edit, and manage users and their roles.
+                            </CardDescription>
+                        </div>
+                    </CollapsibleTrigger>
+                    <Button onClick={onAddNew} className="flex-shrink-0">
+                        <PlusCircle className="mr-2" /> Add New User
+                    </Button>
+                </CardHeader>
+                <CollapsibleContent>
+                    <CardContent>
+                        <div className="md:hidden space-y-4">
+                            {users.map((user) => (
+                                <Card key={user.uid} className="p-4">
+                                    <CardHeader className="p-2 space-y-1">
+                                        <CardTitle className="text-base truncate">
+                                            {user.email}
+                                        </CardTitle>
+                                        <CardDescription className="flex flex-wrap gap-2">
+                                            <Badge variant="secondary" className="capitalize">{user.role}</Badge>
+                                            {user.vertical && <Badge variant="outline">{user.vertical}</Badge>}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardFooter className="p-2 flex justify-end gap-2">
+                                        <Button variant="ghost" size="icon" onClick={() => onEdit(user)}>
+                                            <Pencil className="h-4 w-4" />
                                         </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure you want to delete {user.email}?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This will permanently delete this user from Authentication and Firestore. This action cannot be undone.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => onDelete(user.uid)} className="bg-destructive hover:bg-destructive/90">
-                                                Delete User
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                </div>
-                <Table className="hidden md:table">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[40%]">Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Vertical</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {users.map((user) => (
-                            <TableRow key={user.uid}>
-                                <TableCell className="font-medium">{user.email}</TableCell>
-                                <TableCell>
-                                    <Badge variant="secondary" className="capitalize">{user.role}</Badge>
-                                </TableCell>
-                                <TableCell>
-                                    {user.vertical ? <Badge variant="outline">{user.vertical}</Badge> : 'N/A'}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Button variant="ghost" size="icon" onClick={() => onEdit(user)}>
-                                        <Pencil className="h-4 w-4" />
-                                    </Button>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                <Trash2 className="h-4 w-4" />
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure you want to delete {user.email}?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This will permanently delete this user from Authentication and Firestore. This action cannot be undone.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => onDelete(user.uid)} className="bg-destructive hover:bg-destructive/90">
+                                                        Delete User
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </CardFooter>
+                                </Card>
+                            ))}
+                        </div>
+                        <Table className="hidden md:table">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[40%]">Email</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead>Vertical</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {users.map((user) => (
+                                    <TableRow key={user.uid}>
+                                        <TableCell className="font-medium">{user.email}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="secondary" className="capitalize">{user.role}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            {user.vertical ? <Badge variant="outline">{user.vertical}</Badge> : 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => onEdit(user)}>
+                                                <Pencil className="h-4 w-4" />
                                             </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you absolutely sure you want to delete {user.email}?</AlertDialogTitle>
-                                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the user from Firebase Authentication and remove their role from the system.</AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => onDelete(user.uid)} className="bg-destructive hover:bg-destructive/90">
-                                                    Yes, delete this user
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure you want to delete {user.email}?</AlertDialogTitle>
+                                                        <AlertDialogDescription>This action cannot be undone. This will permanently delete the user from Firebase Authentication and remove their role from the system.</AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => onDelete(user.uid)} className="bg-destructive hover:bg-destructive/90">
+                                                            Yes, delete this user
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </CollapsibleContent>
+            </Card>
+        </Collapsible>
     );
 }
