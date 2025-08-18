@@ -25,12 +25,17 @@ const userSchema = z.object({
     }),
     phone: z.string().optional(),
 }).refine(data => {
+    // Mandatory for volunteer and poc
     if ((data.role === 'volunteer' || data.role === 'poc') && (!data.phone || !indianPhoneNumberRegex.test(data.phone))) {
+        return false;
+    }
+    // Optional for others, but if provided, must be valid
+    if (data.phone && data.phone.length > 0 && !indianPhoneNumberRegex.test(data.phone)) {
         return false;
     }
     return true;
 }, {
-    message: "A valid Indian phone number is required for Volunteers and POCs.",
+    message: "A valid Indian phone number is required for Volunteers and POCs. For other roles, it must be valid if provided.",
     path: ["phone"],
 });
 
@@ -39,7 +44,7 @@ interface UserDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (data: z.infer<typeof userSchema>) => Promise<void>;
-    user: (AppUser & { phone?: string }) | null;
+    user: AppUser | null;
 }
 
 export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
@@ -70,12 +75,24 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
   const watchedRole = form.watch("role");
 
   const onSubmit = async (values: z.infer<typeof userSchema>) => {
-    await onSave(values);
+    // Only pass the phone if the role needs it.
+    const dataToSave = {
+        ...values,
+        phone: (watchedRole !== 'faculty' && values.phone) ? values.phone : undefined
+    };
+    await onSave(dataToSave);
     if (!form.formState.isSubmitSuccessful) {
         return;
     }
     form.reset();
   };
+  
+  const phoneFieldLabel = () => {
+    if (watchedRole === 'volunteer' || watchedRole === 'poc') {
+      return "Phone Number (Mandatory)";
+    }
+    return "Phone Number (Optional)";
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!isSubmitting) onClose() }}>
@@ -125,13 +142,13 @@ export function UserDialog({ isOpen, onClose, onSave, user }: UserDialogProps) {
                             </FormItem>
                         )}
                     />
-                    {(watchedRole === 'volunteer' || watchedRole === 'poc') && (
+                    {watchedRole !== 'faculty' && (
                         <FormField
                             control={form.control}
                             name="phone"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Phone Number</FormLabel>
+                                    <FormLabel>{phoneFieldLabel()}</FormLabel>
                                     <FormControl>
                                         <Input type="tel" placeholder="+91 98765 43210" {...field} disabled={isSubmitting} />
                                     </FormControl>

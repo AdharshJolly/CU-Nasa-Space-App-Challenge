@@ -17,37 +17,32 @@ export async function POST(req: Request) {
         if (!email || !role) {
             return NextResponse.json({ error: 'Email and role are required' }, { status: 400 });
         }
+        
+        const isPhoneMandatory = role === 'volunteer' || role === 'poc';
+        const isPhoneOptional = role === 'admin' || role === 'superadmin';
+        const needsPhone = isPhoneMandatory || isPhoneOptional;
 
-        const isNewRolePhoneRequired = role === 'volunteer' || role === 'poc';
-
-        if (isNewRolePhoneRequired && (!phone || !indianPhoneNumberRegex.test(phone))) {
+        if (isPhoneMandatory && (!phone || !indianPhoneNumberRegex.test(phone))) {
              return NextResponse.json({ error: 'A valid Indian phone number is required for Volunteers and POCs.' }, { status: 400 });
+        }
+        
+        if (phone && needsPhone && !indianPhoneNumberRegex.test(phone)) {
+             return NextResponse.json({ error: 'Please provide a valid Indian phone number.' }, { status: 400 });
+        }
+
+
+        const claims: { [key: string]: any } = { role };
+        if (needsPhone && phone) {
+            claims.phone = phone;
         }
 
         if (uid) { // This is an edit operation
-            const userRecord = await adminAuth.getUser(uid);
-            const existingClaims = userRecord.customClaims || {};
-            const newClaims = { ...existingClaims, role };
-
-            // If the new role requires a phone, add it.
-            if (isNewRolePhoneRequired) {
-                newClaims.phone = phone;
-            } else {
-                // If the new role does not require a phone, remove it if it exists.
-                delete newClaims.phone;
-            }
-
-            await adminAuth.setCustomUserClaims(uid, newClaims);
-            await adminDb.collection('users').doc(uid).update({ role });
+            await adminAuth.setCustomUserClaims(uid, claims);
+            await adminDb.collection('users').doc(uid).set({ role, phone: claims.phone || null }, { merge: true });
             
             return NextResponse.json({ message: 'User updated successfully', uid, isNewUser: false });
 
         } else { // This is a create or "import" operation
-            const claims: { [key: string]: any } = { role };
-            if (isNewRolePhoneRequired) {
-                claims.phone = phone;
-            }
-            
             try {
                 // Check if user already exists
                 const existingUser = await adminAuth.getUserByEmail(email);
@@ -58,6 +53,7 @@ export async function POST(req: Request) {
                     uid: existingUser.uid,
                     email: existingUser.email,
                     role,
+                    phone: claims.phone || null
                 }, { merge: true });
 
                 return NextResponse.json({ message: `Existing user ${email} updated with new role.`, uid: existingUser.uid, isNewUser: false });
@@ -76,6 +72,7 @@ export async function POST(req: Request) {
                         uid: newUserRecord.uid,
                         email,
                         role,
+                        phone: claims.phone || null,
                         createdAt: new Date().toISOString(),
                     });
             
