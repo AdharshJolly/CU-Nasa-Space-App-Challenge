@@ -106,6 +106,7 @@ export function ProblemsControl({ problems, onAddNew, onEdit, onDelete }: Proble
                             <TableHead className="w-[30%]">Title</TableHead>
                             <TableHead className="w-[20%]">Category</TableHead>
                             <TableHead>Description</TableHead>
+                            <TableHead>Sections</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                         </TableHeader>
@@ -116,8 +117,11 @@ export function ProblemsControl({ problems, onAddNew, onEdit, onDelete }: Proble
                                 {problem.title}
                             </TableCell>
                             <TableCell>{problem.category}</TableCell>
-                            <TableCell className="text-muted-foreground">
+                            <TableCell className="text-muted-foreground text-xs max-w-xs truncate">
                                 {problem.description}
+                            </TableCell>
+                             <TableCell className="text-muted-foreground text-center">
+                                {problem.sections ? problem.sections.length : 0}
                             </TableCell>
                             <TableCell className="text-right">
                                 <Button

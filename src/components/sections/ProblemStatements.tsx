@@ -103,8 +103,14 @@ export function ProblemStatements() {
                                     <span>{problem.title}</span>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground">
-                                {problem.description}
+                            <AccordionContent className="text-muted-foreground prose prose-invert prose-sm max-w-none">
+                                <p>{problem.description}</p>
+                                {problem.sections && problem.sections.map((section, index) => (
+                                    <div key={index} className="mt-4">
+                                        <h4 className="font-semibold text-foreground">{section.subheading}</h4>
+                                        <p>{section.content}</p>
+                                    </div>
+                                ))}
                             </AccordionContent>
                         </AccordionItem>
                     ))}
