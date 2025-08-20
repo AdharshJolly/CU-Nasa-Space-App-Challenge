@@ -7,21 +7,6 @@ const collaborators = [
     hint: "United States government agency for space exploration and aeronautics",
   },
   {
-    name: "SUMVN",
-    logo: "/assets/logos/sumvn.png",
-    hint: "Domain name and web services provider",
-  },
-  {
-    name: "Telengana Government",
-    logo: "/assets/logos/govt_telangana.png",
-    hint: "State government of Telangana, India",
-  },
-  {
-    name: "RICH",
-    logo: "/assets/logos/rich.png",
-    hint: "Research and Innovation Circle of Hyderabad, fostering innovation and entrepreneurship",
-  },
-  {
     name: "Microsoft",
     logo: "/assets/logos/msft.png",
     hint: "Global technology company, software and cloud solutions",
