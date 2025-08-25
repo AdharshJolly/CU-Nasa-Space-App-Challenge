@@ -1,10 +1,8 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Rocket, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -26,25 +24,15 @@ const navLinks = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [registrationsOpen, setRegistrationsOpen] = useState<boolean | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
-
-    const unsubscribe = onSnapshot(doc(db, "settings", "registration"), (doc) => {
-      if (doc.exists()) {
-        setRegistrationsOpen(doc.data().enabled);
-      } else {
-        setRegistrationsOpen(false);
-      }
-    });
     
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      unsubscribe();
     }
   }, []);
 
@@ -93,19 +81,14 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          {registrationsOpen && (
-            <Button asChild>
-              <Link href="#register">Register Now</Link>
-            </Button>
-          )}
         </nav>
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <button className="p-2 -mr-2">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle navigation menu</span>
-              </Button>
+              </button>
             </SheetTrigger>
             <SheetContent side="right">
               <nav className="grid gap-6 p-6 text-lg font-medium">
@@ -127,13 +110,6 @@ export function Header() {
                     </Link>
                   </SheetClose>
                 ))}
-                 {registrationsOpen && (
-                  <Button asChild className="mt-4">
-                    <SheetClose asChild>
-                      <Link href="#register">Register Now</Link>
-                    </SheetClose>
-                  </Button>
-                )}
               </nav>
             </SheetContent>
           </Sheet>

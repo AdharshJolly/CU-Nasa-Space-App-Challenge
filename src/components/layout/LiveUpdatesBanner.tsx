@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -8,9 +7,10 @@ import { db } from '@/lib/firebase';
 
 export function LiveUpdatesBanner() {
   const [bannerText, setBannerText] = useState<string | null>(null);
+  const [isEnabled, setIsEnabled] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, "settings", "liveBanner"), (doc) => {
+    const bannerUnsubscribe = onSnapshot(doc(db, "settings", "liveBanner"), (doc) => {
       if (doc.exists() && doc.data().text) {
         setBannerText(doc.data().text);
       } else {
@@ -18,10 +18,21 @@ export function LiveUpdatesBanner() {
       }
     });
 
-    return () => unsubscribe();
+    const featuresUnsubscribe = onSnapshot(doc(db, "settings", "features"), (doc) => {
+      if (doc.exists()) {
+        setIsEnabled(doc.data().liveUpdatesEnabled);
+      } else {
+        setIsEnabled(false);
+      }
+    });
+
+    return () => {
+      bannerUnsubscribe();
+      featuresUnsubscribe();
+    }
   }, []);
 
-  if (!bannerText) {
+  if (!bannerText || !isEnabled) {
     return null;
   }
 
@@ -36,5 +47,3 @@ export function LiveUpdatesBanner() {
     </div>
   );
 }
-
-    

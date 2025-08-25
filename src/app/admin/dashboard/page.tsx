@@ -41,7 +41,6 @@ import {
   SiteControls,
   type RegistrationSettings,
 } from "@/components/admin/dashboard/SiteControls";
-import { LiveBanner } from "@/components/admin/dashboard/LiveBanner";
 import { PreviousDomains } from "@/components/admin/dashboard/PreviousDomains";
 import { TimelineControl } from "@/components/admin/dashboard/TimelineControl";
 import { ProblemsControl } from "@/components/admin/dashboard/ProblemsControl";
@@ -93,6 +92,7 @@ export default function AdminDashboard() {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [problemsReleased, setProblemsReleased] = useState(false);
+  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(false);
   const [registrationSettings, setRegistrationSettings] =
     useState<RegistrationSettings>({
       enabled: false,
@@ -100,8 +100,6 @@ export default function AdminDashboard() {
       scheduledChange: null,
       scheduledState: false,
     });
-  const [liveBannerText, setLiveBannerText] = useState("");
-  const [isSavingBanner, setIsSavingBanner] = useState(false);
   const [isProblemDialogOpen, setIsProblemDialogOpen] = useState(false);
   const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false);
   const [isDomainDialogOpen, setIsDomainDialogOpen] = useState(false);
@@ -238,7 +236,9 @@ export default function AdminDashboard() {
       doc(db, "settings", "features"),
       (doc) => {
         if (doc.exists()) {
-          setProblemsReleased(doc.data().problemsReleased);
+          const data = doc.data();
+          setProblemsReleased(data.problemsReleased);
+          setLiveUpdatesEnabled(data.liveUpdatesEnabled);
         }
       }
     );
@@ -288,21 +288,11 @@ export default function AdminDashboard() {
       }
     );
 
-    const unsubscribeBanner = onSnapshot(
-      doc(db, "settings", "liveBanner"),
-      (doc) => {
-        if (doc.exists()) {
-          setLiveBannerText(doc.data().text);
-        }
-      }
-    );
-
     return () => {
       unsubscribeTeams();
       unsubscribeProblems();
       unsubscribeSettings();
       unsubscribeTimeline();
-      unsubscribeBanner();
       unsubscribeDomains();
       unsubscribeRegistrationSettings();
     };
@@ -374,28 +364,30 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveBanner = async () => {
-    setIsSavingBanner(true);
+  const handleLiveUpdatesToggle = async (checked: boolean) => {
     try {
-      const bannerDoc = await getDoc(doc(db, "settings", "liveBanner"));
-      const oldText = bannerDoc.exists() ? bannerDoc.data().text : "";
-      await setDoc(doc(db, "settings", "liveBanner"), { text: liveBannerText });
+      await setDoc(
+        doc(db, "settings", "features"),
+        { liveUpdatesEnabled: checked },
+        { merge: true }
+      );
+      setLiveUpdatesEnabled(checked);
       toast({
         title: "Success!",
-        description: "Live banner has been updated.",
+        description: `Live Updates Banner is now ${
+          checked ? "enabled" : "disabled"
+        }.`,
       });
-      await logActivity(user?.email, "Live Banner Updated", {
-        from: oldText,
-        to: liveBannerText,
+      await logActivity(user?.email, "Toggled Live Updates Banner", {
+        enabled: checked,
       });
     } catch (error) {
+      console.error("Error updating settings: ", error);
       toast({
         variant: "destructive",
         title: "Update Failed",
-        description: "Could not update the banner. Please try again.",
+        description: "Could not update the setting. Please try again.",
       });
-    } finally {
-      setIsSavingBanner(false);
     }
   };
 
@@ -984,20 +976,16 @@ export default function AdminDashboard() {
             />
           )}
 
-          <SiteControls
-            problemsReleased={problemsReleased}
-            onReleaseToggle={handleReleaseToggle}
-            settings={registrationSettings}
-            onSettingsChange={handleRegistrationSettingsChange}
-            isSuperAdmin={isSuperAdmin}
-          />
-
-          <LiveBanner
-            liveBannerText={liveBannerText}
-            setLiveBannerText={setLiveBannerText}
-            onSave={handleSaveBanner}
-            isSaving={isSavingBanner}
-          />
+          {isSuperAdmin && (
+            <SiteControls
+              problemsReleased={problemsReleased}
+              onReleaseToggle={handleReleaseToggle}
+              liveUpdatesEnabled={liveUpdatesEnabled}
+              onLiveUpdatesToggle={handleLiveUpdatesToggle}
+              settings={registrationSettings}
+              onSettingsChange={handleRegistrationSettingsChange}
+            />
+          )}
 
           <PreviousDomains
             domains={domains}

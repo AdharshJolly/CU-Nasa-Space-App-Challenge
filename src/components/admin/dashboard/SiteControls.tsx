@@ -1,208 +1,279 @@
-
 "use client";
 
 import { useState } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar as CalendarIcon, Settings, AlertTriangle, ChevronsUpDown } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Calendar as CalendarIcon,
+  Settings,
+  AlertTriangle,
+  ChevronsUpDown,
+  Megaphone,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 
 export interface RegistrationSettings {
-    enabled: boolean;
-    isScheduled: boolean;
-    scheduledChange: Date | null;
-    scheduledState: boolean;
+  enabled: boolean;
+  isScheduled: boolean;
+  scheduledChange: Date | null;
+  scheduledState: boolean;
 }
 
 interface SiteControlsProps {
-    problemsReleased: boolean;
-    onReleaseToggle: (checked: boolean) => void;
-    settings: RegistrationSettings;
-    onSettingsChange: (newSettings: RegistrationSettings) => void;
-    isSuperAdmin: boolean;
+  problemsReleased: boolean;
+  onReleaseToggle: (checked: boolean) => void;
+  liveUpdatesEnabled: boolean;
+  onLiveUpdatesToggle: (checked: boolean) => void;
+  settings: RegistrationSettings;
+  onSettingsChange: (newSettings: RegistrationSettings) => void;
 }
 
 export function SiteControls({
-    problemsReleased,
-    onReleaseToggle,
-    settings,
-    onSettingsChange,
-    isSuperAdmin,
+  problemsReleased,
+  onReleaseToggle,
+  liveUpdatesEnabled,
+  onLiveUpdatesToggle,
+  settings,
+  onSettingsChange,
 }: SiteControlsProps) {
-    const [isOpen, setIsOpen] = useState(true);
-    const [scheduledDate, setScheduledDate] = useState<Date | undefined>(settings.scheduledChange || undefined);
-    const [scheduledTime, setScheduledTime] = useState<string>(settings.scheduledChange ? format(settings.scheduledChange, "HH:mm") : "09:00");
-    const [scheduledState, setScheduledState] = useState<"true" | "false">(String(settings.scheduledState));
+  const [isOpen, setIsOpen] = useState(true);
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(
+    settings.scheduledChange || undefined
+  );
+  const [scheduledTime, setScheduledTime] = useState<string>(
+    settings.scheduledChange ? format(settings.scheduledChange, "HH:mm") : "09:00"
+  );
+  const [scheduledState, setScheduledState] = useState<"true" | "false">(
+    String(settings.scheduledState)
+  );
 
-    const handleManualToggle = (checked: boolean) => {
-        onSettingsChange({
-            ...settings,
-            enabled: checked,
-            isScheduled: false, // Manual override cancels schedule
-            scheduledChange: null,
-        });
-    };
+  const handleManualToggle = (checked: boolean) => {
+    onSettingsChange({
+      ...settings,
+      enabled: checked,
+      isScheduled: false, // Manual override cancels schedule
+      scheduledChange: null,
+    });
+  };
 
-    const handleSchedule = () => {
-        if (!scheduledDate) return;
-        
-        const [hours, minutes] = scheduledTime.split(':').map(Number);
-        const combinedDateTime = new Date(scheduledDate);
-        combinedDateTime.setHours(hours, minutes, 0, 0);
+  const handleSchedule = () => {
+    if (!scheduledDate) return;
 
-        onSettingsChange({
-            ...settings,
-            isScheduled: true,
-            scheduledChange: combinedDateTime,
-            scheduledState: scheduledState === "true",
-        });
-    };
+    const [hours, minutes] = scheduledTime.split(":").map(Number);
+    const combinedDateTime = new Date(scheduledDate);
+    combinedDateTime.setHours(hours, minutes, 0, 0);
 
-    const handleCancelSchedule = () => {
-        setScheduledDate(undefined);
-        onSettingsChange({
-            ...settings,
-            isScheduled: false,
-            scheduledChange: null,
-        });
-    };
+    onSettingsChange({
+      ...settings,
+      isScheduled: true,
+      scheduledChange: combinedDateTime,
+      scheduledState: scheduledState === "true",
+    });
+  };
 
-    return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} asChild>
-        <Card>
-            <div className="flex items-center justify-between p-6">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <Settings className="h-6 w-6" />
-                        <CardTitle>Site Controls</CardTitle>
-                    </div>
-                    <CardDescription className="mt-1.5">
-                        Control feature visibility and registration status on the main website.
-                    </CardDescription>
-                </div>
-                <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                         <ChevronsUpDown className="h-4 w-4" />
-                         <span className="sr-only">Toggle</span>
-                    </Button>
-                </CollapsibleTrigger>
+  const handleCancelSchedule = () => {
+    setScheduledDate(undefined);
+    onSettingsChange({
+      ...settings,
+      isScheduled: false,
+      scheduledChange: null,
+    });
+  };
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} asChild>
+      <Card>
+        <div className="flex items-start justify-between p-6">
+          <div>
+            <div className="flex items-center gap-2">
+              <Settings className="h-6 w-6" />
+              <CardTitle>Site Controls</CardTitle>
             </div>
-            <CollapsibleContent>
-                <CardContent className="space-y-6 pt-0">
-                <div className="flex items-center space-x-4 rounded-md border p-4">
-                    <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                        Release Problem Statements
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                        Make the challenges visible to all participants on the main
-                        page.
-                    </p>
-                    </div>
-                    <Switch
-                    id="release-problems"
-                    checked={problemsReleased}
-                    onCheckedChange={onReleaseToggle}
-                    />
+            <CardDescription className="mt-1.5">
+              Control feature visibility and registration status on the main
+              website.
+            </CardDescription>
+          </div>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <ChevronsUpDown className="h-4 w-4" />
+              <span className="sr-only">Toggle</span>
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+        <CollapsibleContent>
+          <CardContent className="space-y-6 pt-0">
+            <div className="flex items-center space-x-4 rounded-md border p-4">
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  Release Problem Statements
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Make the challenges visible to all participants on the main
+                  page.
+                </p>
+              </div>
+              <Switch
+                id="release-problems"
+                checked={problemsReleased}
+                onCheckedChange={onReleaseToggle}
+              />
+            </div>
+            
+            <div className="flex items-center space-x-4 rounded-md border p-4">
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  Enable Live Updates Banner
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Show or hide the live updates banner at the top of the homepage.
+                </p>
+              </div>
+              <Switch
+                id="enable-live-updates"
+                checked={liveUpdatesEnabled}
+                onCheckedChange={onLiveUpdatesToggle}
+              />
+            </div>
+
+            <Separator />
+            <div className="flex items-center space-x-4 rounded-md border p-4">
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  Open Registrations Manually
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Use this switch to immediately open or close event
+                  registrations.
+                </p>
+              </div>
+              <Switch
+                checked={settings.enabled}
+                onCheckedChange={handleManualToggle}
+                aria-label="Toggle Registrations"
+              />
+            </div>
+
+            <div className="space-y-4 rounded-md border p-4">
+              <h4 className="font-medium">Schedule Registration Status Change</h4>
+              {settings.isScheduled && settings.scheduledChange && (
+                <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary-foreground flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-primary" />
+                  <div className="text-sm">
+                    <span className="font-bold text-foreground">
+                      A change is scheduled:
+                    </span>{" "}
+                    Registrations will be set to{" "}
+                    <b className="text-foreground">
+                      {settings.scheduledState ? "OPEN" : "CLOSED"}
+                    </b>{" "}
+                    on {format(settings.scheduledChange, "PPP 'at' h:mm a")}.
+                  </div>
                 </div>
-
-                {isSuperAdmin && (
-                    <>
-                        <Separator />
-                        <div className="flex items-center space-x-4 rounded-md border p-4">
-                            <div className="flex-1 space-y-1">
-                                <p className="text-sm font-medium leading-none">
-                                    Open Registrations Manually
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    Use this switch to immediately open or close event registrations.
-                                </p>
-                            </div>
-                            <Switch
-                                checked={settings.enabled}
-                                onCheckedChange={handleManualToggle}
-                                aria-label="Toggle Registrations"
-                            />
-                        </div>
-
-                        <div className="space-y-4 rounded-md border p-4">
-                            <h4 className="font-medium">Schedule Registration Status Change</h4>
-                            {settings.isScheduled && settings.scheduledChange && (
-                                <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary-foreground flex items-center gap-3">
-                                    <AlertTriangle className="h-5 w-5 text-primary" />
-                                    <div className="text-sm">
-                                        <span className="font-bold text-foreground">A change is scheduled:</span> Registrations will be set to <b className="text-foreground">{settings.scheduledState ? 'OPEN' : 'CLOSED'}</b> on {format(settings.scheduledChange, "PPP 'at' h:mm a")}.
-                                    </div>
-                                </div>
-                            )}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Date</label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-full justify-start text-left font-normal",
-                                                !scheduledDate && "text-muted-foreground"
-                                            )}
-                                            >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {scheduledDate ? format(scheduledDate, "PPP") : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0">
-                                            <Calendar
-                                            mode="single"
-                                            selected={scheduledDate}
-                                            onSelect={setScheduledDate}
-                                            initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                                <div className="space-y-2">
-                                    <label htmlFor="time" className="text-sm font-medium">Time (24-hour)</label>
-                                    <Input
-                                        id="time"
-                                        type="time"
-                                        value={scheduledTime}
-                                        onChange={(e) => setScheduledTime(e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label htmlFor="state" className="text-sm font-medium">Future State</label>
-                                    <Select value={scheduledState} onValueChange={(value: "true" | "false") => setScheduledState(value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Set state..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="true">Open</SelectItem>
-                                            <SelectItem value="false">Closed</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button onClick={handleSchedule} disabled={!scheduledDate}>Schedule Change</Button>
-                                {settings.isScheduled && (
-                                    <Button variant="destructive" onClick={handleCancelSchedule}>Cancel Schedule</Button>
-                                )}
-                            </div>
-                        </div>
-                    </>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Date</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !scheduledDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {scheduledDate ? (
+                          format(scheduledDate, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={scheduledDate}
+                        onSelect={setScheduledDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="time" className="text-sm font-medium">
+                    Time (24-hour)
+                  </label>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="state" className="text-sm font-medium">
+                    Future State
+                  </label>
+                  <Select
+                    value={scheduledState}
+                    onValueChange={(value: "true" | "false") =>
+                      setScheduledState(value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Set state..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Open</SelectItem>
+                      <SelectItem value="false">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSchedule} disabled={!scheduledDate}>
+                  Schedule Change
+                </Button>
+                {settings.isScheduled && (
+                  <Button variant="destructive" onClick={handleCancelSchedule}>
+                    Cancel Schedule
+                  </Button>
                 )}
-                </CardContent>
-            </CollapsibleContent>
-          </Card>
-      </Collapsible>
-    );
+              </div>
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
 }

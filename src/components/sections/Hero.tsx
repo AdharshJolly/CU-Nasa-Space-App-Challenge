@@ -1,13 +1,10 @@
-
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Countdown } from "@/components/Countdown";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Sparkles } from "lucide-react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
 const sponsors = [
   {
@@ -20,19 +17,6 @@ const sponsors = [
 ];
 
 export function Hero() {
-  const [registrationsOpen, setRegistrationsOpen] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, "settings", "registration"), (doc) => {
-      if (doc.exists()) {
-        setRegistrationsOpen(doc.data().enabled);
-      } else {
-        setRegistrationsOpen(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   return (
     <section
@@ -134,15 +118,6 @@ export function Hero() {
           <Countdown />
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          {registrationsOpen && (
-            <Button
-              size="lg"
-              asChild
-              className="transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/40"
-            >
-              <Link href="#register">Register Now</Link>
-            </Button>
-          )}
           <Button
             size="lg"
             variant="secondary"

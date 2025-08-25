@@ -21,21 +21,41 @@ const calculateTimeLeft = (targetDate: Date) => {
 export function Countdown() {
   const [targetDate, setTargetDate] = useState<Date | null>(null);
   const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
+  const [isEventOver, setIsEventOver] = useState(false);
 
   useEffect(() => {
-    setTargetDate(new Date("2025-08-22T10:00:00+05:30"));
+    // Set a date in the past to signify the event is over.
+    const eventEndDate = new Date("2024-08-24T18:00:00+05:30");
+    setTargetDate(eventEndDate);
+    if (+new Date() > +eventEndDate) {
+      setIsEventOver(true);
+    }
   }, []);
 
   useEffect(() => {
-    if (!targetDate) return;
+    if (!targetDate || isEventOver) return;
 
     const timer = setTimeout(() => {
-      setTimeLeft(calculateTimeLeft(targetDate));
+      const newTimeLeft = calculateTimeLeft(targetDate);
+      setTimeLeft(newTimeLeft);
+      if (Object.keys(newTimeLeft).length === 0) {
+        setIsEventOver(true);
+      }
     }, 1000);
 
     return () => clearTimeout(timer);
-  });
+  }, [targetDate, timeLeft, isEventOver]);
 
+  if (isEventOver) {
+    return (
+      <div className="my-8">
+        <span className="text-2xl md:text-3xl font-headline text-primary">
+          The event has concluded. See you next year!
+        </span>
+      </div>
+    );
+  }
+  
   if (!targetDate) {
     return (
       <div className="flex justify-center gap-4 md:gap-8 my-8">
@@ -69,9 +89,11 @@ export function Countdown() {
           </div>
         ))
       ) : (
-        <span className="text-2xl font-headline text-primary">
-          The event has begun!
-        </span>
+         <div className="my-8">
+            <span className="text-2xl md:text-3xl font-headline text-primary">
+              The event has concluded. See you next year!
+            </span>
+        </div>
       )}
     </div>
   );
