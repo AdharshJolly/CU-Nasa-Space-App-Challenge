@@ -30,8 +30,6 @@ const nextConfig: NextConfig = {
   compress: true,
   // Power-saving and performance optimizations
   poweredByHeader: false,
-  // Optimize bundle size
-  swcMinify: true,
 };
 
 export default nextConfig;
