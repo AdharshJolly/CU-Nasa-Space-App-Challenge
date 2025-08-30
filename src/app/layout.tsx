@@ -82,6 +82,10 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="author" content="CHRIST University, NASA Space Apps Team" />
         <meta name="theme-color" content="#0A122A" />
+        <meta
+          name="google-site-verification"
+          content="yE8IZfZoyc_wkCmFj7fH24Rf4kwQUmp2786LlmoTrls"
+        />
         <link rel="canonical" href="https://nasa.cuchallenge.live/" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.ico" />
