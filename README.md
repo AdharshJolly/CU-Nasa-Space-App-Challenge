@@ -36,7 +36,6 @@ This project is a modern, full-featured hackathon event website for the NASA Int
     ```bash
     npm run dev
     ```
-4.  **Open [https://nasa.cuchallenge.live/](https://nasa.cuchallenge.live/) in your browser.**
 
 ## 📁 Project Structure
 
